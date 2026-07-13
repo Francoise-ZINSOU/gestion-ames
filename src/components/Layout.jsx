@@ -1,26 +1,36 @@
 import { useAuth } from '../lib/auth'
+import { Home, CheckSquare, TrendingUp, Users, GitBranch, Bell, MessageCircle, BookOpen, Download, Settings, Search, LogOut, Menu } from 'lucide-react'
+
+const navIcons = {
+  home: Home, pres: CheckSquare, timeline: TrendingUp, ames: Users,
+  filia: GitBranch, alerts: Bell, ents: MessageCircle, protos: BookOpen,
+  export: Download, params: Settings, fiche: Search, menu: Menu
+}
 
 export default function Layout({ page, setPage, alertCount, membreCount, selectedMembre, children }) {
   const { logout, profil, isAdmin } = useAuth()
 
-  const navBtn = (id, icon, label, badge) => (
-    <button key={id} onClick={() => setPage(id)} style={{
-      display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '7px 10px',
-      border: 'none', borderRadius: 6, background: page === id ? '#0ea88816' : 'transparent',
-      color: page === id ? '#0ea888' : '#5a6480', fontWeight: page === id ? 600 : 500,
-      cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', fontSize: 12, marginBottom: 1
-    }}>
-      <span style={{ fontSize: 13, width: 16, textAlign: 'center' }}>{icon}</span>
-      <span style={{ flex: 1 }}>{label}</span>
-      {badge > 0 ? <span style={{ background: '#e03050', color: '#fff', fontSize: 9, fontWeight: 700, padding: '0 5px', borderRadius: 8 }}>{badge}</span> : null}
-    </button>
-  )
+  const navBtn = (id, label, badge) => {
+    const Icon = navIcons[id] || Home
+    return (
+      <button key={id} onClick={() => setPage(id)} style={{
+        display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '7px 10px',
+        border: 'none', borderRadius: 6, background: page === id ? '#0ea88816' : 'transparent',
+        color: page === id ? '#0ea888' : '#5a6480', fontWeight: page === id ? 600 : 500,
+        cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', fontSize: 12, marginBottom: 1
+      }}>
+        <Icon size={15} strokeWidth={page === id ? 2.2 : 1.8} />
+        <span style={{ flex: 1 }}>{label}</span>
+        {badge > 0 ? <span style={{ background: '#e03050', color: '#fff', fontSize: 9, fontWeight: 700, padding: '0 5px', borderRadius: 8 }}>{badge}</span> : null}
+      </button>
+    )
+  }
 
   const titles = {
     home: 'Tableau de bord', pres: 'Saisie des présences', ames: 'Liste des âmes',
     fiche: 'Fiche 360°', alerts: 'Alertes croisées', ents: 'Entretiens',
     protos: 'Plan de croissance', timeline: 'Historique', filia: 'Arbre de suivi',
-    export: 'Export', params: 'Paramètres'
+    export: 'Export', params: 'Paramètres', menu: 'Menu'
   }
 
   return (
@@ -35,33 +45,35 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
 
         <div style={{ padding: '8px 6px 2px' }}>
           <div style={{ fontSize: 8, letterSpacing: 2, textTransform: 'uppercase', color: '#8892a8', fontWeight: 600, padding: '0 6px', marginBottom: 2 }}>PRÉSENCES</div>
-          {navBtn('home', '🏠', 'Accueil', 0)}
-          {navBtn('pres', '✅', 'Saisie', 0)}
-          {navBtn('timeline', '📈', 'Historique', 0)}
-          {navBtn('ames', '👥', 'Âmes', 0)}
-          {navBtn('filia', '🌳', 'Arbre de suivi', 0)}
+          {navBtn('home', 'Accueil', 0)}
+          {navBtn('pres', 'Saisie', 0)}
+          {navBtn('timeline', 'Historique', 0)}
+          {navBtn('ames', 'Âmes', 0)}
+          {navBtn('filia', 'Arbre de suivi', 0)}
         </div>
 
         <div style={{ padding: '8px 6px 2px' }}>
           <div style={{ fontSize: 8, letterSpacing: 2, textTransform: 'uppercase', color: '#8892a8', fontWeight: 600, padding: '0 6px', marginBottom: 2 }}>PASTORAL</div>
-          {navBtn('alerts', '🔔', 'Alertes', alertCount)}
-          {navBtn('ents', '💬', 'Entretiens', 0)}
-          {navBtn('protos', '📖', 'Plan de croissance', 0)}
-          {navBtn('export', '💾', 'Export', 0)}
+          {navBtn('alerts', 'Alertes', alertCount)}
+          {navBtn('ents', 'Entretiens', 0)}
+          {navBtn('protos', 'Plan de croissance', 0)}
+          {navBtn('export', 'Export', 0)}
         </div>
 
         {isAdmin && (
           <div style={{ padding: '8px 6px 2px' }}>
             <div style={{ fontSize: 8, letterSpacing: 2, textTransform: 'uppercase', color: '#8892a8', fontWeight: 600, padding: '0 6px', marginBottom: 2 }}>ADMIN</div>
-            {navBtn('params', '⚙️', 'Paramètres', 0)}
+            {navBtn('params', 'Paramètres', 0)}
           </div>
         )}
 
-        {selectedMembre && <div style={{ padding: '2px 6px' }}>{navBtn('fiche', '🔍', 'Fiche', 0)}</div>}
+        {selectedMembre && <div style={{ padding: '2px 6px' }}>{navBtn('fiche', 'Fiche', 0)}</div>}
 
         <div style={{ marginTop: 'auto', padding: '10px 12px', borderTop: '1px solid #e0e4ec' }}>
           <div style={{ fontSize: 10, color: '#5a6480', marginBottom: 6 }}>{profil?.nom_affiche || profil?.email}</div>
-          <button onClick={logout} style={{ background: 'none', border: 'none', color: '#8892a8', fontSize: 11, cursor: 'pointer', padding: 0 }}>Se déconnecter</button>
+          <button onClick={logout} style={{ background: 'none', border: 'none', color: '#8892a8', fontSize: 11, cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
+            <LogOut size={12} /> Se déconnecter
+          </button>
         </div>
       </div>
 
@@ -75,14 +87,15 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
       </div>
 
       {/* Nav mobile */}
-      <nav className="nv" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderTop: '1px solid #e0e4ec', display: 'none', zIndex: 200, padding: '2px 0' }}>
-        {[['home', '🏠', 'Accueil'], ['pres', '✅', 'Saisie'], ['ames', '👥', 'Âmes'], ['alerts', '🔔', 'Alertes'], ['more', '☰', 'Plus']].map(n => (
-          <button key={n[0]} onClick={() => n[0] === 'more' ? setPage('menu') : setPage(n[0])} style={{
-            flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
+      <nav className="nv" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderTop: '1px solid #e0e4ec', display: 'none', zIndex: 200, padding: '4px 0 2px' }}>
+        {[['home', 'Accueil', Home], ['pres', 'Saisie', CheckSquare], ['ames', 'Âmes', Users], ['alerts', 'Alertes', Bell], ['menu', 'Plus', Menu]].map(([id, label, Icon]) => (
+          <button key={id} onClick={() => id === 'menu' ? setPage('menu') : setPage(id)} style={{
+            flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
             padding: '4px 2px', border: 'none', background: 'transparent', cursor: 'pointer',
-            fontFamily: 'inherit', fontSize: 8, color: page === n[0] ? '#0ea888' : '#8892a8', fontWeight: page === n[0] ? 700 : 500
+            fontFamily: 'inherit', fontSize: 9, color: page === id ? '#0ea888' : '#8892a8', fontWeight: page === id ? 700 : 500
           }}>
-            <span style={{ fontSize: 15 }}>{n[1]}</span><span>{n[2]}</span>
+            <Icon size={18} strokeWidth={page === id ? 2.2 : 1.5} />
+            <span>{label}</span>
           </button>
         ))}
       </nav>
@@ -94,8 +107,6 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
           .nv{display:flex!important}
           .mn>div:last-child{padding:12px 12px 70px!important}
           table{display:block;overflow-x:auto;white-space:nowrap}
-          thead{display:table;width:100%}
-          tbody{display:table;width:100%}
         }
       `}</style>
     </div>

@@ -1,29 +1,30 @@
 import { S } from '../lib/ui'
+import { Home, CheckSquare, TrendingUp, Users, GitBranch, Bell, MessageCircle, BookOpen, Download, Settings } from 'lucide-react'
 
 export default function MenuMobile({ setPage, isAdmin }) {
   const items = [
-    { id: 'home', icon: '🏠', label: 'Accueil' },
-    { id: 'pres', icon: '✅', label: 'Saisie' },
-    { id: 'timeline', icon: '📈', label: 'Historique' },
-    { id: 'ames', icon: '👥', label: 'Âmes' },
-    { id: 'filia', icon: '🌳', label: 'Arbre de suivi' },
-    { id: 'alerts', icon: '🔔', label: 'Alertes' },
-    { id: 'ents', icon: '💬', label: 'Entretiens' },
-    { id: 'protos', icon: '📖', label: 'Plan de croissance' },
-    { id: 'export', icon: '💾', label: 'Export' },
+    { id: 'home', Icon: Home, label: 'Accueil' },
+    { id: 'pres', Icon: CheckSquare, label: 'Saisie' },
+    { id: 'timeline', Icon: TrendingUp, label: 'Historique' },
+    { id: 'ames', Icon: Users, label: 'Âmes' },
+    { id: 'filia', Icon: GitBranch, label: 'Arbre de suivi' },
+    { id: 'alerts', Icon: Bell, label: 'Alertes' },
+    { id: 'ents', Icon: MessageCircle, label: 'Entretiens' },
+    { id: 'protos', Icon: BookOpen, label: 'Plan de croissance' },
+    { id: 'export', Icon: Download, label: 'Export' },
   ]
-  if (isAdmin) items.push({ id: 'params', icon: '⚙️', label: 'Paramètres' })
+  if (isAdmin) items.push({ id: 'params', Icon: Settings, label: 'Paramètres' })
 
   return (
     <div style={S.card}>
       <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 10 }}>Menu</div>
-      {items.map(item => (
-        <div key={item.id} onClick={() => setPage(item.id)} style={{
-          display: 'flex', alignItems: 'center', gap: 10, padding: '10px 8px',
+      {items.map(({ id, Icon, label }) => (
+        <div key={id} onClick={() => setPage(id)} style={{
+          display: 'flex', alignItems: 'center', gap: 12, padding: '12px 8px',
           borderBottom: '1px solid #e0e4ec', cursor: 'pointer'
         }}>
-          <span style={{ fontSize: 18 }}>{item.icon}</span>
-          <span style={{ fontSize: 13, fontWeight: 500 }}>{item.label}</span>
+          <Icon size={18} strokeWidth={1.8} color="#5a6480" />
+          <span style={{ fontSize: 13, fontWeight: 500 }}>{label}</span>
         </div>
       ))}
     </div>
