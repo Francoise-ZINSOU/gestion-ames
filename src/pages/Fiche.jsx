@@ -175,7 +175,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
                   {mp.length === 0 ? <span style={{ fontSize: 11, color: '#8892a8' }}>Aucune</span> : mp.map(p => (
                     <div key={p.id} style={{ textAlign: 'center', padding: '3px 2px', borderRadius: 4, border: '1px solid ' + (p.present ? '#1a9c60' : p.eligible ? '#e03050' : '#e0e4ec'), background: p.present ? '#1a9c6008' : p.eligible ? '#e0305008' : '#f0f2f6', minWidth: 42 }}>
                       <div style={{ fontSize: 8, color: '#8892a8' }}>{fmtS(p.date_presence)}</div>
-                      <div style={{ fontSize: 12 }}>p.present ? <Check size={14} color="#1a9c60" /> : p.eligible ? <X size={14} color="#e03050" /> : '—'</div>
+                      <div style={{ fontSize: 12 }}>{p.present ? <Check size={14} color="#1a9c60" /> : p.eligible ? <X size={14} color="#e03050" /> : '—'}</div>
                     </div>
                   ))}
                 </div>
