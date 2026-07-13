@@ -12,13 +12,13 @@ export function AuthProvider({ children }) {
     // Session initiale
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
-      if (session) loadProfil(session.user.id)
+      if (session) { setLoading(true); loadProfil(session.user.id) }
       else setLoading(false)
     })
     // Écouter les changements d'auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
-      if (session) loadProfil(session.user.id)
+      if (session) { setLoading(true); loadProfil(session.user.id) }
       else { setProfil(null); setLoading(false) }
     })
     return () => subscription.unsubscribe()
