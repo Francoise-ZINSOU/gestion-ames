@@ -64,7 +64,7 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
     supprimerEnt: async (id) => { try { await supprimerEnt(id); showToast('✓ Entretien supprimé') } catch (e) { showToast('⚠ ' + e.message) } },
     ajouterDefi: async (d) => { try { await ajouterDefi(d); showToast('✓ Défi ajouté') } catch (e) { showToast('⚠ ' + e.message) } },
     modifierDefi: async (id, u) => { try { await modifierDefi(id, u); showToast('✓ Défi mis à jour') } catch (e) { showToast('⚠ ' + e.message) } },
-    assignerModule: async (mid, modId) => { try { await assignerModule(mid, modId); showToast('✓ Module assigné') } catch (e) { showToast('⚠ ' + e.message) } },
+    assignerModule: async (mid, modId, defiId) => { try { await assignerModule(mid, modId, defiId); showToast('✓ Module assigné') } catch (e) { showToast('⚠ ' + e.message) } },
     validerModule: async (id, v) => { try { await validerModule(id, v) } catch (e) { showToast('⚠ ' + e.message) } },
     retirerModule: async (id) => { try { await retirerModule(id) } catch (e) { showToast('⚠ ' + e.message) } },
     reloadMembres,

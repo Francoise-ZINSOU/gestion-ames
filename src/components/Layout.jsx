@@ -108,11 +108,13 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
           .mn>div:last-child{padding:12px 12px 70px!important}
           table{display:block;overflow-x:auto;white-space:nowrap}
         }
-        [style*="position: fixed"][style*="inset: 0"]{box-sizing:border-box}
-        [style*="position: fixed"][style*="inset: 0"]>div{box-sizing:border-box;max-height:90vh;margin-top:5vh}
+        .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:500;display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;box-sizing:border-box}
+        .modal-overlay.danger{background:rgba(0,0,0,.5);z-index:600}
+        .modal-box{width:100%;background:#fff;border-radius:12px;overflow:hidden;box-sizing:border-box;margin-top:4vh;max-height:92vh;display:flex;flex-direction:column}
+        .modal-box>div:nth-child(2){overflow-y:auto;flex:1}
         @media(max-width:500px){
-          [style*="position: fixed"][style*="inset: 0"]{padding:8px!important}
-          [style*="position: fixed"][style*="inset: 0"]>div{max-width:100%!important;border-radius:10px!important}
+          .modal-overlay{padding:8px}
+          .modal-box{margin-top:2vh;max-height:96vh;border-radius:10px}
         }
       `}</style>
     </div>

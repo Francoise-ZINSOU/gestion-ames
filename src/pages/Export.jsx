@@ -75,8 +75,8 @@ export default function ExportPage({ membres, presences, entretiens, defis, refs
       </div>
 
       {confirmAction && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
-          <div style={{ width: '100%', maxWidth: 380, background: '#fff', borderRadius: 12, overflow: 'hidden' }}>
+        <div className="modal-overlay danger">
+          <div className="modal-box" style={{ maxWidth: 380 }}>
             <div style={{ padding: '20px 24px' }}><div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Confirmation</div><div style={{ fontSize: 13, color: '#5a6480', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{confirmAction.msg}</div></div>
             <div style={{ padding: '12px 24px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button onClick={() => setConfirmAction(null)} style={S.btn('#8892a8', true)}>Annuler</button>

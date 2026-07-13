@@ -170,10 +170,11 @@ export function usePlanCroissance() {
 
   useEffect(() => { load() }, [load])
 
-  const assigner = async (membreId, moduleId) => {
+  const assigner = async (membreId, moduleId, defiId) => {
     const { error } = await supabase.from('plan_croissance').insert({
       membre_id: membreId,
-      module_id: moduleId
+      module_id: moduleId,
+      defi_id: defiId || null
     })
     if (error) throw error
     await load()

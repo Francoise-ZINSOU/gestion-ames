@@ -235,35 +235,70 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
         <div style={S.card}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
             <div style={{ fontSize: 13, fontWeight: 600 }}>Plan de croissance</div>
-            <button onClick={() => setModal('asMod')} style={S.btn('#7040d0', false)}>+ Assigner</button>
+            {mDf.length > 0 && <button onClick={() => { setFd({ _asDefiId: mDf[0]?.id }); setModal('asMod') }} style={S.btn('#7040d0', false)}>+ Assigner</button>}
           </div>
-          {mPt.length === 0 ? <div style={{ color: '#8892a8', fontSize: 12, padding: 8 }}>Aucun module. <span onClick={() => setModal('asMod')} style={{ color: '#7040d0', cursor: 'pointer', textDecoration: 'underline' }}>Assigner le premier</span></div>
-            : <div>
-              {mPt.map(p => {
-                const mod = (refs.modules || []).find(mod => mod.id === p.module_id)
+          {mDf.length === 0 ? (
+            <div style={{ color: '#8892a8', fontSize: 12, padding: 8 }}>Créez d'abord un défi dans l'onglet Défis, puis assignez des modules pour y répondre.</div>
+          ) : mPt.length === 0 ? (
+            <div style={{ color: '#8892a8', fontSize: 12, padding: 8 }}>Aucun module assigné. <span onClick={() => { setFd({ _asDefiId: mDf[0]?.id }); setModal('asMod') }} style={{ color: '#7040d0', cursor: 'pointer', textDecoration: 'underline' }}>Assigner le premier</span></div>
+          ) : (
+            <div>
+              {mDf.map(d => {
+                const modulesForDefi = mPt.filter(p => p.defi_id === d.id)
+                if (modulesForDefi.length === 0) return null
+                const stColor = (refs.statutsDefi || []).find(s => s.nom === d.statut)?.couleur || '#8892a8'
                 return (
-                  <div key={p.id} onClick={() => validerModule(p.id, !p.valide)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 6, border: '1px solid ' + (p.valide ? '#1a9c60' : '#e0e4ec'), background: p.valide ? '#1a9c6008' : '#fff', marginBottom: 5, cursor: 'pointer' }}>
-                    <div style={{ width: 22, height: 22, borderRadius: '50%', border: '2px solid ' + (p.valide ? '#1a9c60' : '#e0e4ec'), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: p.valide ? '#1a9c60' : '#8892a8' }}>{p.valide ? '✓' : ''}</div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: p.valide ? '#1a9c60' : '#1a1e2e' }}>{mod?.nom || '?'}</div>
-                      {p.valide && p.date_validation && <div style={{ fontSize: 9, color: '#8892a8' }}>Validé le {fmt(p.date_validation)}</div>}
+                  <div key={d.id} style={{ marginBottom: 12 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
+                      <span style={S.pill('#3060d0')}>{d.type_defi}</span>
+                      <span style={S.pill(stColor)}>{d.statut}</span>
+                      <span style={{ fontSize: 11, color: '#5a6480', flex: 1 }}>{d.description?.substring(0, 50)}{d.description?.length > 50 ? '...' : ''}</span>
                     </div>
-                    <span style={S.pill(p.valide ? '#1a9c60' : '#8892a8')}>{p.valide ? 'Validé' : 'En attente'}</span>
-                    <button onClick={e => { e.stopPropagation(); retirerModule(p.id) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 10, color: '#8892a8' }}>✕</button>
+                    {modulesForDefi.map(p => {
+                      const mod = (refs.modules || []).find(mod => mod.id === p.module_id)
+                      return (
+                        <div key={p.id} onClick={() => validerModule(p.id, !p.valide)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 6, border: '1px solid ' + (p.valide ? '#1a9c60' : '#e0e4ec'), background: p.valide ? '#1a9c6008' : '#fff', marginBottom: 4, cursor: 'pointer', marginLeft: 12 }}>
+                          <div style={{ width: 20, height: 20, borderRadius: '50%', border: '2px solid ' + (p.valide ? '#1a9c60' : '#e0e4ec'), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: p.valide ? '#1a9c60' : '#8892a8' }}>{p.valide ? '✓' : ''}</div>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: 12, fontWeight: 600, color: p.valide ? '#1a9c60' : '#1a1e2e' }}>{mod?.nom || '?'}</div>
+                            {p.valide && p.date_validation && <div style={{ fontSize: 9, color: '#8892a8' }}>Validé le {fmt(p.date_validation)}</div>}
+                          </div>
+                          <span style={S.pill(p.valide ? '#1a9c60' : '#8892a8')}>{p.valide ? 'Validé' : 'En attente'}</span>
+                          <button onClick={e => { e.stopPropagation(); retirerModule(p.id) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 10, color: '#8892a8' }}>✕</button>
+                        </div>
+                      )
+                    })}
                   </div>
                 )
               })}
+              {/* Modules sans défi (anciens) */}
+              {mPt.filter(p => !p.defi_id).length > 0 && (
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ fontSize: 11, color: '#8892a8', fontWeight: 600, marginBottom: 6 }}>Non liés à un défi</div>
+                  {mPt.filter(p => !p.defi_id).map(p => {
+                    const mod = (refs.modules || []).find(mod => mod.id === p.module_id)
+                    return (
+                      <div key={p.id} onClick={() => validerModule(p.id, !p.valide)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 6, border: '1px solid ' + (p.valide ? '#1a9c60' : '#e0e4ec'), background: p.valide ? '#1a9c6008' : '#fff', marginBottom: 4, cursor: 'pointer' }}>
+                        <div style={{ width: 20, height: 20, borderRadius: '50%', border: '2px solid ' + (p.valide ? '#1a9c60' : '#e0e4ec'), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: p.valide ? '#1a9c60' : '#8892a8' }}>{p.valide ? '✓' : ''}</div>
+                        <div style={{ flex: 1 }}><div style={{ fontSize: 12, fontWeight: 600, color: p.valide ? '#1a9c60' : '#1a1e2e' }}>{mod?.nom || '?'}</div></div>
+                        <span style={S.pill(p.valide ? '#1a9c60' : '#8892a8')}>{p.valide ? 'Validé' : 'En attente'}</span>
+                        <button onClick={e => { e.stopPropagation(); retirerModule(p.id) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 10, color: '#8892a8' }}>✕</button>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
               <div style={{ marginTop: 8, height: 5, background: '#f0f2f6', borderRadius: 3, overflow: 'hidden' }}><div style={{ height: '100%', borderRadius: 3, background: '#1a9c60', width: (mPt.length ? Math.round(pv / mPt.length * 100) : 0) + '%' }} /></div>
               <div style={{ textAlign: 'center', fontSize: 10, color: '#5a6480', marginTop: 3 }}>{pv}/{mPt.length} validés</div>
             </div>
-          }
+          )}
         </div>
       )}
 
       {/* Modal entretien */}
       {modal === 'ent' && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', zIndex: 500, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 16, overflowY: 'auto' }}>
-          <div style={{ width: '100%', maxWidth: 460, background: '#fff', borderRadius: 12, overflow: 'hidden' }}>
+        <div className="modal-overlay">
+          <div className="modal-box" style={{ maxWidth: 460 }}>
             <div style={{ padding: '16px 20px', borderBottom: '1px solid #e0e4ec' }}>
               <div style={{ fontSize: 15, fontWeight: 700 }}>{editEntId ? "Modifier l'entretien" : 'Nouvel entretien'}</div>
             </div>
@@ -287,8 +322,8 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
 
       {/* Modal défi */}
       {modal === 'defi' && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', zIndex: 500, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 16, overflowY: 'auto' }}>
-          <div style={{ width: '100%', maxWidth: 460, background: '#fff', borderRadius: 12, overflow: 'hidden' }}>
+        <div className="modal-overlay">
+          <div className="modal-box" style={{ maxWidth: 460 }}>
             <div style={{ padding: '16px 20px', borderBottom: '1px solid #e0e4ec' }}><div style={{ fontSize: 15, fontWeight: 700 }}>Nouveau défi</div></div>
             <div style={{ padding: '16px 20px' }}>
               <div style={{ marginBottom: 8 }}><label style={S.label}>Type</label><select value={fd.type_defi || ''} onChange={e => uf('type_defi', e.target.value)} style={S.inp}>{(refs.typesDefi || []).map(t => <option key={t.nom} value={t.nom}>{t.nom}</option>)}</select></div>
@@ -305,22 +340,33 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
 
       {/* Modal assigner module */}
       {modal === 'asMod' && (() => {
-        const done = {}; mPt.forEach(p => { done[p.module_id] = true })
-        const avail = (refs.modules || []).filter(mod => !done[mod.id])
+        const done = {}; mPt.forEach(p => { done[p.module_id + '_' + (p.defi_id || '')] = true })
+        const avail = (refs.modules || []).filter(mod => !done[mod.id + '_' + (fd._asDefiId || '')])
+        const selectedDefi = mDf.find(d => d.id === fd._asDefiId)
         return (
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', zIndex: 500, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 16, overflowY: 'auto' }}>
-            <div style={{ width: '100%', maxWidth: 460, background: '#fff', borderRadius: 12, overflow: 'hidden' }}>
+          <div className="modal-overlay">
+            <div className="modal-box" style={{ maxWidth: 460 }}>
               <div style={{ padding: '16px 20px', borderBottom: '1px solid #e0e4ec' }}><div style={{ fontSize: 15, fontWeight: 700 }}>Assigner un module</div></div>
               <div style={{ padding: '16px 20px', maxHeight: '50vh', overflowY: 'auto' }}>
-                {avail.length === 0 ? <div style={{ padding: 12, textAlign: 'center', color: '#1a9c60', fontSize: 12 }}>✓ Tous assignés</div>
-                  : avail.map(mod => (
-                    <div key={mod.id} onClick={() => { assignerModule(m.id, mod.id); setModal(null) }} style={{ padding: '8px 10px', borderRadius: 6, border: '1px solid #e0e4ec', marginBottom: 5, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontSize: 12, flex: 1 }}>{mod.nom}</span>
-                      <span style={{ fontSize: 10, color: '#0ea888', fontWeight: 600 }}>+ Assigner</span>
-                    </div>
-                  ))}
+                <div style={{ marginBottom: 10 }}>
+                  <label style={S.label}>Lié au défi</label>
+                  <select value={fd._asDefiId || ''} onChange={e => uf('_asDefiId', e.target.value || null)} style={S.inp}>
+                    <option value="">— Choisir un défi —</option>
+                    {mDf.map(d => <option key={d.id} value={d.id}>{d.type_defi} — {(d.description || '').substring(0, 40)}{d.description?.length > 40 ? '...' : ''} ({d.statut})</option>)}
+                  </select>
+                </div>
+                {!fd._asDefiId ? (
+                  <div style={{ padding: 12, textAlign: 'center', color: '#8892a8', fontSize: 12 }}>Sélectionnez d'abord un défi ci-dessus.</div>
+                ) : avail.length === 0 ? (
+                  <div style={{ padding: 12, textAlign: 'center', color: '#1a9c60', fontSize: 12 }}>Tous les modules sont déjà assignés pour ce défi.</div>
+                ) : avail.map(mod => (
+                  <div key={mod.id} onClick={() => { assignerModule(m.id, mod.id, fd._asDefiId); setModal(null); setFd({}) }} style={{ padding: '8px 10px', borderRadius: 6, border: '1px solid #e0e4ec', marginBottom: 5, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 12, flex: 1 }}>{mod.nom}</span>
+                    <span style={{ fontSize: 10, color: '#0ea888', fontWeight: 600 }}>+ Assigner</span>
+                  </div>
+                ))}
               </div>
-              <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', justifyContent: 'flex-end' }}><button onClick={() => setModal(null)} style={S.btn('#8892a8', true)}>Fermer</button></div>
+              <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', justifyContent: 'flex-end' }}><button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#8892a8', true)}>Fermer</button></div>
             </div>
           </div>
         )
@@ -328,8 +374,8 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
 
       {/* Confirmation modal */}
       {confirmAction && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
-          <div style={{ width: '100%', maxWidth: 380, background: '#fff', borderRadius: 12, overflow: 'hidden' }}>
+        <div className="modal-overlay danger">
+          <div className="modal-box" style={{ maxWidth: 380 }}>
             <div style={{ padding: '20px 24px' }}><div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Confirmation</div><div style={{ fontSize: 13, color: '#5a6480', lineHeight: 1.6 }}>{confirmAction.msg}</div></div>
             <div style={{ padding: '12px 24px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button onClick={() => setConfirmAction(null)} style={S.btn('#8892a8', true)}>Annuler</button>
@@ -341,8 +387,8 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
 
       {/* Modal réassignation archivage */}
       {modal === 'archiveReassign' && fd._archiveSuivis && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', zIndex: 500, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 16, overflowY: 'auto' }}>
-          <div style={{ width: '100%', maxWidth: 460, background: '#fff', borderRadius: 12, overflow: 'hidden' }}>
+        <div className="modal-overlay">
+          <div className="modal-box" style={{ maxWidth: 460 }}>
             <div style={{ padding: '16px 20px', borderBottom: '1px solid #e0e4ec' }}>
               <div style={{ fontSize: 15, fontWeight: 700, color: '#d48f00' }}>⚠ Réassigner avant archivage</div>
             </div>
@@ -369,8 +415,8 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
 
       {/* Modal édition membre */}
       {modal === 'edMb' && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', zIndex: 500, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 16, overflowY: 'auto' }}>
-          <div style={{ width: '100%', maxWidth: 500, background: '#fff', borderRadius: 12, overflow: 'hidden' }}>
+        <div className="modal-overlay">
+          <div className="modal-box" style={{ maxWidth: 500 }}>
             <div style={{ padding: '16px 20px', borderBottom: '1px solid #e0e4ec' }}>
               <div style={{ fontSize: 15, fontWeight: 700, fontFamily: 'Georgia, serif' }}>Modifier le membre</div>
             </div>
@@ -384,14 +430,14 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Email</label><input value={fd.email || ''} onChange={e => uf('email', e.target.value)} style={S.inp} type="email" /></div>
               </div>
               <div style={{ marginBottom: 8 }}><label style={S.label}>Date d'inscription</label><input value={fd.date_inscription || ''} onChange={e => uf('date_inscription', e.target.value)} style={S.inp} type="date" /></div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0 8px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px' }}>
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Statut</label><select value={fd.statut || 'Nouveau'} onChange={e => uf('statut', e.target.value)} style={S.inp}>{(refs.statuts || []).filter(s => !s.est_archive).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}</select></div>
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Rôle</label><select value={fd.role || 'Membre'} onChange={e => { uf('role', e.target.value); if (e.target.value === 'Berger principal') uf('suivi_par', null) }} style={S.inp}>{(refs.roles || []).map(r => <option key={r.nom} value={r.nom}>{r.nom}</option>)}</select></div>
-                {(fd.role !== 'Berger principal') && <div style={{ marginBottom: 8 }}><label style={S.label}>Suivi par</label><select value={fd.suivi_par || ''} onChange={e => uf('suivi_par', e.target.value || null)} style={S.inp}><option value="">— Aucun —</option>{leaders.filter(l => l.id !== m.id).map(l => <option key={l.id} value={l.id}>{l.prenom} {l.nom} ({l.role})</option>)}</select></div>}
               </div>
+              {(fd.role !== 'Berger principal') && <div style={{ marginBottom: 8 }}><label style={S.label}>Suivi par</label><select value={fd.suivi_par || ''} onChange={e => uf('suivi_par', e.target.value || null)} style={S.inp}><option value="">— Aucun —</option>{leaders.filter(l => l.id !== m.id).map(l => <option key={l.id} value={l.id}>{l.prenom} {l.nom} ({l.role})</option>)}</select></div>}
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', marginBottom: 8 }}><input type="checkbox" checked={!!fd.est_retour} onChange={e => uf('est_retour', e.target.checked)} /><span style={{ fontSize: 12, color: '#5a6480', fontWeight: 600 }}>C'est un retour</span></label>
               {fd.est_retour && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0 8px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px' }}>
                   <div style={{ marginBottom: 8 }}><label style={S.label}>Date départ</label><input value={fd.date_depart || ''} onChange={e => uf('date_depart', e.target.value)} style={S.inp} type="date" /></div>
                   <div style={{ marginBottom: 8 }}><label style={S.label}>Motif</label><select value={fd.motif_depart || ''} onChange={e => uf('motif_depart', e.target.value)} style={S.inp}><option value="">—</option>{(refs.motifsDepart || []).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}</select></div>
                   <div style={{ marginBottom: 8 }}><label style={S.label}>Date retour</label><input value={fd.date_retour || ''} onChange={e => uf('date_retour', e.target.value)} style={S.inp} type="date" /></div>

@@ -152,8 +152,8 @@ export default function AmesPage({ membres, actifs, refs, openFiche, showToast, 
 
       {/* Modal ajout/édition */}
       {(modal === 'add' || modal === 'edit') && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', zIndex: 500, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 16, overflowY: 'auto' }}>
-          <div style={{ width: '100%', maxWidth: 500, background: '#fff', borderRadius: 12, overflow: 'hidden' }}>
+        <div className="modal-overlay">
+          <div className="modal-box" style={{ maxWidth: 500 }}>
             <div style={{ padding: '16px 20px', borderBottom: '1px solid #e0e4ec' }}>
               <div style={{ fontSize: 15, fontWeight: 700, fontFamily: 'Georgia, serif' }}>{modal === 'edit' ? 'Modifier' : 'Nouveau membre'}</div>
             </div>
@@ -167,11 +167,11 @@ export default function AmesPage({ membres, actifs, refs, openFiche, showToast, 
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Email</label><input value={fd.email || ''} onChange={e => uf('email', e.target.value)} style={{ ...S.inp, borderColor: fd.email && !validEmail(fd.email) ? '#e03050' : '#c8cfe0' }} type="email" /></div>
               </div>
               <div style={{ marginBottom: 8 }}><label style={S.label}>Date d'inscription</label><input value={fd.date_inscription || ''} onChange={e => uf('date_inscription', e.target.value)} style={S.inp} type="date" /></div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0 8px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px' }}>
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Statut</label><select value={fd.statut || 'Nouveau'} onChange={e => uf('statut', e.target.value)} style={S.inp}>{(refs.statuts || []).filter(s => !s.est_archive).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}</select></div>
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Rôle</label><select value={fd.role || 'Membre'} onChange={e => { uf('role', e.target.value); if (e.target.value === 'Berger principal') uf('suivi_par', null) }} style={S.inp}>{(refs.roles || []).map(r => <option key={r.nom} value={r.nom}>{r.nom}</option>)}</select></div>
-                {(fd.role !== 'Berger principal') && <div style={{ marginBottom: 8 }}><label style={S.label}>Suivi par</label><select value={fd.suivi_par || ''} onChange={e => uf('suivi_par', e.target.value || null)} style={S.inp}><option value="">— Aucun —</option>{leaders.filter(l => l.id !== fd.id).map(l => <option key={l.id} value={l.id}>{l.prenom} {l.nom} ({l.role})</option>)}</select></div>}
               </div>
+              {(fd.role !== 'Berger principal') && <div style={{ marginBottom: 8 }}><label style={S.label}>Suivi par</label><select value={fd.suivi_par || ''} onChange={e => uf('suivi_par', e.target.value || null)} style={S.inp}><option value="">— Aucun —</option>{leaders.filter(l => l.id !== fd.id).map(l => <option key={l.id} value={l.id}>{l.prenom} {l.nom} ({l.role})</option>)}</select></div>}
               <div style={{ marginBottom: 8 }}><label style={S.label}>Notes</label><textarea value={fd.notes || ''} onChange={e => uf('notes', e.target.value)} rows={2} style={{ ...S.inp, resize: 'vertical' }} /></div>
             </div>
             <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
@@ -184,8 +184,8 @@ export default function AmesPage({ membres, actifs, refs, openFiche, showToast, 
 
       {/* Modal réassignation (rétrogradation rôle) */}
       {modal === 'reassign' && fd._reassignSuivis && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', zIndex: 500, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 16, overflowY: 'auto' }}>
-          <div style={{ width: '100%', maxWidth: 460, background: '#fff', borderRadius: 12, overflow: 'hidden' }}>
+        <div className="modal-overlay">
+          <div className="modal-box" style={{ maxWidth: 460 }}>
             <div style={{ padding: '16px 20px', borderBottom: '1px solid #e0e4ec' }}>
               <div style={{ fontSize: 15, fontWeight: 700, color: '#d48f00' }}>⚠ Réassigner avant changement de rôle</div>
             </div>
@@ -212,8 +212,8 @@ export default function AmesPage({ membres, actifs, refs, openFiche, showToast, 
 
       {/* Modal confirmation (doublons) */}
       {confirmAction && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
-          <div style={{ width: '100%', maxWidth: 380, background: '#fff', borderRadius: 12, overflow: 'hidden' }}>
+        <div className="modal-overlay danger">
+          <div className="modal-box" style={{ maxWidth: 380 }}>
             <div style={{ padding: '20px 24px' }}><div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Confirmation</div><div style={{ fontSize: 13, color: '#5a6480', lineHeight: 1.6 }}>{confirmAction.msg}</div></div>
             <div style={{ padding: '12px 24px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button onClick={() => setConfirmAction(null)} style={S.btn('#8892a8', true)}>Annuler</button>
