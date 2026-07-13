@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { S, fmtS, getStatutColor, getRoleColor } from '../lib/ui'
+import { S, fmtS, getStatutColor, getRoleColor, validEmail, validTel } from '../lib/ui'
 import { supabase } from '../lib/supabase'
 
 export default function AmesPage({ membres, actifs, refs, openFiche, showToast, reloadMembres, presences, entretiens, setPage }) {
@@ -8,7 +8,7 @@ export default function AmesPage({ membres, actifs, refs, openFiche, showToast, 
   const [fSt, setFSt] = useState('actifs')
   const [modal, setModal] = useState(null)
   const [fd, setFd] = useState({})
-
+  const [confirmAction, setConfirmAction] = useState(null)
   const uf = (k, v) => setFd(prev => ({ ...prev, [k]: v }))
 
   const filt = membres.filter(m => {
@@ -34,15 +34,56 @@ export default function AmesPage({ membres, actifs, refs, openFiche, showToast, 
   }
 
   const mEn = (id) => entretiens.filter(e => e.membre_id === id).length
+  const getSuiveur = (id) => { if (!id) return '—'; const m = membres.find(x => x.id === id); return m ? `${m.prenom} ${m.nom}` : '—' }
+  const getSuivis = (id) => actifs.filter(m => m.suivi_par === id)
+
+  // Détection doublons
+  const hasDuplicate = (nom, prenom, excludeId) => {
+    return membres.some(m => m.id !== excludeId && (m.nom || '').toLowerCase() === (nom || '').toLowerCase() && (m.prenom || '').toLowerCase() === (prenom || '').toLowerCase())
+  }
 
   const handleSave = async () => {
+    // Validation email/téléphone
+    if (fd.email && !validEmail(fd.email)) { showToast('⚠ Email invalide'); return }
+    if (fd.telephone && !validTel(fd.telephone)) { showToast('⚠ Téléphone invalide'); return }
+
+    // Détection doublons
+    const isEdit = modal === 'edit' && fd.id
+    if (hasDuplicate(fd.nom, fd.prenom, isEdit ? fd.id : '')) {
+      setConfirmAction({
+        msg: `${fd.prenom} ${fd.nom} existe déjà. Créer quand même ?`,
+        fn: () => doSave()
+      })
+      return
+    }
+
+    // Vérification rétrogradation rôle
+    if (isEdit) {
+      const old = membres.find(m => m.id === fd.id)
+      const oldRole = (refs.roles || []).find(r => r.nom === old?.role)
+      const newRole = (refs.roles || []).find(r => r.nom === fd.role)
+      if (oldRole?.peut_suivre && !newRole?.peut_suivre) {
+        const suivis = getSuivis(fd.id)
+        if (suivis.length > 0) {
+          setFd(prev => ({ ...prev, _reassignFrom: fd.id, _reassignSuivis: suivis }))
+          setModal('reassign')
+          return
+        }
+      }
+    }
+
+    await doSave()
+  }
+
+  const doSave = async () => {
     try {
-      if (modal === 'edit' && fd.id) {
-        const { id, created_at, created_by, updated_at, updated_by, ...updates } = fd
+      const isEdit = (modal === 'edit' || modal === 'add') && fd.id && membres.some(m => m.id === fd.id)
+      if (isEdit) {
+        const { id, created_at, created_by, updated_at, updated_by, _reassignFrom, _reassignSuivis, ...updates } = fd
         await supabase.from('membres').update(updates).eq('id', id)
         showToast('✓ Membre modifié')
       } else {
-        const { id, ...data } = fd
+        const { id, _reassignFrom, _reassignSuivis, ...data } = fd
         await supabase.from('membres').insert({ ...data, statut: data.statut || 'Nouveau', role: data.role || 'Membre' })
         showToast('✓ Membre ajouté')
       }
@@ -51,7 +92,24 @@ export default function AmesPage({ membres, actifs, refs, openFiche, showToast, 
     } catch (e) { showToast('⚠ ' + e.message) }
   }
 
-  const getSuiveur = (id) => { if (!id) return '—'; const m = membres.find(x => x.id === id); return m ? `${m.prenom} ${m.nom}` : '—' }
+  // Réassignation après rétrogradation
+  const doReassign = async () => {
+    try {
+      const { _reassignFrom, _reassignSuivis, _newSuivId, ...memberUpdates } = fd
+      // Mettre à jour le membre (changement de rôle)
+      const { id, created_at, created_by, updated_at, updated_by, ...updates } = memberUpdates
+      await supabase.from('membres').update(updates).eq('id', _reassignFrom)
+      // Réassigner les suivis
+      if (_newSuivId) {
+        for (const s of _reassignSuivis) {
+          await supabase.from('membres').update({ suivi_par: _newSuivId }).eq('id', s.id)
+        }
+      }
+      showToast('✓ Rôle modifié et suivis réassignés')
+      await reloadMembres()
+      setModal(null); setFd({})
+    } catch (e) { showToast('⚠ ' + e.message) }
+  }
 
   return (
     <div>
@@ -93,7 +151,7 @@ export default function AmesPage({ membres, actifs, refs, openFiche, showToast, 
       </div>
 
       {/* Modal ajout/édition */}
-      {modal && (
+      {(modal === 'add' || modal === 'edit') && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', zIndex: 500, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 16, overflowY: 'auto' }}>
           <div style={{ width: '100%', maxWidth: 500, background: '#fff', borderRadius: 12, overflow: 'hidden' }}>
             <div style={{ padding: '16px 20px', borderBottom: '1px solid #e0e4ec' }}>
@@ -105,8 +163,8 @@ export default function AmesPage({ membres, actifs, refs, openFiche, showToast, 
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Prénom</label><input value={fd.prenom || ''} onChange={e => uf('prenom', e.target.value)} style={S.inp} /></div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px' }}>
-                <div style={{ marginBottom: 8 }}><label style={S.label}>Téléphone</label><input value={fd.telephone || ''} onChange={e => uf('telephone', e.target.value)} style={S.inp} /></div>
-                <div style={{ marginBottom: 8 }}><label style={S.label}>Email</label><input value={fd.email || ''} onChange={e => uf('email', e.target.value)} style={S.inp} type="email" /></div>
+                <div style={{ marginBottom: 8 }}><label style={S.label}>Téléphone</label><input value={fd.telephone || ''} onChange={e => uf('telephone', e.target.value)} style={{ ...S.inp, borderColor: fd.telephone && !validTel(fd.telephone) ? '#e03050' : '#c8cfe0' }} placeholder="+225 07..." /></div>
+                <div style={{ marginBottom: 8 }}><label style={S.label}>Email</label><input value={fd.email || ''} onChange={e => uf('email', e.target.value)} style={{ ...S.inp, borderColor: fd.email && !validEmail(fd.email) ? '#e03050' : '#c8cfe0' }} type="email" /></div>
               </div>
               <div style={{ marginBottom: 8 }}><label style={S.label}>Date d'inscription</label><input value={fd.date_inscription || ''} onChange={e => uf('date_inscription', e.target.value)} style={S.inp} type="date" /></div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0 8px' }}>
@@ -119,6 +177,47 @@ export default function AmesPage({ membres, actifs, refs, openFiche, showToast, 
             <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#8892a8', true)}>Annuler</button>
               <button onClick={handleSave} style={S.btn('#0ea888', false)}>Enregistrer</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal réassignation (rétrogradation rôle) */}
+      {modal === 'reassign' && fd._reassignSuivis && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', zIndex: 500, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 16, overflowY: 'auto' }}>
+          <div style={{ width: '100%', maxWidth: 460, background: '#fff', borderRadius: 12, overflow: 'hidden' }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid #e0e4ec' }}>
+              <div style={{ fontSize: 15, fontWeight: 700, color: '#d48f00' }}>⚠ Réassigner avant changement de rôle</div>
+            </div>
+            <div style={{ padding: '16px 20px' }}>
+              <div style={{ fontSize: 12, color: '#5a6480', marginBottom: 10 }}>Ce membre suit {fd._reassignSuivis.length} personne(s). Choisissez un nouveau responsable :</div>
+              <div style={{ marginBottom: 8, padding: '8px 10px', background: '#f0f2f6', borderRadius: 6, fontSize: 11, color: '#5a6480' }}>
+                {fd._reassignSuivis.map(s => s.prenom + ' ' + s.nom).join(', ')}
+              </div>
+              <div style={{ marginBottom: 8 }}>
+                <label style={S.label}>Nouveau responsable</label>
+                <select value={fd._newSuivId || ''} onChange={e => uf('_newSuivId', e.target.value || null)} style={S.inp}>
+                  <option value="">— Choisir —</option>
+                  {leaders.filter(l => l.id !== fd._reassignFrom).map(l => <option key={l.id} value={l.id}>{l.prenom} {l.nom} ({l.role})</option>)}
+                </select>
+              </div>
+            </div>
+            <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#8892a8', true)}>Annuler</button>
+              <button onClick={doReassign} style={S.btn('#d48f00', false)}>Réassigner et modifier</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal confirmation (doublons) */}
+      {confirmAction && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <div style={{ width: '100%', maxWidth: 380, background: '#fff', borderRadius: 12, overflow: 'hidden' }}>
+            <div style={{ padding: '20px 24px' }}><div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Confirmation</div><div style={{ fontSize: 13, color: '#5a6480', lineHeight: 1.6 }}>{confirmAction.msg}</div></div>
+            <div style={{ padding: '12px 24px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => setConfirmAction(null)} style={S.btn('#8892a8', true)}>Annuler</button>
+              <button onClick={() => { confirmAction.fn(); setConfirmAction(null) }} style={S.btn('#e03050', false)}>Confirmer</button>
             </div>
           </div>
         </div>

@@ -43,14 +43,30 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
   const leaders = actifs.filter(x => { const r = (refs.roles || []).find(r => r.nom === x.role); return r?.peut_suivre && x.id !== m.id })
 
   const handleArchive = async () => {
-    const suivis = getSuivis()
-    if (suivis.length > 0) {
-      showToast('⚠ Réassignez d\'abord les ' + suivis.length + ' suivis de ce membre')
+    const mesSuivis = getSuivis()
+    if (mesSuivis.length > 0) {
+      setFd(prev => ({ ...prev, _archiveSuivis: mesSuivis }))
+      setModal('archiveReassign')
       return
     }
     await supabase.from('membres').update({ archive: true, statut: 'Archivé', date_archivage: new Date().toISOString() }).eq('id', m.id)
     showToast('✓ Membre archivé')
     await reloadMembres()
+  }
+
+  const doArchiveReassign = async () => {
+    try {
+      const newSuivId = fd._archiveNewSuiv || null
+      if (newSuivId) {
+        for (const s of fd._archiveSuivis) {
+          await supabase.from('membres').update({ suivi_par: newSuivId }).eq('id', s.id)
+        }
+      }
+      await supabase.from('membres').update({ archive: true, statut: 'Archivé', date_archivage: new Date().toISOString() }).eq('id', m.id)
+      showToast('✓ Archivé et suivis réassignés')
+      await reloadMembres()
+      setModal(null); setFd({})
+    } catch (e) { showToast('⚠ ' + e.message) }
   }
 
   const handleSaveEnt = async () => {
@@ -73,14 +89,15 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
           <button key={t[0]} onClick={() => setFtab(t[0])} style={{ padding: '4px 12px', borderRadius: 14, border: '1px solid ' + (ftab === t[0] ? '#0ea888' : '#e0e4ec'), background: ftab === t[0] ? '#0ea88814' : '#f0f2f6', color: ftab === t[0] ? '#0ea888' : '#5a6480', fontSize: 11, fontWeight: ftab === t[0] ? 600 : 500, cursor: 'pointer', fontFamily: 'inherit' }}>{t[1]}</button>
         ))}
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 4 }}>
+          <button onClick={() => { setFd({ ...m }); setModal('edMb') }} style={S.btn('#5a6480', true)}>✏️ Modifier</button>
           {!m.archive && <button onClick={() => setConfirmAction({ msg: 'Archiver ce membre ?', fn: handleArchive })} style={S.btn('#8892a8', true)}>📦 Archiver</button>}
         </div>
       </div>
 
       {/* Header */}
-      <div style={{ ...S.card, display: 'flex', alignItems: 'center', gap: 14 }}>
-        <div style={{ width: 44, height: 44, borderRadius: '50%', background: getStatutColor(refs, m.statut) + '18', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 700, color: getStatutColor(refs, m.statut), border: '2px solid ' + getStatutColor(refs, m.statut) }}>{(m.prenom || m.nom || '?').charAt(0)}</div>
-        <div style={{ flex: 1 }}>
+      <div style={{ ...S.card, display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+        <div style={{ width: 44, height: 44, borderRadius: '50%', background: getStatutColor(refs, m.statut) + '18', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 700, color: getStatutColor(refs, m.statut), border: '2px solid ' + getStatutColor(refs, m.statut), flexShrink: 0 }}>{(m.prenom || m.nom || '?').charAt(0)}</div>
+        <div style={{ flex: '1 1 200px', minWidth: 0 }}>
           <div style={{ fontSize: 17, fontWeight: 700, fontFamily: 'Georgia, serif' }}>{m.prenom} {m.nom}</div>
           <div style={{ display: 'flex', gap: 5, marginTop: 3, flexWrap: 'wrap' }}>
             <span style={S.pill(getStatutColor(refs, m.statut))}>{m.statut}</span>
@@ -89,7 +106,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
             {spM && <span style={{ fontSize: 10, color: '#5a6480' }}>suivi par {spM.prenom} {spM.nom}</span>}
           </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, width: '100%', maxWidth: 340 }}>
           {[{ v: days !== null ? days + 'j' : '—', l: 'Inscription', c: '#0ea888' }, { v: ca, l: 'Abs.', c: ca >= 3 ? '#e03050' : '#1a9c60' }, { v: mEn.length, l: 'Entretiens', c: '#3060d0' }, { v: pv + '/' + mPt.length, l: 'Plan', c: '#7040d0' }].map((x, i) => (
             <div key={i} style={{ textAlign: 'center', padding: 6, background: '#f0f2f6', borderRadius: 6 }}>
               <div style={{ fontSize: 16, fontWeight: 700, color: x.c, fontFamily: 'Georgia, serif' }}>{x.v}</div>
@@ -316,6 +333,82 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
             <div style={{ padding: '12px 24px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button onClick={() => setConfirmAction(null)} style={S.btn('#8892a8', true)}>Annuler</button>
               <button onClick={() => { confirmAction.fn(); setConfirmAction(null) }} style={S.btn('#e03050', false)}>Confirmer</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal réassignation archivage */}
+      {modal === 'archiveReassign' && fd._archiveSuivis && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', zIndex: 500, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 16, overflowY: 'auto' }}>
+          <div style={{ width: '100%', maxWidth: 460, background: '#fff', borderRadius: 12, overflow: 'hidden' }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid #e0e4ec' }}>
+              <div style={{ fontSize: 15, fontWeight: 700, color: '#d48f00' }}>⚠ Réassigner avant archivage</div>
+            </div>
+            <div style={{ padding: '16px 20px' }}>
+              <div style={{ fontSize: 12, color: '#5a6480', marginBottom: 10 }}>{m.prenom} {m.nom} suit {fd._archiveSuivis.length} membre(s). Choisissez un nouveau responsable :</div>
+              <div style={{ marginBottom: 8, padding: '8px 10px', background: '#f0f2f6', borderRadius: 6, fontSize: 11, color: '#5a6480' }}>
+                {fd._archiveSuivis.map(s => s.prenom + ' ' + s.nom).join(', ')}
+              </div>
+              <div style={{ marginBottom: 8 }}>
+                <label style={S.label}>Nouveau responsable</label>
+                <select value={fd._archiveNewSuiv || ''} onChange={e => uf('_archiveNewSuiv', e.target.value || null)} style={S.inp}>
+                  <option value="">— Choisir —</option>
+                  {leaders.filter(l => l.id !== m.id).map(l => <option key={l.id} value={l.id}>{l.prenom} {l.nom} ({l.role})</option>)}
+                </select>
+              </div>
+            </div>
+            <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#8892a8', true)}>Annuler</button>
+              <button onClick={doArchiveReassign} style={S.btn('#d48f00', false)}>Réassigner et archiver</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal édition membre */}
+      {modal === 'edMb' && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', zIndex: 500, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 16, overflowY: 'auto' }}>
+          <div style={{ width: '100%', maxWidth: 500, background: '#fff', borderRadius: 12, overflow: 'hidden' }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid #e0e4ec' }}>
+              <div style={{ fontSize: 15, fontWeight: 700, fontFamily: 'Georgia, serif' }}>Modifier le membre</div>
+            </div>
+            <div style={{ padding: '16px 20px', maxHeight: '60vh', overflowY: 'auto' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px' }}>
+                <div style={{ marginBottom: 8 }}><label style={S.label}>Nom</label><input value={fd.nom || ''} onChange={e => uf('nom', e.target.value)} style={S.inp} /></div>
+                <div style={{ marginBottom: 8 }}><label style={S.label}>Prénom</label><input value={fd.prenom || ''} onChange={e => uf('prenom', e.target.value)} style={S.inp} /></div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px' }}>
+                <div style={{ marginBottom: 8 }}><label style={S.label}>Téléphone</label><input value={fd.telephone || ''} onChange={e => uf('telephone', e.target.value)} style={S.inp} /></div>
+                <div style={{ marginBottom: 8 }}><label style={S.label}>Email</label><input value={fd.email || ''} onChange={e => uf('email', e.target.value)} style={S.inp} type="email" /></div>
+              </div>
+              <div style={{ marginBottom: 8 }}><label style={S.label}>Date d'inscription</label><input value={fd.date_inscription || ''} onChange={e => uf('date_inscription', e.target.value)} style={S.inp} type="date" /></div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0 8px' }}>
+                <div style={{ marginBottom: 8 }}><label style={S.label}>Statut</label><select value={fd.statut || 'Nouveau'} onChange={e => uf('statut', e.target.value)} style={S.inp}>{(refs.statuts || []).filter(s => !s.est_archive).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}</select></div>
+                <div style={{ marginBottom: 8 }}><label style={S.label}>Rôle</label><select value={fd.role || 'Membre'} onChange={e => uf('role', e.target.value)} style={S.inp}>{(refs.roles || []).map(r => <option key={r.nom} value={r.nom}>{r.nom}</option>)}</select></div>
+                <div style={{ marginBottom: 8 }}><label style={S.label}>Suivi par</label><select value={fd.suivi_par || ''} onChange={e => uf('suivi_par', e.target.value || null)} style={S.inp}><option value="">— Aucun —</option>{leaders.filter(l => l.id !== m.id).map(l => <option key={l.id} value={l.id}>{l.prenom} {l.nom} ({l.role})</option>)}</select></div>
+              </div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', marginBottom: 8 }}><input type="checkbox" checked={!!fd.est_retour} onChange={e => uf('est_retour', e.target.checked)} /><span style={{ fontSize: 12, color: '#5a6480', fontWeight: 600 }}>C'est un retour</span></label>
+              {fd.est_retour && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0 8px' }}>
+                  <div style={{ marginBottom: 8 }}><label style={S.label}>Date départ</label><input value={fd.date_depart || ''} onChange={e => uf('date_depart', e.target.value)} style={S.inp} type="date" /></div>
+                  <div style={{ marginBottom: 8 }}><label style={S.label}>Motif</label><select value={fd.motif_depart || ''} onChange={e => uf('motif_depart', e.target.value)} style={S.inp}><option value="">—</option>{(refs.motifsDepart || []).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}</select></div>
+                  <div style={{ marginBottom: 8 }}><label style={S.label}>Date retour</label><input value={fd.date_retour || ''} onChange={e => uf('date_retour', e.target.value)} style={S.inp} type="date" /></div>
+                </div>
+              )}
+              <div style={{ marginBottom: 8 }}><label style={S.label}>Notes</label><textarea value={fd.notes || ''} onChange={e => uf('notes', e.target.value)} rows={2} style={{ ...S.inp, resize: 'vertical' }} /></div>
+            </div>
+            <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#8892a8', true)}>Annuler</button>
+              <button onClick={async () => {
+                try {
+                  const { id, created_at, created_by, updated_at, updated_by, ...updates } = fd
+                  await supabase.from('membres').update(updates).eq('id', m.id)
+                  showToast('✓ Membre modifié')
+                  await reloadMembres()
+                  setModal(null); setFd({})
+                } catch (e) { showToast('⚠ ' + e.message) }
+              }} style={S.btn('#0ea888', false)}>Enregistrer</button>
             </div>
           </div>
         </div>

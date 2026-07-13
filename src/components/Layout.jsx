@@ -87,7 +87,17 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
         ))}
       </nav>
 
-      <style>{`@media(max-width:768px){.sb{display:none!important}.mn{margin-left:0!important}.nv{display:flex!important}}`}</style>
+      <style>{`
+        @media(max-width:768px){
+          .sb{display:none!important}
+          .mn{margin-left:0!important}
+          .nv{display:flex!important}
+          .mn>div:last-child{padding:12px 12px 70px!important}
+          table{display:block;overflow-x:auto;white-space:nowrap}
+          thead{display:table;width:100%}
+          tbody{display:table;width:100%}
+        }
+      `}</style>
     </div>
   )
 }
