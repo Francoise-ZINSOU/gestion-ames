@@ -245,29 +245,43 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
             <div>
               {mDf.map(d => {
                 const modulesForDefi = mPt.filter(p => p.defi_id === d.id)
-                if (modulesForDefi.length === 0) return null
                 const stColor = (refs.statutsDefi || []).find(s => s.nom === d.statut)?.couleur || '#8892a8'
+                const vCount = modulesForDefi.filter(p => p.valide).length
+                const pct = modulesForDefi.length ? Math.round(vCount / modulesForDefi.length * 100) : 0
+                const allDone = modulesForDefi.length > 0 && vCount === modulesForDefi.length
                 return (
-                  <div key={d.id} style={{ marginBottom: 12 }}>
+                  <div key={d.id} style={{ marginBottom: 14, padding: '10px 12px', borderRadius: 8, border: '1px solid ' + (allDone ? '#1a9c60' : '#e0e4ec'), background: allDone ? '#1a9c6006' : '#fff' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
                       <span style={S.pill('#3060d0')}>{d.type_defi}</span>
                       <span style={S.pill(stColor)}>{d.statut}</span>
                       <span style={{ fontSize: 11, color: '#5a6480', flex: 1 }}>{d.description?.substring(0, 50)}{d.description?.length > 50 ? '...' : ''}</span>
+                      <button onClick={() => { setFd({ _asDefiId: d.id }); setModal('asMod') }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 10, color: '#7040d0', fontWeight: 600 }}>+ Module</button>
                     </div>
-                    {modulesForDefi.map(p => {
-                      const mod = (refs.modules || []).find(mod => mod.id === p.module_id)
-                      return (
-                        <div key={p.id} onClick={() => validerModule(p.id, !p.valide)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 6, border: '1px solid ' + (p.valide ? '#1a9c60' : '#e0e4ec'), background: p.valide ? '#1a9c6008' : '#fff', marginBottom: 4, cursor: 'pointer', marginLeft: 12 }}>
-                          <div style={{ width: 20, height: 20, borderRadius: '50%', border: '2px solid ' + (p.valide ? '#1a9c60' : '#e0e4ec'), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: p.valide ? '#1a9c60' : '#8892a8' }}>{p.valide ? '✓' : ''}</div>
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: 12, fontWeight: 600, color: p.valide ? '#1a9c60' : '#1a1e2e' }}>{mod?.nom || '?'}</div>
-                            {p.valide && p.date_validation && <div style={{ fontSize: 9, color: '#8892a8' }}>Validé le {fmt(p.date_validation)}</div>}
-                          </div>
-                          <span style={S.pill(p.valide ? '#1a9c60' : '#8892a8')}>{p.valide ? 'Validé' : 'En attente'}</span>
-                          <button onClick={e => { e.stopPropagation(); retirerModule(p.id) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 10, color: '#8892a8' }}>✕</button>
+                    {modulesForDefi.length === 0 ? (
+                      <div style={{ fontSize: 11, color: '#8892a8', padding: '4px 0 0 12px' }}>Aucun module assigné — <span onClick={() => { setFd({ _asDefiId: d.id }); setModal('asMod') }} style={{ color: '#7040d0', cursor: 'pointer', textDecoration: 'underline' }}>assigner</span></div>
+                    ) : (
+                      <div>
+                        {modulesForDefi.map(p => {
+                          const mod = (refs.modules || []).find(mod => mod.id === p.module_id)
+                          return (
+                            <div key={p.id} onClick={() => validerModule(p.id, !p.valide)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', borderRadius: 6, border: '1px solid ' + (p.valide ? '#1a9c60' : '#e0e4ec'), background: p.valide ? '#1a9c6008' : '#fff', marginBottom: 3, cursor: 'pointer', marginLeft: 8 }}>
+                              <div style={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid ' + (p.valide ? '#1a9c60' : '#e0e4ec'), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: p.valide ? '#1a9c60' : '#8892a8' }}>{p.valide ? '✓' : ''}</div>
+                              <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: 12, fontWeight: 600, color: p.valide ? '#1a9c60' : '#1a1e2e' }}>{mod?.nom || '?'}</div>
+                                {p.valide && p.date_validation && <div style={{ fontSize: 9, color: '#8892a8' }}>Validé le {fmt(p.date_validation)}</div>}
+                              </div>
+                              <span style={S.pill(p.valide ? '#1a9c60' : '#8892a8')}>{p.valide ? 'Validé' : 'En attente'}</span>
+                              <button onClick={e => { e.stopPropagation(); retirerModule(p.id) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 10, color: '#8892a8' }}>✕</button>
+                            </div>
+                          )
+                        })}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, marginLeft: 8 }}>
+                          <div style={{ flex: 1, height: 4, background: '#f0f2f6', borderRadius: 2, overflow: 'hidden' }}><div style={{ height: '100%', borderRadius: 2, background: allDone ? '#1a9c60' : '#7040d0', width: pct + '%' }} /></div>
+                          <span style={{ fontSize: 10, fontWeight: 600, color: allDone ? '#1a9c60' : '#5a6480' }}>{vCount}/{modulesForDefi.length}</span>
+                          {allDone && <span style={{ fontSize: 10, color: '#1a9c60', fontWeight: 600 }}>Parcours terminé</span>}
                         </div>
-                      )
-                    })}
+                      </div>
+                    )}
                   </div>
                 )
               })}
@@ -342,15 +356,22 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
       {modal === 'asMod' && (() => {
         const done = {}; mPt.forEach(p => { done[p.module_id + '_' + (p.defi_id || '')] = true })
         const avail = (refs.modules || []).filter(mod => !done[mod.id + '_' + (fd._asDefiId || '')])
-        const selectedDefi = mDf.find(d => d.id === fd._asDefiId)
+        const sel = fd._asModIds || {}
+        const nSel = Object.keys(sel).filter(k => sel[k]).length
+        const toggleMod = (id) => setFd(prev => ({ ...prev, _asModIds: { ...(prev._asModIds || {}), [id]: !(prev._asModIds || {})[id] } }))
+        const doAssignAll = async () => {
+          const ids = Object.keys(sel).filter(k => sel[k])
+          for (const modId of ids) { await assignerModule(m.id, modId, fd._asDefiId) }
+          setModal(null); setFd({})
+        }
         return (
           <div className="modal-overlay">
             <div className="modal-box" style={{ maxWidth: 460 }}>
-              <div style={{ padding: '16px 20px', borderBottom: '1px solid #e0e4ec' }}><div style={{ fontSize: 15, fontWeight: 700 }}>Assigner un module</div></div>
+              <div style={{ padding: '16px 20px', borderBottom: '1px solid #e0e4ec' }}><div style={{ fontSize: 15, fontWeight: 700 }}>Assigner des modules</div></div>
               <div style={{ padding: '16px 20px', maxHeight: '50vh', overflowY: 'auto' }}>
                 <div style={{ marginBottom: 10 }}>
                   <label style={S.label}>Lié au défi</label>
-                  <select value={fd._asDefiId || ''} onChange={e => uf('_asDefiId', e.target.value || null)} style={S.inp}>
+                  <select value={fd._asDefiId || ''} onChange={e => setFd(prev => ({ ...prev, _asDefiId: e.target.value || null, _asModIds: {} }))} style={S.inp}>
                     <option value="">— Choisir un défi —</option>
                     {mDf.map(d => <option key={d.id} value={d.id}>{d.type_defi} — {(d.description || '').substring(0, 40)}{d.description?.length > 40 ? '...' : ''} ({d.statut})</option>)}
                   </select>
@@ -359,14 +380,27 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
                   <div style={{ padding: 12, textAlign: 'center', color: '#8892a8', fontSize: 12 }}>Sélectionnez d'abord un défi ci-dessus.</div>
                 ) : avail.length === 0 ? (
                   <div style={{ padding: 12, textAlign: 'center', color: '#1a9c60', fontSize: 12 }}>Tous les modules sont déjà assignés pour ce défi.</div>
-                ) : avail.map(mod => (
-                  <div key={mod.id} onClick={() => { assignerModule(m.id, mod.id, fd._asDefiId); setModal(null); setFd({}) }} style={{ padding: '8px 10px', borderRadius: 6, border: '1px solid #e0e4ec', marginBottom: 5, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 12, flex: 1 }}>{mod.nom}</span>
-                    <span style={{ fontSize: 10, color: '#0ea888', fontWeight: 600 }}>+ Assigner</span>
+                ) : (
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <span style={{ fontSize: 11, color: '#8892a8' }}>Cochez les modules à assigner</span>
+                      <button onClick={() => { const all = {}; avail.forEach(mod => { all[mod.id] = true }); setFd(prev => ({ ...prev, _asModIds: all })) }} style={{ background: 'none', border: 'none', fontSize: 11, color: '#0ea888', cursor: 'pointer', fontWeight: 600 }}>Tout cocher</button>
+                    </div>
+                    {avail.map(mod => (
+                      <div key={mod.id} onClick={() => toggleMod(mod.id)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', borderRadius: 6, border: '1px solid ' + (sel[mod.id] ? '#7040d0' : '#e0e4ec'), background: sel[mod.id] ? '#7040d008' : '#fff', marginBottom: 4, cursor: 'pointer' }}>
+                        <div style={{ width: 20, height: 20, borderRadius: 4, border: '2px solid ' + (sel[mod.id] ? '#7040d0' : '#e0e4ec'), background: sel[mod.id] ? '#7040d0' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: '#fff', flexShrink: 0 }}>
+                          {sel[mod.id] ? '✓' : ''}
+                        </div>
+                        <span style={{ fontSize: 12, flex: 1 }}>{mod.nom}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
-              <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', justifyContent: 'flex-end' }}><button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#8892a8', true)}>Fermer</button></div>
+              <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#8892a8', true)}>Annuler</button>
+                {nSel > 0 && <button onClick={doAssignAll} style={S.btn('#7040d0', false)}>Assigner {nSel} module{nSel > 1 ? 's' : ''}</button>}
+              </div>
             </div>
           </div>
         )
