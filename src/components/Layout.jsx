@@ -108,6 +108,12 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
           .mn>div:last-child{padding:12px 12px 70px!important}
           table{display:block;overflow-x:auto;white-space:nowrap}
         }
+        [style*="position: fixed"][style*="inset: 0"]{box-sizing:border-box}
+        [style*="position: fixed"][style*="inset: 0"]>div{box-sizing:border-box;max-height:90vh;margin-top:5vh}
+        @media(max-width:500px){
+          [style*="position: fixed"][style*="inset: 0"]{padding:8px!important}
+          [style*="position: fixed"][style*="inset: 0"]>div{max-width:100%!important;border-radius:10px!important}
+        }
       `}</style>
     </div>
   )

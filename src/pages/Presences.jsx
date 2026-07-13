@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { S, fmt, today } from '../lib/ui'
+import { Save, Trash2, CheckSquare, Square, Search } from 'lucide-react'
 
 export default function PresencesPage({ actifs, presences, refs, sauverPresences, supprimerDate }) {
   const activites = refs.activites || []
@@ -8,24 +9,20 @@ export default function PresencesPage({ actifs, presences, refs, sauverPresences
   const [chk, setChk] = useState({})
   const [saved, setSaved] = useState(false)
   const [search, setSearch] = useState('')
+  const [confirmAction, setConfirmAction] = useState(null)
 
-  // Sync actId when activites load
   useEffect(() => { if (!actId && activites.length) setActId(activites[0].id) }, [activites])
-
-  // Load existing presences for selected activity+date
   useEffect(() => {
     const obj = {}
     presences.filter(p => p.activite_id === actId && p.date_presence === date && p.present)
       .forEach(p => { obj[p.membre_id] = true })
     setChk(obj)
   }, [actId, date, presences])
-
   useEffect(() => { setSaved(false) }, [actId, date])
 
   const isFuture = new Date(date) > new Date(today())
   const act = activites.find(a => a.id === actId)
 
-  // Eligibility check (simplified - full check is in SQL function)
   const eligible = actifs.filter(m => {
     if (m.date_inscription && new Date(m.date_inscription) > new Date(date)) return false
     if (m.est_retour && m.date_depart) {
@@ -36,10 +33,7 @@ export default function PresencesPage({ actifs, presences, refs, sauverPresences
     return true
   }).sort((a, b) => (a.nom + a.prenom).localeCompare(b.nom + b.prenom))
 
-  const filtered = search
-    ? eligible.filter(m => (m.nom + ' ' + m.prenom).toLowerCase().includes(search.toLowerCase()))
-    : eligible
-
+  const filtered = search ? eligible.filter(m => (m.nom + ' ' + m.prenom).toLowerCase().includes(search.toLowerCase())) : eligible
   const existing = presences.filter(p => p.activite_id === actId && p.date_presence === date)
   const nChecked = Object.keys(chk).filter(k => chk[k]).length
 
@@ -49,12 +43,11 @@ export default function PresencesPage({ actifs, presences, refs, sauverPresences
     setSaved(true)
   }
 
-  const handleDelete = async () => {
-    if (confirm(`Supprimer TOUTES les présences du ${fmt(date)} pour ${act?.nom} ?\n\nCette action est irréversible.`)) {
-      await supprimerDate(actId, date)
-      setChk({})
-      setSaved(false)
-    }
+  const handleDelete = () => {
+    setConfirmAction({
+      msg: `Supprimer TOUTES les présences du ${fmt(date)} pour ${act?.nom} ?\n\nCette action est irréversible.`,
+      fn: async () => { await supprimerDate(actId, date); setChk({}); setSaved(false) }
+    })
   }
 
   return (
@@ -74,7 +67,7 @@ export default function PresencesPage({ actifs, presences, refs, sauverPresences
 
       {isFuture ? (
         <div style={{ padding: '12px 16px', borderRadius: 8, background: '#e0305008', border: '1px solid #e0305033', fontSize: 12, color: '#e03050' }}>
-          ⚠ Impossible de saisir des présences pour une date future.
+          Impossible de saisir des présences pour une date future.
         </div>
       ) : (
         <div style={S.card}>
@@ -85,22 +78,27 @@ export default function PresencesPage({ actifs, presences, refs, sauverPresences
                 {nChecked}/{eligible.length} coché(s){existing.length > 0 ? ' · Déjà enregistré — vous complétez' : ''}
               </div>
             </div>
-            <div style={{ display: 'flex', gap: 5 }}>
+            <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
               <button onClick={() => { const o = {}; eligible.forEach(m => { o[m.id] = true }); setChk(o); setSaved(false) }} style={S.btn('#0ea888', true)}>Tous</button>
               <button onClick={() => { setChk({}); setSaved(false) }} style={S.btn('#8892a8', true)}>Aucun</button>
-              <button onClick={handleSave} style={S.btn('#1a9c60', false)}>{saved ? '✓ Enregistré' : '💾 Sauver'}</button>
-              {existing.length > 0 && <button onClick={handleDelete} style={S.btn('#e03050', true)}>🗑 Suppr. date</button>}
+              <button onClick={handleSave} style={{ ...S.btn('#1a9c60', false), display: 'flex', alignItems: 'center', gap: 4 }}>
+                {saved ? <><CheckSquare size={13} /> Enregistré</> : <><Save size={13} /> Sauver</>}
+              </button>
+              {existing.length > 0 && <button onClick={handleDelete} style={{ ...S.btn('#e03050', true), display: 'flex', alignItems: 'center', gap: 4 }}><Trash2 size={13} /> Suppr. date</button>}
             </div>
           </div>
 
           <div style={{ padding: '8px 10px', background: '#3060d008', borderRadius: 6, marginBottom: 10, fontSize: 11, color: '#3060d0', borderLeft: '3px solid #3060d0' }}>
             {existing.length > 0
-              ? `💡 ${existing.length} enregistrement(s) existent. Modifiez et sauvez pour mettre à jour. Si erreur, « Suppr. date ».`
-              : '💡 Cochez les présents et sauvez. Les non-cochés = absents. Vous pouvez compléter plus tard.'}
+              ? `${existing.length} enregistrement(s) existent. Modifiez et sauvez pour mettre à jour. Si erreur, « Suppr. date ».`
+              : 'Cochez les présents et sauvez. Les non-cochés = absents. Vous pouvez compléter plus tard.'}
           </div>
 
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 Filtrer..."
-            style={{ ...S.inp, marginBottom: 8 }} />
+          <div style={{ position: 'relative', marginBottom: 8 }}>
+            <Search size={14} style={{ position: 'absolute', left: 10, top: 9, color: '#8892a8' }} />
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Filtrer..."
+              style={{ ...S.inp, paddingLeft: 30 }} />
+          </div>
 
           <div style={{ maxHeight: 400, overflowY: 'auto' }}>
             {filtered.map(m => (
@@ -114,6 +112,18 @@ export default function PresencesPage({ actifs, presences, refs, sauverPresences
               </div>
             ))}
             {filtered.length === 0 && <div style={{ padding: 14, textAlign: 'center', color: '#8892a8', fontSize: 12 }}>Aucun membre éligible</div>}
+          </div>
+        </div>
+      )}
+
+      {confirmAction && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <div style={{ width: '100%', maxWidth: 380, background: '#fff', borderRadius: 12, overflow: 'hidden' }}>
+            <div style={{ padding: '20px 24px' }}><div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Confirmation</div><div style={{ fontSize: 13, color: '#5a6480', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{confirmAction.msg}</div></div>
+            <div style={{ padding: '12px 24px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => setConfirmAction(null)} style={S.btn('#8892a8', true)}>Annuler</button>
+              <button onClick={() => { confirmAction.fn(); setConfirmAction(null) }} style={S.btn('#e03050', false)}>Confirmer</button>
+            </div>
           </div>
         </div>
       )}

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { S, today } from '../lib/ui'
 import { supabase } from '../lib/supabase'
+import { Users, CheckSquare, MessageCircle, Zap, Download, Trash2 } from 'lucide-react'
 
 export default function ExportPage({ membres, presences, entretiens, defis, refs, showToast }) {
   const [confirmAction, setConfirmAction] = useState(null)
@@ -37,33 +38,40 @@ export default function ExportPage({ membres, presences, entretiens, defis, refs
 
   const doReset = async () => {
     try {
-      await supabase.from('plan_croissance').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-      await supabase.from('defis').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-      await supabase.from('entretiens').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-      await supabase.from('presences').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-      await supabase.from('membres').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+      await supabase.from('plan_croissance').delete().gte('created_at', '1970-01-01')
+      await supabase.from('defis').delete().gte('created_at', '1970-01-01')
+      await supabase.from('entretiens').delete().gte('created_at', '1970-01-01')
+      await supabase.from('presences').delete().gte('created_at', '1970-01-01')
+      await supabase.from('membres').delete().gte('created_at', '1970-01-01')
       showToast('✓ Toutes les données ont été supprimées')
       window.location.reload()
     } catch (e) { showToast('⚠ ' + e.message) }
   }
 
+  const items = [
+    { t: 'membres', Icon: Users, l: 'Membres', n: membres.length, c: '#0ea888' },
+    { t: 'presences', Icon: CheckSquare, l: 'Présences', n: presences.length, c: '#3060d0' },
+    { t: 'entretiens', Icon: MessageCircle, l: 'Entretiens', n: entretiens.length, c: '#d48f00' },
+    { t: 'defis', Icon: Zap, l: 'Défis', n: defis.length, c: '#d86820' }
+  ]
+
   return (
     <div>
       <div style={S.card}>
         <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 10 }}>Exporter les données</div>
-        {[{ t: 'membres', ic: '👥', l: 'Membres', n: membres.length, c: '#0ea888' }, { t: 'presences', ic: '✅', l: 'Présences', n: presences.length, c: '#3060d0' }, { t: 'entretiens', ic: '💬', l: 'Entretiens', n: entretiens.length, c: '#d48f00' }, { t: 'defis', ic: '⚡', l: 'Défis', n: defis.length, c: '#d86820' }].map(item => (
-          <div key={item.t} onClick={() => doExport(item.t)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', borderRadius: 8, border: '1px solid #e0e4ec', cursor: 'pointer', marginBottom: 6 }}>
-            <div style={{ width: 32, height: 32, borderRadius: '50%', background: item.c + '14', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>{item.ic}</div>
-            <div style={{ flex: 1 }}><div style={{ fontSize: 13, fontWeight: 600 }}>{item.l}</div><div style={{ fontSize: 10, color: '#8892a8' }}>{item.n} enregistrement(s)</div></div>
-            <span style={{ fontSize: 11, color: item.c, fontWeight: 600 }}>⬇ CSV</span>
+        {items.map(({ t, Icon, l, n, c }) => (
+          <div key={t} onClick={() => doExport(t)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', borderRadius: 8, border: '1px solid #e0e4ec', cursor: 'pointer', marginBottom: 6 }}>
+            <div style={{ width: 32, height: 32, borderRadius: '50%', background: c + '14', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon size={16} color={c} /></div>
+            <div style={{ flex: 1 }}><div style={{ fontSize: 13, fontWeight: 600 }}>{l}</div><div style={{ fontSize: 10, color: '#8892a8' }}>{n} enregistrement(s)</div></div>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: c, fontWeight: 600 }}><Download size={13} /> CSV</span>
           </div>
         ))}
       </div>
 
       <div style={{ ...S.card, marginTop: 12 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4, color: '#e03050' }}>🗑 Réinitialiser les données</div>
-        <div style={{ fontSize: 11, color: '#8892a8', marginBottom: 10 }}>Supprime tous les membres, présences, entretiens et défis. Les tables de référence (statuts, rôles, activités) sont conservées. Exportez d'abord !</div>
-        <button onClick={() => setConfirmAction({ msg: 'Supprimer TOUTES les données pastorales ?\n\nCette action est irréversible. Assurez-vous d\'avoir exporté avant.', fn: doReset })} style={S.btn('#e03050', true)}>Réinitialiser</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, marginBottom: 4, color: '#e03050' }}><Trash2 size={14} /> Réinitialiser les données</div>
+        <div style={{ fontSize: 11, color: '#8892a8', marginBottom: 10 }}>Supprime tous les membres, présences, entretiens et défis. Les tables de référence sont conservées.</div>
+        <button onClick={() => setConfirmAction({ msg: 'Supprimer TOUTES les données pastorales ?\n\nCette action est irréversible. Exportez d\'abord.', fn: doReset })} style={S.btn('#e03050', true)}>Réinitialiser</button>
       </div>
 
       {confirmAction && (

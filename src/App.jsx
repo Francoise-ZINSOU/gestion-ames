@@ -74,7 +74,7 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
 
   let content
   switch (page) {
-    case 'home': content = <HomePage {...ctx} />; break
+    case 'home': content = <HomePage {...ctx} setPage={setPage} />; break
     case 'pres': content = <PresencesPage {...ctx} />; break
     case 'ames': content = <AmesPage {...ctx} setPage={setPage} />; break
     case 'fiche': content = <FichePage {...ctx} setPage={setPage} />; break
@@ -86,7 +86,7 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
     case 'export': content = <ExportPage {...ctx} />; break
     case 'params': content = auth.isAdmin ? <ParamsPage {...ctx} /> : null; break
     case 'menu': content = <MenuMobile setPage={setPage} isAdmin={auth.isAdmin} />; break
-    default: content = <HomePage {...ctx} />
+    default: content = <HomePage {...ctx} setPage={setPage} />
   }
 
   return (

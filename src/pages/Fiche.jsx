@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { S, fmt, fmtS, dago, today, getStatutColor, getRoleColor } from '../lib/ui'
 import { supabase } from '../lib/supabase'
+import { ClipboardList, BarChart3, MessageCircle, Zap, BookOpen, Pencil, Archive } from 'lucide-react'
 
 export default function FichePage({ membres, actifs, presences, entretiens, defis, plans, refs, selectedMembre: m, selectedId, openFiche, showToast, ajouterEnt, modifierEnt, supprimerEnt, ajouterDefi, modifierDefi, assignerModule, validerModule, retirerModule, reloadMembres, setPage }) {
   const [ftab, setFtab] = useState('id')
@@ -85,12 +86,12 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
     <div>
       <div style={{ display: 'flex', gap: 5, marginBottom: 10, flexWrap: 'wrap', alignItems: 'center' }}>
         <button onClick={() => setPage('ames')} style={S.btn('#5a6480', true)}>← Liste</button>
-        {[['id', '📋 Identité'], ['pr', '📊 Présences'], ['en', '💬 Entretiens'], ['df', '⚡ Défis'], ['pt', '📖 Plan']].map(t => (
-          <button key={t[0]} onClick={() => setFtab(t[0])} style={{ padding: '4px 12px', borderRadius: 14, border: '1px solid ' + (ftab === t[0] ? '#0ea888' : '#e0e4ec'), background: ftab === t[0] ? '#0ea88814' : '#f0f2f6', color: ftab === t[0] ? '#0ea888' : '#5a6480', fontSize: 11, fontWeight: ftab === t[0] ? 600 : 500, cursor: 'pointer', fontFamily: 'inherit' }}>{t[1]}</button>
+        {[['id', 'Identité', ClipboardList], ['pr', 'Présences', BarChart3], ['en', 'Entretiens', MessageCircle], ['df', 'Défis', Zap], ['pt', 'Plan', BookOpen]].map(([id, label, Icon]) => (
+          <button key={id} onClick={() => setFtab(id)} style={{ padding: '4px 12px', borderRadius: 14, border: '1px solid ' + (ftab === id ? '#0ea888' : '#e0e4ec'), background: ftab === id ? '#0ea88814' : '#f0f2f6', color: ftab === id ? '#0ea888' : '#5a6480', fontSize: 11, fontWeight: ftab === id ? 600 : 500, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4 }}><Icon size={12} /> {label}</button>
         ))}
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 4 }}>
-          <button onClick={() => { setFd({ ...m }); setModal('edMb') }} style={S.btn('#5a6480', true)}>✏️ Modifier</button>
-          {!m.archive && <button onClick={() => setConfirmAction({ msg: 'Archiver ce membre ?', fn: handleArchive })} style={S.btn('#8892a8', true)}>📦 Archiver</button>}
+          <button onClick={() => { setFd({ ...m }); setModal('edMb') }} style={{ ...S.btn('#5a6480', true), display: 'flex', alignItems: 'center', gap: 4 }}><Pencil size={13} /> Modifier</button>
+          {!m.archive && <button onClick={() => setConfirmAction({ msg: 'Archiver ce membre ?', fn: handleArchive })} style={{ ...S.btn('#8892a8', true), display: 'flex', alignItems: 'center', gap: 4 }}><Archive size={13} /> Archiver</button>}
         </div>
       </div>
 
@@ -385,8 +386,8 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
               <div style={{ marginBottom: 8 }}><label style={S.label}>Date d'inscription</label><input value={fd.date_inscription || ''} onChange={e => uf('date_inscription', e.target.value)} style={S.inp} type="date" /></div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0 8px' }}>
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Statut</label><select value={fd.statut || 'Nouveau'} onChange={e => uf('statut', e.target.value)} style={S.inp}>{(refs.statuts || []).filter(s => !s.est_archive).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}</select></div>
-                <div style={{ marginBottom: 8 }}><label style={S.label}>Rôle</label><select value={fd.role || 'Membre'} onChange={e => uf('role', e.target.value)} style={S.inp}>{(refs.roles || []).map(r => <option key={r.nom} value={r.nom}>{r.nom}</option>)}</select></div>
-                <div style={{ marginBottom: 8 }}><label style={S.label}>Suivi par</label><select value={fd.suivi_par || ''} onChange={e => uf('suivi_par', e.target.value || null)} style={S.inp}><option value="">— Aucun —</option>{leaders.filter(l => l.id !== m.id).map(l => <option key={l.id} value={l.id}>{l.prenom} {l.nom} ({l.role})</option>)}</select></div>
+                <div style={{ marginBottom: 8 }}><label style={S.label}>Rôle</label><select value={fd.role || 'Membre'} onChange={e => { uf('role', e.target.value); if (e.target.value === 'Berger principal') uf('suivi_par', null) }} style={S.inp}>{(refs.roles || []).map(r => <option key={r.nom} value={r.nom}>{r.nom}</option>)}</select></div>
+                {(fd.role !== 'Berger principal') && <div style={{ marginBottom: 8 }}><label style={S.label}>Suivi par</label><select value={fd.suivi_par || ''} onChange={e => uf('suivi_par', e.target.value || null)} style={S.inp}><option value="">— Aucun —</option>{leaders.filter(l => l.id !== m.id).map(l => <option key={l.id} value={l.id}>{l.prenom} {l.nom} ({l.role})</option>)}</select></div>}
               </div>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', marginBottom: 8 }}><input type="checkbox" checked={!!fd.est_retour} onChange={e => uf('est_retour', e.target.checked)} /><span style={{ fontSize: 12, color: '#5a6480', fontWeight: 600 }}>C'est un retour</span></label>
               {fd.est_retour && (
