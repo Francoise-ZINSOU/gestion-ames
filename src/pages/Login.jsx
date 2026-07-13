@@ -27,7 +27,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', minHeight: '100vh', background: '#f4f6f9', fontFamily: 'Trebuchet MS, sans-serif', padding: '60px 16px' }}>
+    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', minHeight: '100vh', background: '#f4f6f9', fontFamily: 'Trebuchet MS, Gill Sans, Calibri, sans-serif', padding: '60px 16px' }}>
       <div style={{ width: '100%', maxWidth: 400, background: '#fff', borderRadius: 16, overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,.06)' }}>
         <div style={{ padding: '28px 28px 20px', borderBottom: '1px solid #e0e4ec', textAlign: 'center' }}>
           <div style={{ fontSize: 9, letterSpacing: 3, textTransform: 'uppercase', color: '#0ea888', fontWeight: 700, marginBottom: 6 }}>Gestion Pastorale</div>

@@ -207,7 +207,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
                     <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
                       <span style={S.pill(sc)}>{e.statut}</span>
                       <button onClick={() => { setFd({ ...e }); setEditEntId(e.id); setModal('ent') }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, color: '#3060d0' }}><Pencil size={12} /></button>
-                      <button onClick={() => setConfirmAction({ msg: 'Supprimer cet entretien ?', fn: () => supprimerEnt(e.id) })} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, color: '#8892a8' }}>✕</button>
+                      <button onClick={() => setConfirmAction({ msg: 'Supprimer cet entretien ?', fn: () => supprimerEnt(e.id) })} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: '#8892a8', padding: '0 2px' }}>✕</button>
                     </div>
                   </div>
                   {e.commentaires && <div style={{ fontSize: 11, color: '#5a6480', lineHeight: 1.4, whiteSpace: 'pre-wrap', padding: '4px 8px', background: '#f0f2f6', borderRadius: 4, borderLeft: '3px solid ' + sc }}>{e.commentaires}</div>}
@@ -233,8 +233,8 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
                     <div style={{ display: 'flex', gap: 4, marginBottom: 3, flexWrap: 'wrap', alignItems: 'center' }}>
                       <span style={S.pill('#3060d0')}>{d.type_defi}</span>
                       <span style={S.pill(stColor)}>{d.statut}</span>
-                      <button onClick={() => { setFd({ _editDefiId: d.id, type_defi: d.type_defi, description: d.description, statut_defi: d.statut }); setModal('editDefi') }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#3060d0', padding: 0 }}><Pencil size={12} /></button>
-                      <button onClick={() => setConfirmAction({ msg: 'Supprimer ce défi ?', fn: async () => { await supabase.from('defis').delete().eq('id', d.id); showToast('✓ Défi supprimé'); reloadMembres() } })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8892a8', padding: 0 }}><X size={12} /></button>
+                      <button onClick={() => { setFd({ _editDefiId: d.id, type_defi: d.type_defi, description: d.description, statut_defi: d.statut }); setModal('editDefi') }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#3060d0', padding: '0 2px' }}><Pencil size={13} /></button>
+                      <button onClick={() => setConfirmAction({ msg: 'Supprimer ce défi ?', fn: async () => { await supabase.from('defis').delete().eq('id', d.id); showToast('✓ Défi supprimé'); reloadMembres() } })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8892a8', padding: '0 2px', fontSize: 13 }}>✕</button>
                     </div>
                     <div style={{ fontSize: 12, lineHeight: 1.4 }}>{d.description}</div>
                   </div>

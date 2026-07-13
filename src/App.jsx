@@ -28,7 +28,7 @@ export default function App() {
 
   // Auth states
   if (auth.loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: 'Trebuchet MS, sans-serif' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: 'Trebuchet MS, Gill Sans, Calibri, sans-serif' }}>
       <div style={{ color: '#5a6480', fontSize: 14 }}>Chargement...</div>
     </div>
   )
