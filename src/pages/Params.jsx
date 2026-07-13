@@ -1,0 +1,89 @@
+import { useState } from 'react'
+import { S } from '../lib/ui'
+import { useRefAdmin, useProfils } from '../lib/data'
+
+const REF_TABLES = [
+  { key: 'ref_statuts', label: 'Statuts des membres', fields: ['nom', 'couleur'] },
+  { key: 'ref_roles', label: 'Rôles des membres', fields: ['nom', 'couleur'] },
+  { key: 'activites', label: 'Activités', fields: ['nom', 'code', 'icone', 'couleur'] },
+  { key: 'modules', label: 'Modules de croissance', fields: ['nom'] },
+  { key: 'sujets_entretien', label: "Sujets d'entretien", fields: ['nom'] },
+  { key: 'ref_types_defi', label: 'Types de défis', fields: ['nom'] },
+  { key: 'ref_statuts_defi', label: 'Statuts des défis', fields: ['nom', 'couleur'] },
+  { key: 'ref_statuts_entretien', label: 'Statuts des entretiens', fields: ['nom', 'couleur'] },
+  { key: 'ref_motifs_depart', label: 'Motifs de départ', fields: ['nom'] },
+]
+
+function RefTable({ table, label, fields }) {
+  const { rows, ajouter, modifier, desactiver } = useRefAdmin(table)
+  const [newNom, setNewNom] = useState('')
+  const [showToast, setShowToast] = useState('')
+
+  const handleAdd = async () => {
+    if (!newNom.trim()) return
+    try { await ajouter({ nom: newNom.trim() }); setNewNom('') }
+    catch (e) { setShowToast('⚠ ' + e.message) }
+  }
+
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 6 }}>{label}</div>
+      {rows.map(r => (
+        <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0', borderBottom: '1px solid #e0e4ec', opacity: r.actif ? 1 : 0.4 }}>
+          {r.couleur && <div style={{ width: 12, height: 12, borderRadius: 3, background: r.couleur, flexShrink: 0 }} />}
+          <span style={{ flex: 1, fontSize: 12 }}>{r.nom}</span>
+          <button onClick={() => desactiver(r.id, !r.actif)} style={{ background: 'none', border: 'none', fontSize: 10, color: r.actif ? '#8892a8' : '#0ea888', cursor: 'pointer' }}>
+            {r.actif ? 'Désactiver' : 'Réactiver'}
+          </button>
+        </div>
+      ))}
+      <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+        <input value={newNom} onChange={e => setNewNom(e.target.value)} placeholder="Nouveau..." style={{ ...S.inp, flex: 1 }} onKeyDown={e => e.key === 'Enter' && handleAdd()} />
+        <button onClick={handleAdd} style={S.btn('#0ea888', false)}>+</button>
+      </div>
+    </div>
+  )
+}
+
+function UsersTable() {
+  const { profils, setRole } = useProfils()
+
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 6 }}>Utilisateurs</div>
+      {profils.map(p => (
+        <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: '1px solid #e0e4ec' }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 12, fontWeight: 600 }}>{p.nom_affiche || p.email}</div>
+            <div style={{ fontSize: 10, color: '#8892a8' }}>{p.email}</div>
+          </div>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, cursor: 'pointer' }}>
+            <input type="checkbox" checked={p.est_responsable || false} onChange={e => setRole(p.id, e.target.checked, p.est_admin)} />
+            Responsable
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, cursor: 'pointer' }}>
+            <input type="checkbox" checked={p.est_admin || false} onChange={e => setRole(p.id, p.est_responsable, e.target.checked)} />
+            Admin
+          </label>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+export default function ParamsPage() {
+  const [tab, setTab] = useState('refs')
+
+  return (
+    <div>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
+        <button onClick={() => setTab('refs')} style={{ ...S.btn(tab === 'refs' ? '#0ea888' : '#8892a8', tab !== 'refs'), fontFamily: 'inherit' }}>Tables de référence</button>
+        <button onClick={() => setTab('users')} style={{ ...S.btn(tab === 'users' ? '#0ea888' : '#8892a8', tab !== 'users'), fontFamily: 'inherit' }}>Utilisateurs</button>
+      </div>
+      <div style={S.card}>
+        {tab === 'users' ? <UsersTable />
+          : REF_TABLES.map(t => <RefTable key={t.key} table={t.key} label={t.label} fields={t.fields} />)}
+      </div>
+    </div>
+  )
+}
