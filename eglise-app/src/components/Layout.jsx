@@ -1,0 +1,93 @@
+import { useAuth } from '../lib/auth'
+
+export default function Layout({ page, setPage, alertCount, membreCount, selectedMembre, children }) {
+  const { logout, profil, isAdmin } = useAuth()
+
+  const navBtn = (id, icon, label, badge) => (
+    <button key={id} onClick={() => setPage(id)} style={{
+      display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '7px 10px',
+      border: 'none', borderRadius: 6, background: page === id ? '#0ea88816' : 'transparent',
+      color: page === id ? '#0ea888' : '#5a6480', fontWeight: page === id ? 600 : 500,
+      cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', fontSize: 12, marginBottom: 1
+    }}>
+      <span style={{ fontSize: 13, width: 16, textAlign: 'center' }}>{icon}</span>
+      <span style={{ flex: 1 }}>{label}</span>
+      {badge > 0 ? <span style={{ background: '#e03050', color: '#fff', fontSize: 9, fontWeight: 700, padding: '0 5px', borderRadius: 8 }}>{badge}</span> : null}
+    </button>
+  )
+
+  const titles = {
+    home: 'Tableau de bord', pres: 'Saisie des présences', ames: 'Liste des âmes',
+    fiche: 'Fiche 360°', alerts: 'Alertes croisées', ents: 'Entretiens',
+    protos: 'Plan de croissance', timeline: 'Historique', filia: 'Arbre de suivi',
+    export: 'Export', params: 'Paramètres'
+  }
+
+  return (
+    <div style={{ fontFamily: 'Trebuchet MS, Gill Sans, Calibri, sans-serif', background: '#f4f6f9', color: '#1a1e2e', fontSize: 13, lineHeight: 1.55, minHeight: '100vh' }}>
+      {/* Sidebar desktop */}
+      <div className="sb" style={{ position: 'fixed', top: 0, left: 0, bottom: 0, width: 210, background: '#fff', borderRight: '1px solid #e0e4ec', display: 'flex', flexDirection: 'column', zIndex: 100, overflowY: 'auto' }}>
+        <div style={{ padding: '18px 16px 14px', borderBottom: '1px solid #e0e4ec' }}>
+          <div style={{ fontSize: 9, letterSpacing: 3, textTransform: 'uppercase', color: '#0ea888', fontWeight: 700, marginBottom: 4 }}>Gestion Pastorale</div>
+          <div style={{ fontSize: 14, fontWeight: 700 }}>Suivi des Âmes</div>
+          <div style={{ fontSize: 10, color: '#8892a8', marginTop: 2 }}>{membreCount} actif(s)</div>
+        </div>
+
+        <div style={{ padding: '8px 6px 2px' }}>
+          <div style={{ fontSize: 8, letterSpacing: 2, textTransform: 'uppercase', color: '#8892a8', fontWeight: 600, padding: '0 6px', marginBottom: 2 }}>PRÉSENCES</div>
+          {navBtn('home', '🏠', 'Accueil', 0)}
+          {navBtn('pres', '✅', 'Saisie', 0)}
+          {navBtn('timeline', '📈', 'Historique', 0)}
+          {navBtn('ames', '👥', 'Âmes', 0)}
+          {navBtn('filia', '🌳', 'Arbre de suivi', 0)}
+        </div>
+
+        <div style={{ padding: '8px 6px 2px' }}>
+          <div style={{ fontSize: 8, letterSpacing: 2, textTransform: 'uppercase', color: '#8892a8', fontWeight: 600, padding: '0 6px', marginBottom: 2 }}>PASTORAL</div>
+          {navBtn('alerts', '🔔', 'Alertes', alertCount)}
+          {navBtn('ents', '💬', 'Entretiens', 0)}
+          {navBtn('protos', '📖', 'Plan de croissance', 0)}
+          {navBtn('export', '💾', 'Export', 0)}
+        </div>
+
+        {isAdmin && (
+          <div style={{ padding: '8px 6px 2px' }}>
+            <div style={{ fontSize: 8, letterSpacing: 2, textTransform: 'uppercase', color: '#8892a8', fontWeight: 600, padding: '0 6px', marginBottom: 2 }}>ADMIN</div>
+            {navBtn('params', '⚙️', 'Paramètres', 0)}
+          </div>
+        )}
+
+        {selectedMembre && <div style={{ padding: '2px 6px' }}>{navBtn('fiche', '🔍', 'Fiche', 0)}</div>}
+
+        <div style={{ marginTop: 'auto', padding: '10px 12px', borderTop: '1px solid #e0e4ec' }}>
+          <div style={{ fontSize: 10, color: '#5a6480', marginBottom: 6 }}>{profil?.nom_affiche || profil?.email}</div>
+          <button onClick={logout} style={{ background: 'none', border: 'none', color: '#8892a8', fontSize: 11, cursor: 'pointer', padding: 0 }}>Se déconnecter</button>
+        </div>
+      </div>
+
+      {/* Contenu */}
+      <div className="mn" style={{ marginLeft: 210, minHeight: '100vh' }}>
+        <div style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(255,255,255,.92)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #e0e4ec', padding: '0 20px', height: 44, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ fontSize: 13, fontWeight: 600 }}>{titles[page] || '—'}</div>
+          <span style={{ fontSize: 10, color: '#8892a8' }}>{membreCount} âmes</span>
+        </div>
+        <div style={{ padding: '16px 20px 50px' }}>{children}</div>
+      </div>
+
+      {/* Nav mobile */}
+      <nav className="nv" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderTop: '1px solid #e0e4ec', display: 'none', zIndex: 200, padding: '2px 0' }}>
+        {[['home', '🏠', 'Accueil'], ['pres', '✅', 'Saisie'], ['ames', '👥', 'Âmes'], ['alerts', '🔔', 'Alertes'], ['more', '☰', 'Plus']].map(n => (
+          <button key={n[0]} onClick={() => n[0] === 'more' ? setPage('menu') : setPage(n[0])} style={{
+            flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
+            padding: '4px 2px', border: 'none', background: 'transparent', cursor: 'pointer',
+            fontFamily: 'inherit', fontSize: 8, color: page === n[0] ? '#0ea888' : '#8892a8', fontWeight: page === n[0] ? 700 : 500
+          }}>
+            <span style={{ fontSize: 15 }}>{n[1]}</span><span>{n[2]}</span>
+          </button>
+        ))}
+      </nav>
+
+      <style>{`@media(max-width:768px){.sb{display:none!important}.mn{margin-left:0!important}.nv{display:flex!important}}`}</style>
+    </div>
+  )
+}
