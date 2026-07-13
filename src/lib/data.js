@@ -328,3 +328,19 @@ export function useProfils() {
 
   return { profils, loading, setRole, reload: load }
 }
+
+// ── Historique des statuts ──
+export function useHistoriqueStatuts(membreId) {
+  const [hist, setHist] = useState([])
+  const load = useCallback(async () => {
+    if (!membreId) return
+    const { data } = await supabase
+      .from('historique_statuts')
+      .select('*')
+      .eq('membre_id', membreId)
+      .order('date_changement', { ascending: false })
+    setHist(data || [])
+  }, [membreId])
+  useEffect(() => { load() }, [load])
+  return { hist, reload: load }
+}

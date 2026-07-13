@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { S, fmt, today } from '../lib/ui'
 import { Save, Trash2, CheckSquare, Square, Search } from 'lucide-react'
 
-export default function PresencesPage({ actifs, presences, refs, sauverPresences, supprimerDate }) {
+export default function PresencesPage({ actifs, presences, refs, sauverPresences, supprimerDate, auth }) {
   const activites = refs.activites || []
   const [actId, setActId] = useState(activites[0]?.id || '')
   const [date, setDate] = useState(today())
@@ -93,6 +93,11 @@ export default function PresencesPage({ actifs, presences, refs, sauverPresences
               ? `${existing.length} enregistrement(s) existent. Modifiez et sauvez pour mettre à jour. Si erreur, « Suppr. date ».`
               : 'Cochez les présents et sauvez. Les non-cochés = absents. Vous pouvez compléter plus tard.'}
           </div>
+          {existing.length > 0 && existing[0]?.created_by && auth?.session?.user?.id && existing[0].created_by !== auth.session.user.id && (
+            <div style={{ padding: '6px 10px', background: '#FAEEDA', borderRadius: 6, marginBottom: 10, fontSize: 11, color: '#633806', borderLeft: '3px solid #d48f00' }}>
+              Ces présences ont été saisies par un autre responsable. Sauver écrasera ses données.
+            </div>
+          )}
 
           <div style={{ position: 'relative', marginBottom: 8 }}>
             <Search size={14} style={{ position: 'absolute', left: 10, top: 9, color: '#8892a8' }} />

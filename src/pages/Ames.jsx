@@ -1,6 +1,7 @@
-import { useState } from 'react'
-import { S, fmtS, getStatutColor, getRoleColor, validEmail, validTel } from '../lib/ui'
+import { useState, useRef } from 'react'
+import { S, fmtS, today, getStatutColor, getRoleColor, validEmail, validTel } from '../lib/ui'
 import { supabase } from '../lib/supabase'
+import { Upload } from 'lucide-react'
 
 export default function AmesPage({ membres, actifs, refs, openFiche, showToast, reloadMembres, presences, entretiens, setPage }) {
   const [q, setQ] = useState('')
@@ -9,6 +10,7 @@ export default function AmesPage({ membres, actifs, refs, openFiche, showToast, 
   const [modal, setModal] = useState(null)
   const [fd, setFd] = useState({})
   const [confirmAction, setConfirmAction] = useState(null)
+  const [saving, setSaving] = useState(false)
   const uf = (k, v) => setFd(prev => ({ ...prev, [k]: v }))
 
   const filt = membres.filter(m => {
@@ -34,7 +36,7 @@ export default function AmesPage({ membres, actifs, refs, openFiche, showToast, 
   }
 
   const mEn = (id) => entretiens.filter(e => e.membre_id === id).length
-  const getSuiveur = (id) => { if (!id) return '—'; const m = membres.find(x => x.id === id); return m ? `${m.prenom} ${m.nom}` : '—' }
+  const getSuiveur = (id) => { if (!id) return '—'; const m = membres.find(x => x.id === id); return m ? `${m.prenom} ${m.nom}${m.archive ? ' (archivé)' : ''}` : '—' }
   const getSuivis = (id) => actifs.filter(m => m.suivi_par === id)
 
   // Détection doublons
@@ -43,6 +45,8 @@ export default function AmesPage({ membres, actifs, refs, openFiche, showToast, 
   }
 
   const handleSave = async () => {
+    // Validation champs obligatoires
+    if (!fd.nom?.trim() || !fd.prenom?.trim()) { showToast('⚠ Nom et prénom obligatoires'); return }
     // Validation email/téléphone
     if (fd.email && !validEmail(fd.email)) { showToast('⚠ Email invalide'); return }
     if (fd.telephone && !validTel(fd.telephone)) { showToast('⚠ Téléphone invalide'); return }
@@ -76,20 +80,32 @@ export default function AmesPage({ membres, actifs, refs, openFiche, showToast, 
   }
 
   const doSave = async () => {
+    setSaving(true)
     try {
       const isEdit = (modal === 'edit' || modal === 'add') && fd.id && membres.some(m => m.id === fd.id)
       if (isEdit) {
         const { id, created_at, created_by, updated_at, updated_by, _reassignFrom, _reassignSuivis, ...updates } = fd
         await supabase.from('membres').update(updates).eq('id', id)
         showToast('✓ Membre modifié')
+        await reloadMembres()
+        setModal(null); setFd({})
       } else {
+        // #13 - Vérifier qu'il n'y a pas déjà un Berger principal
+        if (fd.role === 'Berger principal') {
+          const existingBerger = membres.find(m => m.role === 'Berger principal' && !m.archive)
+          if (existingBerger) { showToast('⚠ Un Berger principal existe déjà : ' + existingBerger.prenom + ' ' + existingBerger.nom); setSaving(false); return }
+        }
         const { id, _reassignFrom, _reassignSuivis, ...data } = fd
-        await supabase.from('membres').insert({ ...data, statut: data.statut || 'Nouveau', role: data.role || 'Membre' })
+        const { data: inserted, error } = await supabase.from('membres').insert({ ...data, statut: data.statut || 'Nouveau', role: data.role || 'Membre' }).select('id').single()
+        if (error) throw error
         showToast('✓ Membre ajouté')
+        await reloadMembres()
+        setModal(null); setFd({})
+        // #2 - Redirection vers la fiche du nouveau membre
+        if (inserted?.id) openFiche(inserted.id)
       }
-      await reloadMembres()
-      setModal(null); setFd({})
     } catch (e) { showToast('⚠ ' + e.message) }
+    setSaving(false)
   }
 
   // Réassignation après rétrogradation
@@ -124,7 +140,8 @@ export default function AmesPage({ membres, actifs, refs, openFiche, showToast, 
           <option value="actifs">Actifs seulement</option>
           {(refs.statuts || []).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}
         </select>
-        <button onClick={() => { setFd({ statut: 'Nouveau', role: 'Membre' }); setModal('add') }} style={S.btn('#0ea888', false)}>+ Âme</button>
+        <button onClick={() => { setFd({ statut: 'Nouveau', role: 'Membre', date_inscription: today() }); setModal('add') }} style={S.btn('#0ea888', false)}>+ Âme</button>
+        <button onClick={() => setModal('import')} style={{ ...S.btn('#3060d0', true), display: 'flex', alignItems: 'center', gap: 4 }}><Upload size={13} /> Import CSV</button>
       </div>
 
       <div style={S.card}>
@@ -176,7 +193,7 @@ export default function AmesPage({ membres, actifs, refs, openFiche, showToast, 
             </div>
             <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#8892a8', true)}>Annuler</button>
-              <button onClick={handleSave} style={S.btn('#0ea888', false)}>Enregistrer</button>
+              <button onClick={handleSave} disabled={saving} style={{ ...S.btn('#0ea888', false), opacity: saving ? 0.6 : 1 }}>{saving ? 'Enregistrement...' : 'Enregistrer'}</button>
             </div>
           </div>
         </div>
@@ -205,6 +222,120 @@ export default function AmesPage({ membres, actifs, refs, openFiche, showToast, 
             <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#8892a8', true)}>Annuler</button>
               <button onClick={doReassign} style={S.btn('#d48f00', false)}>Réassigner et modifier</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal import CSV */}
+      {modal === 'import' && (
+        <div className="modal-overlay">
+          <div className="modal-box" style={{ maxWidth: 520 }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid #e0e4ec' }}>
+              <div style={{ fontSize: 15, fontWeight: 700 }}>Importer des membres (CSV)</div>
+            </div>
+            <div style={{ padding: '16px 20px' }}>
+              {!fd._csvRows ? (
+                <div>
+                  <div style={{ fontSize: 12, color: '#5a6480', marginBottom: 10, lineHeight: 1.6 }}>
+                    Préparez un fichier CSV avec les colonnes suivantes (séparateur virgule ou point-virgule) :
+                  </div>
+                  <div style={{ padding: '8px 12px', background: '#f0f2f6', borderRadius: 6, fontSize: 11, fontFamily: 'monospace', marginBottom: 12, lineHeight: 1.8 }}>
+                    Prénom,Nom,Téléphone,Email,Date inscription<br/>
+                    Marina,N'GUESSAN,+225 07 12 34 56,marina@email.com,2024-01-15<br/>
+                    David,Mensah,+225 05 33 44 55,,2024-03-20
+                  </div>
+                  <div style={{ fontSize: 11, color: '#8892a8', marginBottom: 10 }}>
+                    Seuls Prénom et Nom sont obligatoires. Les colonnes manquantes seront ignorées. Le statut sera "Nouveau" et le rôle "Membre" par défaut.
+                  </div>
+                  <input type="file" accept=".csv,.txt" onChange={e => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    const reader = new FileReader()
+                    reader.onload = (ev) => {
+                      const text = ev.target.result
+                      const sep = text.includes(';') ? ';' : ','
+                      const lines = text.split(/\r?\n/).filter(l => l.trim())
+                      if (lines.length < 2) { showToast('⚠ Fichier vide ou sans données'); return }
+                      const headerRaw = lines[0].split(sep).map(h => h.trim().replace(/^["']|["']$/g, '').toLowerCase())
+                      const colMap = {}
+                      headerRaw.forEach((h, i) => {
+                        if (/pr[ée]nom/i.test(h)) colMap.prenom = i
+                        else if (/nom/i.test(h) && !colMap.nom) colMap.nom = i
+                        else if (/t[ée]l/i.test(h) || /phone/i.test(h)) colMap.telephone = i
+                        else if (/mail/i.test(h)) colMap.email = i
+                        else if (/date.*inscr/i.test(h) || /inscription/i.test(h)) colMap.date_inscription = i
+                        else if (/statut/i.test(h)) colMap.statut = i
+                        else if (/r[oô]le/i.test(h)) colMap.role = i
+                      })
+                      if (colMap.prenom === undefined && colMap.nom === undefined) { showToast('⚠ Colonnes Prénom et Nom introuvables'); return }
+                      const rows = lines.slice(1).map(line => {
+                        const cells = line.split(sep).map(c => c.trim().replace(/^["']|["']$/g, ''))
+                        return {
+                          prenom: cells[colMap.prenom] || '',
+                          nom: cells[colMap.nom] || '',
+                          telephone: colMap.telephone !== undefined ? cells[colMap.telephone] || '' : '',
+                          email: colMap.email !== undefined ? cells[colMap.email] || '' : '',
+                          date_inscription: colMap.date_inscription !== undefined ? cells[colMap.date_inscription] || today() : today(),
+                          statut: colMap.statut !== undefined ? cells[colMap.statut] || 'Nouveau' : 'Nouveau',
+                          role: colMap.role !== undefined ? cells[colMap.role] || 'Membre' : 'Membre',
+                          _skip: false,
+                          _dup: membres.some(m => m.nom?.toLowerCase() === (cells[colMap.nom] || '').toLowerCase() && m.prenom?.toLowerCase() === (cells[colMap.prenom] || '').toLowerCase())
+                        }
+                      }).filter(r => r.prenom || r.nom)
+                      setFd(prev => ({ ...prev, _csvRows: rows }))
+                    }
+                    reader.readAsText(file, 'UTF-8')
+                  }} style={{ fontSize: 12 }} />
+                </div>
+              ) : (
+                <div>
+                  <div style={{ fontSize: 12, color: '#5a6480', marginBottom: 8 }}>
+                    {fd._csvRows.length} ligne(s) détectée(s). {fd._csvRows.filter(r => r._dup).length > 0 && <span style={{ color: '#d48f00' }}>⚠ {fd._csvRows.filter(r => r._dup).length} doublon(s) potentiel(s) en jaune.</span>}
+                  </div>
+                  <div style={{ maxHeight: '35vh', overflowY: 'auto', border: '1px solid #e0e4ec', borderRadius: 6 }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+                      <thead><tr>{['', 'Prénom', 'Nom', 'Tél', 'Email', 'Inscr.'].map(h => <th key={h} style={{ ...S.th, padding: '4px 6px' }}>{h}</th>)}</tr></thead>
+                      <tbody>{fd._csvRows.map((r, i) => (
+                        <tr key={i} style={{ background: r._dup ? '#FAEEDA' : 'transparent', opacity: r._skip ? 0.4 : 1 }}>
+                          <td style={{ padding: '3px 6px', borderBottom: '1px solid #e0e4ec' }}>
+                            <input type="checkbox" checked={!r._skip} onChange={() => {
+                              const rows = [...fd._csvRows]; rows[i] = { ...rows[i], _skip: !rows[i]._skip }; setFd(prev => ({ ...prev, _csvRows: rows }))
+                            }} />
+                          </td>
+                          <td style={{ padding: '3px 6px', borderBottom: '1px solid #e0e4ec' }}>{r.prenom}</td>
+                          <td style={{ padding: '3px 6px', borderBottom: '1px solid #e0e4ec', fontWeight: 600 }}>{r.nom}</td>
+                          <td style={{ padding: '3px 6px', borderBottom: '1px solid #e0e4ec', color: '#8892a8' }}>{r.telephone}</td>
+                          <td style={{ padding: '3px 6px', borderBottom: '1px solid #e0e4ec', color: '#8892a8' }}>{r.email}</td>
+                          <td style={{ padding: '3px 6px', borderBottom: '1px solid #e0e4ec', color: '#8892a8' }}>{r.date_inscription}</td>
+                        </tr>
+                      ))}</tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#8892a8', true)}>Annuler</button>
+              {fd._csvRows && (() => {
+                const toImport = fd._csvRows.filter(r => !r._skip)
+                return toImport.length > 0 && (
+                  <button disabled={saving} onClick={async () => {
+                    setSaving(true)
+                    try {
+                      const rows = toImport.map(({ _skip, _dup, ...r }) => r)
+                      const { error } = await supabase.from('membres').insert(rows)
+                      if (error) throw error
+                      showToast(`✓ ${rows.length} membre(s) importé(s)`)
+                      await reloadMembres()
+                      setModal(null); setFd({})
+                    } catch (e) { showToast('⚠ ' + e.message) }
+                    setSaving(false)
+                  }} style={{ ...S.btn('#3060d0', false), opacity: saving ? 0.6 : 1 }}>
+                    {saving ? 'Import...' : `Importer ${toImport.length} membre(s)`}
+                  </button>
+                )
+              })()}
             </div>
           </div>
         </div>

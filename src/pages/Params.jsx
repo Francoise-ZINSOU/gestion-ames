@@ -14,15 +14,14 @@ const REF_TABLES = [
   { key: 'ref_motifs_depart', label: 'Motifs de départ', fields: ['nom'] },
 ]
 
-function RefTable({ table, label, fields }) {
+function RefTable({ table, label, fields, showToast }) {
   const { rows, ajouter, modifier, desactiver } = useRefAdmin(table)
   const [newNom, setNewNom] = useState('')
-  const [showToast, setShowToast] = useState('')
 
   const handleAdd = async () => {
     if (!newNom.trim()) return
-    try { await ajouter({ nom: newNom.trim() }); setNewNom('') }
-    catch (e) { setShowToast('⚠ ' + e.message) }
+    try { await ajouter({ nom: newNom.trim() }); setNewNom(''); showToast('✓ Ajouté') }
+    catch (e) { showToast('⚠ ' + e.message) }
   }
 
   return (
@@ -45,8 +44,13 @@ function RefTable({ table, label, fields }) {
   )
 }
 
-function UsersTable() {
+function UsersTable({ showToast }) {
   const { profils, setRole } = useProfils()
+
+  const handleRole = async (id, resp, admin) => {
+    try { await setRole(id, resp, admin); showToast('✓ Droits mis à jour') }
+    catch (e) { showToast('⚠ ' + e.message) }
+  }
 
   return (
     <div style={{ marginBottom: 16 }}>
@@ -58,11 +62,11 @@ function UsersTable() {
             <div style={{ fontSize: 10, color: '#8892a8' }}>{p.email}</div>
           </div>
           <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, cursor: 'pointer' }}>
-            <input type="checkbox" checked={p.est_responsable || false} onChange={e => setRole(p.id, e.target.checked, p.est_admin)} />
+            <input type="checkbox" checked={p.est_responsable || false} onChange={e => handleRole(p.id, e.target.checked, p.est_admin)} />
             Responsable
           </label>
           <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, cursor: 'pointer' }}>
-            <input type="checkbox" checked={p.est_admin || false} onChange={e => setRole(p.id, p.est_responsable, e.target.checked)} />
+            <input type="checkbox" checked={p.est_admin || false} onChange={e => handleRole(p.id, p.est_responsable, e.target.checked)} />
             Admin
           </label>
         </div>
@@ -71,7 +75,7 @@ function UsersTable() {
   )
 }
 
-export default function ParamsPage() {
+export default function ParamsPage({ showToast }) {
   const [tab, setTab] = useState('refs')
 
   return (
@@ -81,8 +85,8 @@ export default function ParamsPage() {
         <button onClick={() => setTab('users')} style={{ ...S.btn(tab === 'users' ? '#0ea888' : '#8892a8', tab !== 'users'), fontFamily: 'inherit' }}>Utilisateurs</button>
       </div>
       <div style={S.card}>
-        {tab === 'users' ? <UsersTable />
-          : REF_TABLES.map(t => <RefTable key={t.key} table={t.key} label={t.label} fields={t.fields} />)}
+        {tab === 'users' ? <UsersTable showToast={showToast} />
+          : REF_TABLES.map(t => <RefTable key={t.key} table={t.key} label={t.label} fields={t.fields} showToast={showToast} />)}
       </div>
     </div>
   )

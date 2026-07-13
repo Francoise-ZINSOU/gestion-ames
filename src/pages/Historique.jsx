@@ -13,6 +13,8 @@ export default function HistoriquePage({ presences, refs }) {
     if (p.eligible) { dates[p.date_presence].el += 1; if (p.present) dates[p.date_presence].pr += 1 }
   })
   const tl = Object.values(dates).sort((a, b) => new Date(a.date) - new Date(b.date))
+  const firstDate = tl.length > 0 ? tl[0].date : null
+  const lastDate = tl.length > 0 ? tl[tl.length - 1].date : null
 
   return (
     <div>
@@ -23,6 +25,7 @@ export default function HistoriquePage({ presences, refs }) {
       </div>
       <div style={S.card}>
         <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Taux par date — {act?.icone} {act?.nom}</div>
+        {tl.length > 0 && <div style={{ fontSize: 11, color: '#8892a8', marginBottom: 8 }}>{tl.length} date(s) saisie(s) · du {fmtS(firstDate)} au {fmtS(lastDate)}</div>}
         {tl.length === 0 ? <div style={{ padding: 20, textAlign: 'center', color: '#8892a8', fontSize: 12 }}>Aucune donnée</div>
           : <div>
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 140, marginBottom: 8, overflowX: 'auto' }}>

@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import { S, fmt, fmtS, dago, today, getStatutColor, getRoleColor } from '../lib/ui'
 import { supabase } from '../lib/supabase'
-import { ClipboardList, BarChart3, MessageCircle, Zap, BookOpen, Pencil, Archive } from 'lucide-react'
+import { useHistoriqueStatuts } from '../lib/data'
+import { ClipboardList, BarChart3, MessageCircle, Zap, BookOpen, Pencil, Archive, Phone, Mail, CalendarDays, RotateCcw, Check, X, History } from 'lucide-react'
 
 export default function FichePage({ membres, actifs, presences, entretiens, defis, plans, refs, selectedMembre: m, selectedId, openFiche, showToast, ajouterEnt, modifierEnt, supprimerEnt, ajouterDefi, modifierDefi, assignerModule, validerModule, retirerModule, reloadMembres, setPage }) {
   const [ftab, setFtab] = useState('id')
   const [modal, setModal] = useState(null)
   const [fd, setFd] = useState({})
   const [editEntId, setEditEntId] = useState(null)
+  const { hist: historiqueStatuts } = useHistoriqueStatuts(m?.id)
   const [confirmAction, setConfirmAction] = useState(null)
   const uf = (k, v) => setFd(prev => ({ ...prev, [k]: v }))
 
@@ -121,12 +123,12 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
       {ftab === 'id' && (
         <div style={S.card}>
           <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Informations</div>
-          {m.telephone && <div style={{ fontSize: 12, marginBottom: 4 }}><a href={'tel:' + m.telephone.replace(/\s/g, '')} style={{ color: '#0ea888', textDecoration: 'none' }}>📞 {m.telephone}</a></div>}
-          {m.email && <div style={{ fontSize: 12, marginBottom: 4 }}><a href={'mailto:' + m.email} style={{ color: '#3060d0', textDecoration: 'none' }}>✉️ {m.email}</a></div>}
-          <div style={{ fontSize: 12, color: '#5a6480', marginBottom: 4 }}>📅 Inscription : {fmt(m.date_inscription)}</div>
+          {m.telephone && <div style={{ fontSize: 12, marginBottom: 4 }}><a href={'tel:' + m.telephone.replace(/\s/g, '')} style={{ color: '#0ea888', textDecoration: 'none' }}><Phone size={12} style={{display:'inline',verticalAlign:'middle',marginRight:4}} />{m.telephone}</a></div>}
+          {m.email && <div style={{ fontSize: 12, marginBottom: 4 }}><a href={'mailto:' + m.email} style={{ color: '#3060d0', textDecoration: 'none' }}><Mail size={12} style={{display:'inline',verticalAlign:'middle',marginRight:4}} />{m.email}</a></div>}
+          <div style={{ fontSize: 12, color: '#5a6480', marginBottom: 4 }}><CalendarDays size={12} style={{display:'inline',verticalAlign:'middle',marginRight:4}} />Inscription : {fmt(m.date_inscription)}</div>
           {m.est_retour && (
             <div style={{ marginTop: 6, padding: '6px 10px', background: '#7040d00a', borderRadius: 5, borderLeft: '3px solid #7040d0' }}>
-              <div style={{ fontSize: 10, fontWeight: 600, color: '#7040d0' }}>↩ RETOUR</div>
+              <div style={{ fontSize: 10, fontWeight: 600, color: '#7040d0' }}><RotateCcw size={11} style={{display:'inline',verticalAlign:'middle',marginRight:3}} />RETOUR</div>
               <div style={{ fontSize: 11, color: '#5a6480' }}>Départ : {fmt(m.date_depart)} · Motif : {m.motif_depart || '—'} · Retour : {fmt(m.date_retour)}</div>
             </div>
           )}
@@ -139,6 +141,19 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
             </div>
           )}
           {m.notes && <div style={{ marginTop: 8, fontSize: 12, color: '#5a6480', lineHeight: 1.6, whiteSpace: 'pre-wrap', padding: '8px 10px', background: '#f0f2f6', borderRadius: 6 }}>{m.notes}</div>}
+          {historiqueStatuts.length > 0 && (
+            <div style={{ marginTop: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, color: '#5a6480', marginBottom: 4 }}><History size={12} /> Historique des statuts</div>
+              {historiqueStatuts.slice(0, 8).map(h => (
+                <div key={h.id} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, padding: '3px 0', borderBottom: '1px solid #e0e4ec' }}>
+                  <span style={{ color: '#8892a8', width: 70, flexShrink: 0 }}>{fmtS(h.date_changement)}</span>
+                  <span style={S.pill(getStatutColor(refs, h.ancien_statut))}>{h.ancien_statut}</span>
+                  <span style={{ color: '#8892a8' }}>→</span>
+                  <span style={S.pill(getStatutColor(refs, h.nouveau_statut))}>{h.nouveau_statut}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -160,7 +175,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
                   {mp.length === 0 ? <span style={{ fontSize: 11, color: '#8892a8' }}>Aucune</span> : mp.map(p => (
                     <div key={p.id} style={{ textAlign: 'center', padding: '3px 2px', borderRadius: 4, border: '1px solid ' + (p.present ? '#1a9c60' : p.eligible ? '#e03050' : '#e0e4ec'), background: p.present ? '#1a9c6008' : p.eligible ? '#e0305008' : '#f0f2f6', minWidth: 42 }}>
                       <div style={{ fontSize: 8, color: '#8892a8' }}>{fmtS(p.date_presence)}</div>
-                      <div style={{ fontSize: 12 }}>{p.present ? '✅' : p.eligible ? '❌' : '—'}</div>
+                      <div style={{ fontSize: 12 }}>p.present ? <Check size={14} color="#1a9c60" /> : p.eligible ? <X size={14} color="#e03050" /> : '—'</div>
                     </div>
                   ))}
                 </div>
@@ -191,7 +206,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
                     </div>
                     <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
                       <span style={S.pill(sc)}>{e.statut}</span>
-                      <button onClick={() => { setFd({ ...e }); setEditEntId(e.id); setModal('ent') }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, color: '#3060d0' }}>✏️</button>
+                      <button onClick={() => { setFd({ ...e }); setEditEntId(e.id); setModal('ent') }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, color: '#3060d0' }}><Pencil size={12} /></button>
                       <button onClick={() => setConfirmAction({ msg: 'Supprimer cet entretien ?', fn: () => supprimerEnt(e.id) })} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, color: '#8892a8' }}>✕</button>
                     </div>
                   </div>
@@ -278,7 +293,8 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, marginLeft: 8 }}>
                           <div style={{ flex: 1, height: 4, background: '#f0f2f6', borderRadius: 2, overflow: 'hidden' }}><div style={{ height: '100%', borderRadius: 2, background: allDone ? '#1a9c60' : '#7040d0', width: pct + '%' }} /></div>
                           <span style={{ fontSize: 10, fontWeight: 600, color: allDone ? '#1a9c60' : '#5a6480' }}>{vCount}/{modulesForDefi.length}</span>
-                          {allDone && <span style={{ fontSize: 10, color: '#1a9c60', fontWeight: 600 }}>Parcours terminé</span>}
+                          {allDone && d.statut !== 'Résolu' && <button onClick={e => { e.stopPropagation(); modifierDefi(d.id, { statut: 'Résolu' }) }} style={{ background: 'none', border: '1px solid #1a9c60', borderRadius: 5, padding: '2px 8px', fontSize: 10, color: '#1a9c60', fontWeight: 600, cursor: 'pointer' }}>Passer en Résolu</button>}
+                          {allDone && d.statut === 'Résolu' && <span style={{ fontSize: 10, color: '#1a9c60', fontWeight: 600 }}>Parcours terminé</span>}
                         </div>
                       </div>
                     )}

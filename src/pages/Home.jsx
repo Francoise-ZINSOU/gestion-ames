@@ -1,11 +1,11 @@
 import { S, fmtS, dago, getStatutColor } from '../lib/ui'
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, Clock, BookOpen } from 'lucide-react'
 
-export default function HomePage({ actifs, alertes, presences, refs, openFiche, setPage }) {
+export default function HomePage({ actifs, alertes, presences, defis, plans, refs, openFiche, setPage }) {
   const nn = actifs.filter(m => m.statut === 'Nouveau').length
   const ni = actifs.filter(m => m.statut === 'Intégré').length
 
-  // Taux culte global
+  // Taux culte global (moyenne des taux individuels, chaque âme compte)
   const culte = (refs.activites || []).find(a => a.code === 'culte')
   let tG = 0
   if (culte) {
@@ -30,12 +30,34 @@ export default function HomePage({ actifs, alertes, presences, refs, openFiche, 
       </div>
 
       {alertes.length > 0 && (
-        <div onClick={() => setPage('alerts')} style={{ padding: '8px 12px', borderRadius: 7, border: '1px solid #e0305033', background: '#e0305008', marginBottom: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div onClick={() => setPage('alerts')} style={{ padding: '8px 12px', borderRadius: 7, border: '1px solid #e0305033', background: '#e0305008', marginBottom: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
           <AlertTriangle size={14} color="#e03050" />
           <strong style={{ color: '#e03050', fontSize: 12 }}>{alertes.length} alerte(s)</strong>
           <span style={{ fontSize: 11, color: '#0ea888', marginLeft: 'auto', textDecoration: 'underline' }}>Voir</span>
         </div>
       )}
+
+      {(() => {
+        const staleNouveau = actifs.filter(m => m.statut === 'Nouveau' && dago(m.date_inscription) > 90)
+        const defisSansModule = defis.filter(d => d.statut !== 'Résolu' && !plans.some(p => p.defi_id === d.id))
+        if (!staleNouveau.length && !defisSansModule.length) return null
+        return (
+          <div style={{ marginBottom: 14 }}>
+            {staleNouveau.length > 0 && (
+              <div style={{ padding: '8px 12px', borderRadius: 7, border: '1px solid #d48f0033', background: '#d48f0008', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Clock size={14} color="#d48f00" />
+                <span style={{ fontSize: 12, color: '#d48f00' }}><strong>{staleNouveau.length}</strong> membre(s) "Nouveau" depuis + de 3 mois — penser à mettre à jour leur statut</span>
+              </div>
+            )}
+            {defisSansModule.length > 0 && (
+              <div style={{ padding: '8px 12px', borderRadius: 7, border: '1px solid #7040d033', background: '#7040d008', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <BookOpen size={14} color="#7040d0" />
+                <span style={{ fontSize: 12, color: '#7040d0' }}><strong>{defisSansModule.length}</strong> défi(s) sans module de croissance assigné</span>
+              </div>
+            )}
+          </div>
+        )
+      })()}
 
       <div style={S.card}>
         <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 10 }}>Inscriptions récentes</div>
