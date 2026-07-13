@@ -230,9 +230,11 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
               return (
                 <div key={d.id} style={{ padding: '10px 12px', borderRadius: 7, border: '1px solid #e0e4ec', marginBottom: 6, display: 'flex', gap: 8 }}>
                   <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', gap: 4, marginBottom: 3 }}>
+                    <div style={{ display: 'flex', gap: 4, marginBottom: 3, flexWrap: 'wrap', alignItems: 'center' }}>
                       <span style={S.pill('#3060d0')}>{d.type_defi}</span>
                       <span style={S.pill(stColor)}>{d.statut}</span>
+                      <button onClick={() => { setFd({ _editDefiId: d.id, type_defi: d.type_defi, description: d.description, statut_defi: d.statut }); setModal('editDefi') }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#3060d0', padding: 0 }}><Pencil size={12} /></button>
+                      <button onClick={() => setConfirmAction({ msg: 'Supprimer ce défi ?', fn: async () => { await supabase.from('defis').delete().eq('id', d.id); showToast('✓ Défi supprimé'); reloadMembres() } })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8892a8', padding: 0 }}><X size={12} /></button>
                     </div>
                     <div style={{ fontSize: 12, lineHeight: 1.4 }}>{d.description}</div>
                   </div>
@@ -266,7 +268,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
                 const allDone = modulesForDefi.length > 0 && vCount === modulesForDefi.length
                 return (
                   <div key={d.id} style={{ marginBottom: 14, padding: '10px 12px', borderRadius: 8, border: '1px solid ' + (allDone ? '#1a9c60' : '#e0e4ec'), background: allDone ? '#1a9c6006' : '#fff' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, flexWrap: 'wrap' }}>
                       <span style={S.pill('#3060d0')}>{d.type_defi}</span>
                       <span style={S.pill(stColor)}>{d.statut}</span>
                       <span style={{ fontSize: 11, color: '#5a6480', flex: 1 }}>{d.description?.substring(0, 50)}{d.description?.length > 50 ? '...' : ''}</span>
@@ -363,6 +365,29 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
             <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#8892a8', true)}>Annuler</button>
               <button onClick={handleSaveDefi} style={S.btn('#d86820', false)}>Enregistrer</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal édition défi */}
+      {modal === 'editDefi' && (
+        <div className="modal-overlay">
+          <div className="modal-box" style={{ maxWidth: 460 }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid #e0e4ec' }}><div style={{ fontSize: 15, fontWeight: 700 }}>Modifier le défi</div></div>
+            <div style={{ padding: '16px 20px' }}>
+              <div style={{ marginBottom: 8 }}><label style={S.label}>Type</label><select value={fd.type_defi || ''} onChange={e => uf('type_defi', e.target.value)} style={S.inp}>{(refs.typesDefi || []).map(t => <option key={t.nom} value={t.nom}>{t.nom}</option>)}</select></div>
+              <div style={{ marginBottom: 8 }}><label style={S.label}>Description</label><textarea value={fd.description || ''} onChange={e => uf('description', e.target.value)} rows={3} style={{ ...S.inp, resize: 'vertical' }} /></div>
+              <div style={{ marginBottom: 8 }}><label style={S.label}>Statut</label><select value={fd.statut_defi || ''} onChange={e => uf('statut_defi', e.target.value)} style={S.inp}>{(refs.statutsDefi || []).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}</select></div>
+            </div>
+            <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#8892a8', true)}>Annuler</button>
+              <button onClick={async () => {
+                try {
+                  await modifierDefi(fd._editDefiId, { type_defi: fd.type_defi, description: fd.description, statut: fd.statut_defi })
+                  setModal(null); setFd({})
+                } catch (e) { showToast('⚠ ' + e.message) }
+              }} style={S.btn('#d86820', false)}>Enregistrer</button>
             </div>
           </div>
         </div>

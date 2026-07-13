@@ -2,7 +2,7 @@
 export const S = {
   pill: (color) => ({
     display: 'inline-block', padding: '2px 8px', borderRadius: 10,
-    fontSize: 10, fontWeight: 600, background: color + '18', color, whiteSpace: 'nowrap'
+    fontSize: 10, fontWeight: 600, background: color + '18', color, whiteSpace: 'nowrap', marginRight: 2
   }),
   card: {
     background: '#fff', border: '1px solid #e0e4ec', borderRadius: 10,
