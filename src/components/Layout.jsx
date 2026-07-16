@@ -34,7 +34,7 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
   }
 
   return (
-    <div style={{ fontFamily: 'DM Sans, sans-serif', background: '#f4f6f9', color: '#1a1e2e', fontSize: 13, lineHeight: 1.55, minHeight: '100vh' }}>
+    <div style={{ fontFamily: 'DM Sans, sans-serif', background: '#f4f6f9', color: '#1a1e2e', fontSize: 13, lineHeight: 1.55, minHeight: '100vh', minHeight: '100dvh' }}>
       {/* Sidebar desktop */}
       <div className="sb" style={{ position: 'fixed', top: 0, left: 0, bottom: 0, width: 210, background: '#fff', borderRight: '1px solid #e0e4ec', display: 'flex', flexDirection: 'column', zIndex: 100, overflowY: 'auto' }}>
         <div style={{ padding: '18px 16px 14px', borderBottom: '1px solid #e0e4ec' }}>
@@ -78,7 +78,7 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
       </div>
 
       {/* Contenu */}
-      <div className="mn" style={{ marginLeft: 210, minHeight: '100vh' }}>
+      <div className="mn" style={{ marginLeft: 210, minHeight: '100vh', minHeight: '100dvh' }}>
         <div style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(255,255,255,.92)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #e0e4ec', padding: '0 20px', height: 44, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ fontSize: 13, fontWeight: 600 }}>{titles[page] || '—'}</div>
           <span style={{ fontSize: 10, color: '#8892a8' }}>{membreCount} âmes</span>
@@ -101,6 +101,8 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
       </nav>
 
       <style>{`
+        :root { --vh: 1vh; }
+        @supports (height: 100dvh) { :root { --vh: 1dvh; } }
         .mob-only{display:none}
         .desk-only{display:block}
         @media(max-width:768px){
@@ -110,16 +112,17 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
           .mn>div:last-child{padding:12px 12px 70px!important}
           .mob-only{display:block!important}
           .desk-only{display:none!important}
+          .sticky-save{bottom:56px!important}
           table{display:block;overflow-x:auto;white-space:nowrap}
         }
         .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:500;display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;box-sizing:border-box;-webkit-overflow-scrolling:touch}
         body:has(.modal-overlay){overflow:hidden!important}
         .modal-overlay.danger{background:rgba(0,0,0,.5);z-index:600}
-        .modal-box{width:100%;background:#fff;border-radius:12px;overflow:hidden;box-sizing:border-box;margin-top:4vh;max-height:92vh;display:flex;flex-direction:column}
+        .modal-box{width:100%;background:#fff;border-radius:12px;overflow:hidden;box-sizing:border-box;margin-top:4vh;max-height:92vh;max-height:92dvh;display:flex;flex-direction:column}
         .modal-box>div:nth-child(2){overflow-y:auto;flex:1}
         @media(max-width:500px){
           .modal-overlay{padding:8px}
-          .modal-box{margin-top:2vh;max-height:96vh;border-radius:10px}
+          .modal-box{margin-top:2vh;max-height:96vh;max-height:96dvh;border-radius:10px}
         }
       `}</style>
     </div>

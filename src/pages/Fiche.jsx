@@ -421,7 +421,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
           <div className="modal-overlay">
             <div className="modal-box" style={{ maxWidth: 460 }}>
               <div style={{ padding: '16px 20px', borderBottom: '1px solid #e0e4ec' }}><div style={{ fontSize: 15, fontWeight: 700 }}>Assigner des modules</div></div>
-              <div style={{ padding: '16px 20px', maxHeight: '50vh', overflowY: 'auto' }}>
+              <div style={{ padding: '16px 20px', maxHeight: '45dvh', overflowY: 'auto' }}>
                 <div style={{ marginBottom: 10 }}>
                   <label style={S.label}>Lié au défi</label>
                   <select value={fd._asDefiId || ''} onChange={e => setFd(prev => ({ ...prev, _asDefiId: e.target.value || null, _asModIds: {} }))} style={S.inp}>
@@ -507,7 +507,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
             <div style={{ padding: '16px 20px', borderBottom: '1px solid #e0e4ec' }}>
               <div style={{ fontSize: 15, fontWeight: 700, fontFamily: "'Outfit', sans-serif" }}>Modifier le membre</div>
             </div>
-            <div style={{ padding: '16px 20px', maxHeight: '60vh', overflowY: 'auto' }}>
+            <div style={{ padding: '16px 20px', maxHeight: '55dvh', overflowY: 'auto' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px' }}>
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Nom</label><input value={fd.nom || ''} onChange={e => uf('nom', e.target.value)} style={S.inp} /></div>
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Prénom</label><input value={fd.prenom || ''} onChange={e => uf('prenom', e.target.value)} style={S.inp} /></div>

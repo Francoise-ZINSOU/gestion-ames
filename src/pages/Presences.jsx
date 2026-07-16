@@ -119,7 +119,7 @@ export default function PresencesPage({ actifs, presences, refs, enregistrerPres
           </div>
 
           {/* Barre sticky en bas — Enregistrer */}
-          <div style={{ position: 'sticky', bottom: 56, left: 0, right: 0, background: '#fff', borderTop: '1px solid #e0e4ec', padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', zIndex: 10, boxShadow: '0 -2px 8px rgba(0,0,0,.06)', borderRadius: '0 0 12px 12px' }}>
+          <div className="sticky-save" style={{ position: 'sticky', bottom: 0, left: 0, right: 0, background: '#fff', borderTop: '1px solid #e0e4ec', padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', zIndex: 10, boxShadow: '0 -2px 8px rgba(0,0,0,.06)', borderRadius: '0 0 12px 12px' }}>
             <div style={{ fontSize: 12, color: '#5a6480' }}>
               <strong style={{ fontSize: 16, color: '#1a1e2e' }}>{nChecked}</strong> / {eligible.length}
             </div>

@@ -12,10 +12,15 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
   const [saving, setSaving] = useState(false)
   const uf = (k, v) => setFd(prev => ({ ...prev, [k]: v }))
 
+  // Trouver le membre lié au profil connecté (même email)
+  const myEmail = auth?.profil?.email?.toLowerCase()
+  const myMembre = myEmail ? actifs.find(m => m.email?.toLowerCase() === myEmail) : null
+
   const filt = membres.filter(m => {
     if (fSt === 'actifs' && m.archive) return false
     if (fSt === '__archived' && !m.archive) return false
-    if (fSt !== 'all' && fSt !== 'actifs' && fSt !== '__archived' && m.statut !== fSt) return false
+    if (fSt === '__mysuivis') return myMembre ? m.suivi_par === myMembre.id : false
+    if (fSt !== 'all' && fSt !== 'actifs' && fSt !== '__archived' && fSt !== '__mysuivis' && m.statut !== fSt) return false
     if (fRole !== 'all' && m.role !== fRole) return false
     if (q) return (m.nom + ' ' + m.prenom).toLowerCase().includes(q.toLowerCase())
     return !m.archive
@@ -186,7 +191,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
             <div style={{ padding: '16px 20px', borderBottom: '1px solid #e0e4ec' }}>
               <div style={{ fontSize: 15, fontWeight: 700, fontFamily: "'Outfit', sans-serif" }}>{modal === 'edit' ? 'Modifier' : 'Nouveau membre'}</div>
             </div>
-            <div style={{ padding: '16px 20px', maxHeight: '60vh', overflowY: 'auto' }}>
+            <div style={{ padding: '16px 20px', maxHeight: '55dvh', overflowY: 'auto' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px' }}>
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Nom</label><input value={fd.nom || ''} onChange={e => uf('nom', e.target.value)} style={{ ...S.inp, borderColor: fd.nom === '' ? '#e03050' : '#c8cfe0' }} /></div>
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Prénom</label><input value={fd.prenom || ''} onChange={e => uf('prenom', e.target.value)} style={{ ...S.inp, borderColor: fd.prenom === '' ? '#e03050' : '#c8cfe0' }} /></div>
@@ -284,7 +289,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                   <div style={{ fontSize: 12, color: '#5a6480', marginBottom: 8 }}>
                     {fd._csvRows.length} ligne(s). {fd._csvRows.filter(r => r._dup).length > 0 && <span style={{ color: '#d48f00' }}>⚠ {fd._csvRows.filter(r => r._dup).length} doublon(s) en jaune.</span>}
                   </div>
-                  <div style={{ maxHeight: '35vh', overflowY: 'auto' }}>
+                  <div style={{ maxHeight: '30dvh', overflowY: 'auto' }}>
                     {fd._csvRows.map((r, i) => (
                       <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 6px', borderBottom: '1px solid #e0e4ec', background: r._dup ? '#FAEEDA' : 'transparent', opacity: r._skip ? 0.4 : 1 }}>
                         <input type="checkbox" checked={!r._skip} onChange={() => { const rows = [...fd._csvRows]; rows[i] = { ...rows[i], _skip: !rows[i]._skip }; setFd(prev => ({ ...prev, _csvRows: rows })) }} />

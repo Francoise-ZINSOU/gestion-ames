@@ -25,7 +25,7 @@ export default function App() {
   const [selectedId, setSelectedId] = useState(null)
 
   if (auth.loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: 'DM Sans, sans-serif' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100dvh', fallback: '100vh', fontFamily: 'DM Sans, sans-serif' }}>
       <div style={{ color: '#5a6480', fontSize: 14 }}>Chargement...</div>
     </div>
   )
