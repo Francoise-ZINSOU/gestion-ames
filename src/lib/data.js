@@ -310,12 +310,16 @@ export function useDatesAnnulees() {
   }, [])
   useEffect(() => { load() }, [load])
   const ajouter = async (activiteId, dateAnnulee, motif) => {
-    const { error } = await supabase.from('dates_annulees').insert({ activite_id: activiteId, date_annulee: dateAnnulee, motif: motif || null })
-    if (error) throw error; await load()
+    const { data, error } = await supabase.from('dates_annulees').insert({ activite_id: activiteId, date_annulee: dateAnnulee, motif: motif || null }).select()
+    if (error) throw error
+    if (!data || data.length === 0) throw new Error("Impossible d'annuler cette date. Vérifiez vos droits.")
+    await load()
   }
   const supprimer = async (id) => {
-    const { error } = await supabase.from('dates_annulees').delete().eq('id', id)
-    if (error) throw error; await load()
+    const { data, error } = await supabase.from('dates_annulees').delete().eq('id', id).select()
+    if (error) throw error
+    if (!data || data.length === 0) throw new Error("Impossible de rétablir cette date. Vérifiez vos droits.")
+    await load()
   }
   return { dates, loading, ajouter, supprimer, reload: load }
 }

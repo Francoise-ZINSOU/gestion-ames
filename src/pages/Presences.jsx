@@ -74,7 +74,7 @@ export default function PresencesPage({ actifs, presences, refs, enregistrerPres
         if (cancelled) return (
           <div style={{ padding: '12px 16px', borderRadius: 8, background: '#d48f0010', border: '1px solid #d48f0033', fontSize: 12, color: '#d48f00', marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span>Cette date a été annulée{cancelled.motif ? ' : ' + cancelled.motif : ''}. Les absences ne comptent pas.</span>
-            <button onClick={async () => { try { await supprimerDateAnnulee(cancelled.id) } catch(e) {} }} style={{ background: 'none', border: '1px solid #d48f00', borderRadius: 5, padding: '3px 10px', fontSize: 11, color: '#d48f00', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', marginLeft: 8 }}>Rétablir</button>
+            <button onClick={async () => { await supprimerDateAnnulee(cancelled.id) }} style={{ background: 'none', border: '1px solid #d48f00', borderRadius: 5, padding: '3px 10px', fontSize: 11, color: '#d48f00', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', marginLeft: 8 }}>Rétablir</button>
           </div>
         )
         return null
@@ -98,7 +98,7 @@ export default function PresencesPage({ actifs, presences, refs, enregistrerPres
               <button onClick={() => { setChk({}); setSaved(false) }} style={S.btn('#6b7280', true)}>Aucun</button>
               {existing.length > 0 && <button onClick={handleDelete} style={{ ...S.btn('#e03050', true), display: 'flex', alignItems: 'center', gap: 4 }}><Trash2 size={13} /> Suppr.</button>}
 {!(datesAnnulees || []).some(d => d.activite_id === actId && d.date_annulee === date) && (
-                <button onClick={() => setConfirmAction({ msg: 'Annuler cette date ? Les absences ne seront pas comptabilisées.', input: true, fn: async (motif) => { try { await ajouterDateAnnulee(actId, date, motif || null) } catch(e) {} } })} style={{ ...S.btn('#d48f00', true), fontSize: 10, padding: '4px 8px' }}>Annuler date</button>
+                <button onClick={() => setConfirmAction({ msg: 'Annuler cette date ? Les absences ne seront pas comptabilisées.', input: true, fn: async (motif) => { try { await ajouterDateAnnulee(actId, date, motif || null) } catch(e) {} } })} style={S.btn('#d48f00', true)}>Annuler date</button>
               )}
             </div>
           </div>
