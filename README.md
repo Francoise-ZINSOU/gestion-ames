@@ -1,158 +1,227 @@
 # Gestion des Âmes — Suivi Pastoral
 
-Application de gestion pastorale pour le suivi individualisé des membres d'une église.
+Application web de gestion pastorale pour le suivi individualisé des membres d'une église.
 
-**Démo en production** : [suivi-enracinees.netlify.app](https://suivi-enracinees.netlify.app)
+**Production** : https://suivi-enracinees.netlify.app
 
-## Fonctionnalités
+---
 
-### Présences
-- Saisie par activité (Culte, Enseignement, Prière) avec grille de coches
-- Complétion partielle — revenir plus tard sans perdre les données
-- Suppression d'une date entière avec confirmation
-- Blocage des dates futures
-- Détection de conflit multi-utilisateurs
-- Éligibilité automatique (inscription, départ/retour)
+## Stack technique
 
-### Suivi des Âmes
-- Fiche 360° avec 5 onglets : Identité, Présences, Entretiens, Défis, Plan
-- CRUD complet (ajout, modification, archivage)
-- Validation email/téléphone + détection de doublons
-- Import CSV avec prévisualisation et détection des doublons
-- Archivage avec réassignation automatique des suivis
-- Rétrogradation de rôle avec réassignation
-- Historique des changements de statut
+- **Frontend** : React 18 + Vite
+- **Backend** : Supabase (PostgreSQL + Auth + Realtime + Row-Level Security)
+- **Hébergement** : Netlify (auto-deploy depuis GitHub)
+- **Polices** : DM Sans (corps), Outfit (titres), Roboto Mono (code)
+- **Icônes** : Lucide React
 
-### Entretiens
-- Création depuis la fiche membre ou la page globale
-- Dropdowns avec qui + sujets de référence
-- Statuts : Planifié, Réalisé, Annulé
-- Alerte sur les entretiens planifiés en retard
-
-### Défis & Plan de croissance
-- Défis avec cycle de vie : Identifié → En cours → Résolu
-- Modification et suppression des défis
-- Modules de croissance liés à un défi
-- Multi-sélection de modules à assigner
-- Barre de progression par défi
-- Suggestion automatique "Passer en Résolu" quand tous les modules sont validés
-
-### Alertes croisées
-- Score de sévérité combinant : absences consécutives + jours sans entretien + défis ouverts
-- Seuils configurables en base de données
-- Berger principal exclu des alertes
-- Entretiens planifiés en retard signalés
-
-### Dashboard
-- KPIs : total actifs, nouveaux, intégrés, taux culte global
-- Notifications : membres "Nouveau" depuis 3+ mois, défis sans module
-- Lien direct vers les alertes
-- Inscriptions récentes cliquables
-
-### Arbre de suivi
-- Hiérarchie : Berger principal → Piliers → Membres
-- Piliers sans berger affichés avec leurs suivis
-- Membres orphelins identifiés
-- KPIs : nombre de bergers, piliers, sans suiveur
-
-### Administration
-- 9 tables de référence configurables (statuts, rôles, activités, modules, sujets...)
-- Gestion des utilisateurs (Responsable / Admin)
-- Export 4 CSV (membres, présences, entretiens, défis)
-- Réinitialisation des données avec confirmation
+---
 
 ## Architecture
 
 ```
 src/
-├── main.jsx                    # Point d'entrée React
-├── App.jsx                     # Orchestrateur (routing + data hooks)
+├── main.jsx                    Point d'entrée
+├── App.jsx                     Orchestrateur, hooks data, routing
 ├── lib/
-│   ├── supabase.js             # Client Supabase
-│   ├── auth.jsx                # Authentification + 3 niveaux d'accès
-│   ├── data.js                 # Hooks de données (CRUD, realtime, vues SQL)
-│   └── ui.jsx                  # Styles partagés, formatage, toast
+│   ├── supabase.js            Client Supabase
+│   ├── auth.jsx               Contexte auth (login/profil/rôles)
+│   ├── data.js                Hooks : useMembres, usePresences, useEntretiens, useDefis, usePlanCroissance, useAlertes, useRefs, useDatesAnnulees, useJournal, useHistoriqueStatuts, useProfils, refHelpers, resetAllData
+│   └── ui.jsx                 Styles S, formatters fmt/fmtS/dago/dagoLabel, Toast
 ├── components/
-│   └── Layout.jsx              # Sidebar Lucide + header + nav mobile
+│   └── Layout.jsx             Sidebar desktop + nav mobile + header
 └── pages/
-    ├── Login.jsx               # Connexion / inscription
-    ├── AccessDenied.jsx        # Accès refusé (membre non responsable)
-    ├── MenuMobile.jsx          # Menu complet mobile
-    ├── Home.jsx                # Dashboard + KPIs + notifications
-    ├── Presences.jsx           # Grille de saisie
-    ├── Ames.jsx                # Liste des membres + import CSV
-    ├── Fiche.jsx               # Fiche 360° (5 onglets)
-    ├── Alertes.jsx             # Alertes croisées
-    ├── EntretiensGlobal.jsx    # Vue globale + création
-    ├── Croissance.jsx          # Avancement des plans
-    ├── Historique.jsx          # Graphique barres + tableau
-    ├── Filiation.jsx           # Arbre de suivi
-    ├── Export.jsx              # Export CSV + réinitialisation
-    └── Params.jsx              # Paramètres admin
+    ├── Login.jsx              Connexion
+    ├── AccessDenied.jsx       Accès refusé
+    ├── NoFamille.jsx          Utilisateur sans famille assignée
+    ├── MenuMobile.jsx         Menu "Plus" mobile
+    ├── Home.jsx               Dashboard (KPIs, notifications, quick actions)
+    ├── Presences.jsx          Saisie des présences par activité/date
+    ├── Ames.jsx               Liste + création + import CSV + actions en masse
+    ├── Fiche.jsx              Fiche 360° (6 onglets : Identité, Présences, Entretiens, Défis, Plan, Journal)
+    ├── Alertes.jsx            Alertes de suivi avec détail du score
+    ├── EntretiensGlobal.jsx   Vue globale des entretiens
+    ├── Croissance.jsx         Plan de croissance
+    ├── Historique.jsx         Graphique + tableau présences par activité
+    ├── Filiation.jsx          Arbre de suivi récursif
+    ├── Export.jsx             Export CSV + reset données
+    ├── Params.jsx             Paramètres (Références, Utilisateurs, Église)
+    └── VueEglise.jsx          Vue macro multi-familles (Berger d'église)
 ```
 
-## Stack technique
+---
 
-- **Frontend** : React 18 + Vite + Lucide React (icônes)
-- **Backend** : Supabase (PostgreSQL + Auth + Realtime + RLS)
-- **Hébergement** : Netlify (frontend) + Supabase (backend)
-- **Coût** : Gratuit (tier gratuit Supabase + Netlify)
+## Fonctionnalités principales
 
-## Installation
+### Gestion des membres
+- CRUD complet, import CSV (auto-détection UTF-8/windows-1252)
+- Actions en masse (changer statut, assigner à un pilier)
+- Archivage réversible
+- Historique des statuts
+- Transfert intelligent entre familles
+- Filtres : rôle, statut, "Mes suivis" (basé sur profil ↔ membre)
+- Cartes sur mobile, tableau sur desktop
 
-### 1. Supabase
+### Saisie des présences
+- Par activité (Culte, Enseignement, Prière, etc.)
+- Boutons "Tous" / "Aucun"
+- Dates annulées (les absences ne comptent pas)
+- Barre "Enregistrer" sticky en bas
+- Conflit multi-utilisateur détecté
 
-1. Créer un projet sur [supabase.com](https://supabase.com)
-2. SQL Editor → exécuter `supabase-schema.sql`
-3. SQL Editor → exécuter `evolution-v1.1.sql` (seuils configurables)
-4. Settings → API → copier Project URL + anon key
+### Fiche 360°
+- 6 onglets : Identité, Présences, Entretiens, Défis, Plan de croissance, Journal pastoral
+- Menu "⋯ Actions" : Modifier / Archiver / Transférer (admin)
+- Bouton retour contextuel (← Alertes / ← Liste / ← Entretiens / ← Accueil)
+- KPIs : jours depuis inscription, absences consécutives, entretiens, plan validé
+- Suggestion "Passer en Résolu" quand tous les modules d'un défi sont validés
 
-### 2. Déploiement Netlify
+### Alertes de suivi
+- Score = absences (3pts) + jours sans entretien (2pts) + défis ouverts (1pt)
+- Détail par pill coloré : "3 abs. consécutives (+3) · 25j sans entretien (+2)"
+- Seuils configurables via `ref_parametres`
 
-1. Pousser le code sur GitHub
-2. Netlify → Add new site → Import from Git → GitHub
-3. Build command : `npm run build`
-4. Publish directory : `dist`
-5. Variables d'environnement :
-   - `VITE_SUPABASE_URL` → URL du projet Supabase
-   - `VITE_SUPABASE_ANON_KEY` → clé anon publique
-6. Deploy
+### Entretiens
+- Création depuis la Fiche ou la page globale
+- Filtre "Avec qui" = uniquement Bergers + Piliers (peut_suivre)
+- Détection des entretiens planifiés en retard
+- Pagination "Voir plus" (30 par batch)
 
-### 3. Premier admin
+### Plan de croissance
+- Modules liés à des défis via `defi_id`
+- Suivi individuel + collectif
 
-1. S'inscrire sur l'app
-2. Dans Supabase SQL Editor :
-```sql
--- Désactiver les protections temporairement
-DROP TRIGGER IF EXISTS trg_protect_profil ON public.profils;
-ALTER TABLE public.profils DISABLE ROW LEVEL SECURITY;
+### Filiation
+- Arbre récursif (Berger → Pilier → Pilier → Membre)
+- Piliers non rattachés = signal d'anomalie
+- Membres sans suiveur affichés séparément
 
-UPDATE public.profils
-SET est_admin = true, est_responsable = true
-WHERE email = 'votre-email@ici.com';
+### Multi-église
+- Table `eglises` + `familles_disciples`
+- `famille_id` sur toutes les données
+- RLS filtrant automatiquement par famille
+- Super-admin bypass
+- Trigger auto-set du `famille_id` à l'insertion
 
-ALTER TABLE public.profils ENABLE ROW LEVEL SECURITY;
-CREATE TRIGGER trg_protect_profil
-  BEFORE UPDATE ON public.profils
-  FOR EACH ROW EXECUTE FUNCTION protect_profil_fields();
+### Berger d'église (vue macro)
+- Nouvelle page "Vue église"
+- Accès en lecture seule à toutes les familles de son église
+- 4 KPIs : total actifs, taux culte moyen (4 dernières sem), nouveaux 30j, familles à risque
+- 2 sections critiques : familles < 80% au dernier dimanche + familles en baisse de -10 pts
+- Comparatif par famille : culte 4sem, tendance, dim dernier, nouveaux, entretiens
+
+### Journal pastoral (6ème onglet Fiche)
+- Notes libres, appels, visites, SMS, observations
+- Timeline chronologique
+
+### Anniversaires
+- Champ `date_naissance`
+- Notification dashboard : "3 anniversaires cette semaine : Marina, David, Careine"
+
+### Détection de tendances
+- Présence en baisse : 3+/4 dimanches passés vs 0-1/4 récents → alerte préventive
+
+### PWA
+- Installable sur écran d'accueil (mobile + desktop)
+- Icône dédiée, plein écran, theme-color
+
+---
+
+## Rôles & permissions
+
+| Rôle | Peut... |
+|---|---|
+| **Membre** (par défaut) | Aucun accès à l'app |
+| **Responsable** (`est_responsable`) | Lire et modifier les données de sa famille |
+| **Admin** (`est_admin`) | + Modifier les tables de référence, gérer les utilisateurs |
+| **Berger d'église** (`est_berger_eglise`) | + Lire toutes les familles de son église (page "Vue église") |
+| **Super-admin** (`est_super_admin`) | + Bypass RLS, accès total |
+
+Un utilisateur peut cumuler plusieurs rôles.
+
+---
+
+## Base de données
+
+### Tables principales
+- `membres` : les âmes suivies
+- `presences` : présences par membre/activité/date
+- `entretiens` : entretiens pastoraux
+- `defis` : défis à surmonter
+- `plan_croissance` : modules assignés/validés
+- `historique_statuts` : trace des changements de statut
+- `journal_pastoral` : notes libres
+- `dates_annulees` : dates où les absences ne comptent pas
+
+### Tables de référence
+- `ref_roles` : Berger principal / Pilier / Membre
+- `ref_statuts` : Nouveau / STAR / Intégré / En difficulté / Archivé
+- `ref_statuts_defi`, `ref_statuts_entretien`
+- `ref_sujets_entretien`, `ref_types_defi`
+- `activites` : Culte, Enseignement, Prière, etc. (par famille)
+- `modules` : modules du plan de croissance
+- `ref_parametres` : seuils configurables
+
+### Multi-tenant
+- `eglises` : églises
+- `familles_disciples` : familles au sein d'une église
+- `famille_id` sur toutes les tables de données
+- `profils` : lié à `auth.users`, contient `famille_id`, `eglise_id`, `membre_id`, flags de rôles
+
+---
+
+## Migrations SQL
+
+Les évolutions sont fournies en fichiers séparés à exécuter dans Supabase SQL Editor :
+
+- `evolution-v1.1.sql` : Seuils alertes configurables, dates annulées, vue alertes robuste
+- `evolution-v1.2.sql` : Statut STAR, lien profil ↔ membre, fondations multi-église
+- `evolution-v1.3-multi-eglise.sql` : Multi-église complet (RLS, triggers, indexes)
+- `evolution-v1.4-activites-famille.sql` : Activités par famille, date_naissance, journal pastoral
+- `evolution-v1.5-berger-eglise.sql` : Berger d'église (RLS lecture cross-famille)
+
+---
+
+## Développement
+
+Pas de Node.js local requis — édition via GitHub web editor, Netlify redéploie automatiquement.
+
+### Build
+```
+npm run build       → dossier dist/
 ```
 
-## Niveaux d'accès
+### Structure des styles
+- Palette : `#0ea888` (vert primaire), `#3060d0` (bleu info), `#d48f00` (orange warning), `#e03050` (rouge danger), `#7040d0` (violet)
+- Grays : `#1a1e2e` texte, `#5a6480` sub-texte, `#6b7280` meta (WCAG AA), `#e0e4ec` bordures
+- Polices : DM Sans / Outfit / Roboto Mono via Google Fonts CDN
 
-| Rôle | Données pastorales | Paramètres |
-|------|-------------------|------------|
-| Membre connecté | ❌ Page "Accès restreint" | ❌ |
-| Responsable | ✅ Toutes les pages | ❌ |
-| Admin | ✅ Toutes les pages | ✅ Paramètres + utilisateurs |
+### Responsive
+- Mobile-first : `mob-only` / `desk-only` classes
+- Breakpoint : 768px
+- Viewport : `100dvh` + `viewport-fit=cover` (safe-area iOS)
+- Nav bottom mobile avec 5 boutons + safe-area
+- Sidebar fixe 210px desktop
 
-## Hiérarchie pastorale
+### Principes
+- **Zéro string hardcodée** : tout passe par `refHelpers(refs)`
+- **Realtime** : 5 channels Supabase (membres, presences, entretiens, defis, plan_croissance)
+- **Wrapper w()** : centralise try/catch + toast + reload pour toutes les opérations async
+- **Body scroll lock** modales via `body:has(.modal-overlay){overflow:hidden}`
 
-```
-Berger principal (niveau 0)
-  └── Pilier (niveau 1, peut suivre)
-        └── Membre (niveau 2)
-```
+---
 
-- Le Berger principal n'a pas de "Suivi par" et est exclu des alertes
-- Un Pilier peut suivre un autre Pilier
-- Un seul Berger principal autorisé par église
+## Feuille de route
+
+### v2 — Valeur pastorale forte
+- Notifications email hebdomadaires (Supabase Edge Functions + Resend)
+- Rapports mensuels PDF
+- Dashboard personnalisé Pilier
+- Log de communication (appels, SMS)
+
+### v3 — Fonctionnalités avancées
+- Mode hors-ligne (Service Worker + IndexedDB)
+- Cellules de maison / groupes
+- Événements (retraites, baptêmes)
+- Recherche globale
+- Journal d'audit
+- API ouverte
