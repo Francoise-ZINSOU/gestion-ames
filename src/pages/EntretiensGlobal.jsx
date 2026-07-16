@@ -56,7 +56,7 @@ export default function EntretiensPage({ entretiens, membres, actifs, refs, h, o
             {/* Desktop */}
             <div className="desk-only">
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead><tr>{['Date', 'Âme', 'Avec qui', 'Sujet', 'Statut'].map(h => <th key={h} style={S.th}>{h}</th>)}</tr></thead>
+                <thead><tr>{['Date', 'Âme', 'Avec', 'Sujet', 'Statut'].map(h => <th key={h} style={S.th}>{h}</th>)}</tr></thead>
                 <tbody>{all.slice(0, showCount).map(e => (
                   <tr key={e.id} onClick={() => openFiche(e.membre_id)} style={{ cursor: 'pointer' }}>
                     <td style={{ ...S.td, color: '#5a6480' }}>{fmtS(e.date_entretien)}</td>

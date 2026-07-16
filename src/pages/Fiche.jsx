@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { S, fmt, fmtS, dago, today, getStatutColor, getRoleColor } from '../lib/ui'
+import { S, fmt, fmtS, dago, dagoLabel, today, getStatutColor, getRoleColor } from '../lib/ui'
 import { useHistoriqueStatuts } from '../lib/data'
 import { ClipboardList, BarChart3, MessageCircle, Zap, BookOpen, Pencil, Archive, Phone, Mail, CalendarDays, RotateCcw, Check, X, History } from 'lucide-react'
 
@@ -120,7 +120,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
           </div>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, width: '100%', maxWidth: 340 }}>
-          {[{ v: days !== null ? days + 'j' : '—', l: 'Inscription', c: '#0ea888' }, { v: ca, l: 'Abs.', c: ca >= 3 ? '#e03050' : '#1a9c60' }, { v: mEn.length, l: 'Entretiens', c: '#3060d0' }, { v: pv + '/' + mPt.length, l: 'Plan', c: '#7040d0' }].map((x, i) => (
+          {[{ v: dagoLabel(m.date_inscription), l: 'Inscription', c: '#0ea888' }, { v: ca, l: 'Abs.', c: ca >= 3 ? '#e03050' : '#1a9c60' }, { v: mEn.length, l: 'Entretiens', c: '#3060d0' }, { v: pv + '/' + mPt.length, l: 'Plan', c: '#7040d0' }].map((x, i) => (
             <div key={i} style={{ textAlign: 'center', padding: 6, background: '#f0f2f6', borderRadius: 6 }}>
               <div style={{ fontSize: 16, fontWeight: 700, color: x.c, fontFamily: "'Outfit', sans-serif" }}>{x.v}</div>
               <div style={{ fontSize: 8, color: '#8892a8', fontWeight: 600, textTransform: 'uppercase' }}>{x.l}</div>

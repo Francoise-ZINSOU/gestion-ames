@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { S, fmt, today } from '../lib/ui'
 import { Save, Trash2, CheckSquare, Square, Search } from 'lucide-react'
 
-export default function PresencesPage({ actifs, presences, refs, enregistrerPresences, supprimerDate, auth }) {
+export default function PresencesPage({ actifs, presences, refs, enregistrerPresences, supprimerDate, auth, datesAnnulees, ajouterDateAnnulee, supprimerDateAnnulee, showToast }) {
   const activites = refs.activites || []
   const [actId, setActId] = useState(activites[0]?.id || '')
   const [date, setDate] = useState(today())
@@ -57,15 +57,28 @@ export default function PresencesPage({ actifs, presences, refs, enregistrerPres
       <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', marginBottom: 12 }}>
         {activites.map(a => (
           <button key={a.id} onClick={() => setActId(a.id)} style={{
-            padding: '6px 12px', borderRadius: 7, fontFamily: 'inherit', fontSize: 12, cursor: 'pointer',
+            padding: '6px 10px', borderRadius: 7, fontFamily: 'inherit', fontSize: 11, cursor: 'pointer',
             border: '1px solid ' + (actId === a.id ? a.couleur : '#e0e4ec'),
             background: actId === a.id ? a.couleur + '12' : 'transparent',
-            color: actId === a.id ? a.couleur : '#5a6480', fontWeight: actId === a.id ? 600 : 500
+            color: actId === a.id ? a.couleur : '#5a6480', fontWeight: actId === a.id ? 600 : 500,
+            whiteSpace: 'nowrap'
           }}>{a.icone} {a.nom}</button>
         ))}
         <input type="date" value={date} max={today()} onChange={e => setDate(e.target.value)}
-          style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid #c8cfe0', background: '#f0f2f6', fontSize: 12, fontFamily: 'inherit', marginLeft: 'auto' }} />
+          style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #c8cfe0', background: '#f0f2f6', fontSize: 11, fontFamily: 'inherit', marginLeft: 'auto' }} />
       </div>
+
+      {/* Date annulée ? */}
+      {(() => {
+        const cancelled = (datesAnnulees || []).find(d => d.activite_id === actId && d.date_annulee === date)
+        if (cancelled) return (
+          <div style={{ padding: '12px 16px', borderRadius: 8, background: '#d48f0010', border: '1px solid #d48f0033', fontSize: 12, color: '#d48f00', marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>Cette date a été annulée{cancelled.motif ? ' : ' + cancelled.motif : ''}. Les absences ne comptent pas.</span>
+            <button onClick={async () => { try { await supprimerDateAnnulee(cancelled.id) } catch(e) {} }} style={{ background: 'none', border: '1px solid #d48f00', borderRadius: 5, padding: '3px 10px', fontSize: 11, color: '#d48f00', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', marginLeft: 8 }}>Rétablir</button>
+          </div>
+        )
+        return null
+      })()}
 
       {isFuture ? (
         <div style={{ padding: '12px 16px', borderRadius: 8, background: '#e0305008', border: '1px solid #e0305033', fontSize: 12, color: '#e03050' }}>
@@ -84,6 +97,12 @@ export default function PresencesPage({ actifs, presences, refs, enregistrerPres
               <button onClick={() => { const o = {}; eligible.forEach(m => { o[m.id] = true }); setChk(o); setSaved(false) }} style={S.btn('#0ea888', true)}>Tous</button>
               <button onClick={() => { setChk({}); setSaved(false) }} style={S.btn('#8892a8', true)}>Aucun</button>
               {existing.length > 0 && <button onClick={handleDelete} style={{ ...S.btn('#e03050', true), display: 'flex', alignItems: 'center', gap: 4 }}><Trash2 size={13} /> Suppr.</button>}
+              {!(datesAnnulees || []).some(d => d.activite_id === actId && d.date_annulee === date) && (
+                <button onClick={async () => {
+                  const motif = prompt('Motif d\'annulation (optionnel) :')
+                  try { await ajouterDateAnnulee(actId, date, motif || null) } catch(e) {}
+                }} style={{ ...S.btn('#d48f00', true), fontSize: 10, padding: '4px 8px' }}>Annuler date</button>
+              )}
             </div>
           </div>
 

@@ -12,9 +12,10 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
   const [saving, setSaving] = useState(false)
   const uf = (k, v) => setFd(prev => ({ ...prev, [k]: v }))
 
-  // Trouver le membre lié au profil connecté (même email)
+  // Trouver le membre lié au profil connecté (membre_id direct, sinon fallback email)
+  const myMembreId = auth?.profil?.membre_id
   const myEmail = auth?.profil?.email?.toLowerCase()
-  const myMembre = myEmail ? actifs.find(m => m.email?.toLowerCase() === myEmail) : null
+  const myMembre = myMembreId ? actifs.find(m => m.id === myMembreId) : (myEmail ? actifs.find(m => m.email?.toLowerCase() === myEmail) : null)
 
   const filt = membres.filter(m => {
     if (fSt === 'actifs' && m.archive) return false
@@ -113,25 +114,26 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
 
   return (
     <div>
-      {/* Filtres — empilés sur mobile */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center', marginBottom: 12 }}>
-        <div style={{ position: 'relative', flex: '1 1 100%', minWidth: 0 }}>
-          <Search size={14} style={{ position: 'absolute', left: 10, top: 9, color: '#8892a8' }} />
-          <input value={q} onChange={e => setQ(e.target.value)} placeholder="Rechercher..." style={{ ...S.inp, paddingLeft: 30, width: '100%', boxSizing: 'border-box' }} />
-        </div>
-        <select value={fRole} onChange={e => setFRole(e.target.value)} style={{ ...S.inp, flex: '1 1 100px' }}>
+      {/* Barre de recherche */}
+      <div style={{ position: 'relative', marginBottom: 8 }}>
+        <Search size={14} style={{ position: 'absolute', left: 10, top: 9, color: '#8892a8' }} />
+        <input value={q} onChange={e => setQ(e.target.value)} placeholder="Rechercher..." style={{ ...S.inp, paddingLeft: 30, width: '100%', boxSizing: 'border-box' }} />
+      </div>
+      {/* Filtres + actions — une seule ligne */}
+      <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 12, flexWrap: 'wrap' }}>
+        <select value={fRole} onChange={e => setFRole(e.target.value)} style={{ ...S.inp, flex: '1 1 0', minWidth: 90, fontSize: 11, padding: '6px 4px' }}>
           <option value="all">Tous rôles</option>
           {(refs.roles || []).map(r => <option key={r.nom} value={r.nom}>{r.nom}</option>)}
         </select>
-        <select value={fSt} onChange={e => setFSt(e.target.value)} style={{ ...S.inp, flex: '1 1 100px' }}>
-          <option value="all">Tous statuts</option>
-          <option value="actifs">Actifs seulement</option>
+        <select value={fSt} onChange={e => setFSt(e.target.value)} style={{ ...S.inp, flex: '1 1 0', minWidth: 90, fontSize: 11, padding: '6px 4px' }}>
+          <option value="actifs">Actifs</option>
+          <option value="all">Tous</option>
           <option value="__archived">Archivés</option>
           {myMembre && <option value="__mysuivis">Mes suivis</option>}
           {(refs.statuts || []).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}
         </select>
-        <button onClick={() => { setFd({ statut: h.defaultStatut, role: h.defaultRole, date_inscription: today() }); setModal('add') }} style={{ ...S.btn('#0ea888', false), whiteSpace: 'nowrap' }}>+ Âme</button>
-        <button onClick={() => setModal('import')} style={{ ...S.btn('#3060d0', true), display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}><Upload size={13} /> CSV</button>
+        <button onClick={() => { setFd({ statut: h.defaultStatut, role: h.defaultRole, date_inscription: today() }); setModal('add') }} style={{ ...S.btn('#0ea888', false), whiteSpace: 'nowrap', padding: '6px 12px', fontSize: 12 }}>+ Âme</button>
+        <button onClick={() => setModal('import')} style={{ ...S.btn('#3060d0', true), display: 'flex', alignItems: 'center', gap: 3, whiteSpace: 'nowrap', padding: '6px 10px', fontSize: 11 }}><Upload size={12} /> CSV</button>
       </div>
 
       {/* Liste — CARTES sur mobile, tableau sur desktop */}
@@ -143,7 +145,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
             {/* Desktop: tableau */}
             <div className="desk-only">
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead><tr>{['Nom', 'Rôle', 'Inscription', 'Suivi par', 'Statut', 'Prés.', 'Ent.'].map(h => <th key={h} style={S.th}>{h}</th>)}</tr></thead>
+                <thead><tr>{['Nom', 'Rôle', 'Inscr.', 'Suivi par', 'Statut', 'Prés.', 'Ent.'].map(h => <th key={h} style={S.th}>{h}</th>)}</tr></thead>
                 <tbody>{filt.map(m => {
                   const t = taux(m.id)
                   return (
@@ -253,9 +255,8 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                   <div style={{ fontSize: 11, color: '#8892a8', marginBottom: 10 }}>Seuls Prénom et Nom sont obligatoires. Statut = Nouveau, Rôle = Membre par défaut.</div>
                   <input type="file" accept=".csv,.txt" onChange={e => {
                     const file = e.target.files?.[0]; if (!file) return
-                    const reader = new FileReader()
-                    reader.onload = (ev) => {
-                      const text = ev.target.result; const sep = text.includes(';') ? ';' : ','
+                    const parseCSV = (text) => {
+                      const sep = text.includes(';') ? ';' : ','
                       const lines = text.split(/\r?\n/).filter(l => l.trim())
                       if (lines.length < 2) { showToast('⚠ Fichier vide'); return }
                       const headerRaw = lines[0].split(sep).map(h => h.trim().replace(/^["']|["']$/g, '').toLowerCase())
@@ -281,7 +282,17 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                       }).filter(r => r.prenom || r.nom)
                       setFd(prev => ({ ...prev, _csvRows: rows }))
                     }
-                    reader.readAsText(file, 'UTF-8')
+                    // Essayer UTF-8, fallback windows-1252 si accents cassés (�)
+                    const r1 = new FileReader()
+                    r1.onload = (ev) => {
+                      const text = ev.target.result
+                      if (/\ufffd/.test(text)) {
+                        const r2 = new FileReader()
+                        r2.onload = (ev2) => parseCSV(ev2.target.result)
+                        r2.readAsText(file, 'windows-1252')
+                      } else { parseCSV(text) }
+                    }
+                    r1.readAsText(file, 'UTF-8')
                   }} style={{ fontSize: 12 }} />
                 </div>
               ) : (

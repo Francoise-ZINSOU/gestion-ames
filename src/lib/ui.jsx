@@ -55,6 +55,18 @@ export function dago(d) {
   return Math.max(0, Math.floor((Date.now() - new Date(d).getTime()) / 864e5))
 }
 
+export function dagoLabel(d) {
+  const n = dago(d)
+  if (n === null) return '—'
+  if (n === 0) return "Aujourd'hui"
+  if (n === 1) return 'Hier'
+  if (n < 30) return n + 'j'
+  if (n < 365) return Math.floor(n / 30) + ' mois'
+  const y = Math.floor(n / 365)
+  const m = Math.floor((n % 365) / 30)
+  return y + ' an' + (y > 1 ? 's' : '') + (m > 0 ? ' ' + m + 'm' : '')
+}
+
 export function today() { return new Date().toISOString().slice(0, 10) }
 
 // ── Validation ──

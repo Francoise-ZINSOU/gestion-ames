@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from './lib/auth'
-import { useMembres, usePresences, useEntretiens, useDefis, usePlanCroissance, useAlertes, useRefs, refHelpers } from './lib/data'
+import { useMembres, usePresences, useEntretiens, useDefis, usePlanCroissance, useAlertes, useRefs, useDatesAnnulees, refHelpers } from './lib/data'
 import { Toast, useToast, today } from './lib/ui'
 import LoginPage from './pages/Login'
 import AccessDenied from './pages/AccessDenied'
@@ -43,6 +43,7 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
   const pt = usePlanCroissance()
   const al = useAlertes()
   const rf = useRefs()
+  const da = useDatesAnnulees()
   const h = refHelpers(rf.refs)
 
   const dataLoading = mb.loading || pr.loading || rf.loading
@@ -82,6 +83,9 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
     retirerModule: w(pt.retirer, '✓ Module retiré'),
     // Refs
     reloadRefs: rf.reload,
+    datesAnnulees: da.dates,
+    ajouterDateAnnulee: w(da.ajouter, '✓ Date annulée ajoutée'),
+    supprimerDateAnnulee: w(da.supprimer, '✓ Date rétablie'),
   }
 
   if (dataLoading) return (
