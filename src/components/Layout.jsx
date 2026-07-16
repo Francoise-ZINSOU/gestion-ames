@@ -1,5 +1,5 @@
 import { useAuth } from '../lib/auth'
-import { Home, CheckSquare, TrendingUp, Users, GitBranch, Bell, MessageCircle, BookOpen, Download, Settings, Search, LogOut, Menu } from 'lucide-react'
+import { Home, CheckSquare, TrendingUp, Users, GitBranch, Bell, MessageCircle, BookOpen, Download, Settings, Search, LogOut, Menu, Building2 } from 'lucide-react'
 
 const navIcons = {
   home: Home, pres: CheckSquare, timeline: TrendingUp, ames: Users,
