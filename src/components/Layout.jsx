@@ -101,11 +101,15 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
       </nav>
 
       <style>{`
+        .mob-only{display:none}
+        .desk-only{display:block}
         @media(max-width:768px){
           .sb{display:none!important}
           .mn{margin-left:0!important}
           .nv{display:flex!important}
           .mn>div:last-child{padding:12px 12px 70px!important}
+          .mob-only{display:block!important}
+          .desk-only{display:none!important}
           table{display:block;overflow-x:auto;white-space:nowrap}
         }
         .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:500;display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;box-sizing:border-box}

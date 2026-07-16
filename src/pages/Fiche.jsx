@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import { S, fmt, fmtS, dago, today, getStatutColor, getRoleColor } from '../lib/ui'
-import { supabase } from '../lib/supabase'
 import { useHistoriqueStatuts } from '../lib/data'
 import { ClipboardList, BarChart3, MessageCircle, Zap, BookOpen, Pencil, Archive, Phone, Mail, CalendarDays, RotateCcw, Check, X, History } from 'lucide-react'
 
-export default function FichePage({ membres, actifs, presences, entretiens, defis, plans, refs, selectedMembre: m, selectedId, openFiche, showToast, ajouterEnt, modifierEnt, supprimerEnt, ajouterDefi, modifierDefi, assignerModule, validerModule, retirerModule, reloadMembres, setPage }) {
+export default function FichePage({ membres, actifs, presences, entretiens, defis, plans, refs, h, selectedMembre: m, selectedId, openFiche, showToast, ajouterEnt, modifierEnt, supprimerEnt, ajouterDefi, modifierDefi, supprimerDefi, assignerModule, validerModule, retirerModule, modifierMembre, archiverMembre, reloadMembres, setPage }) {
   const [ftab, setFtab] = useState('id')
   const [modal, setModal] = useState(null)
   const [fd, setFd] = useState({})
@@ -29,7 +28,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
   }
 
   const cAbs = () => {
-    const culte = (refs.activites || []).find(a => a.code === 'culte')
+    const culte = h.culteId ? { id: h.culteId } : null
     if (!culte) return 0
     const ps = mPr(culte.id).filter(p => p.eligible).sort((a, b) => new Date(b.date_presence) - new Date(a.date_presence))
     let c = 0
@@ -46,15 +45,18 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
   const leaders = actifs.filter(x => { const r = (refs.roles || []).find(r => r.nom === x.role); return r?.peut_suivre && x.id !== m.id })
 
   const handleArchive = async () => {
+    // Protection: ne pas archiver le Berger principal s'il est le seul
+    if (h.isBergerRole(m.role)) {
+      showToast('⚠ Impossible d\'archiver le Berger principal. Transférez d\'abord le rôle à quelqu\'un d\'autre.')
+      return
+    }
     const mesSuivis = getSuivis()
     if (mesSuivis.length > 0) {
       setFd(prev => ({ ...prev, _archiveSuivis: mesSuivis }))
       setModal('archiveReassign')
       return
     }
-    await supabase.from('membres').update({ archive: true, statut: 'Archivé', date_archivage: new Date().toISOString() }).eq('id', m.id)
-    showToast('✓ Membre archivé')
-    await reloadMembres()
+    await archiverMembre(m.id)
   }
 
   const doArchiveReassign = async () => {
@@ -62,31 +64,35 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
       const newSuivId = fd._archiveNewSuiv || null
       if (newSuivId) {
         for (const s of fd._archiveSuivis) {
-          await supabase.from('membres').update({ suivi_par: newSuivId }).eq('id', s.id)
+          await modifierMembre(s.id, { suivi_par: newSuivId })
         }
       }
-      await supabase.from('membres').update({ archive: true, statut: 'Archivé', date_archivage: new Date().toISOString() }).eq('id', m.id)
-      showToast('✓ Archivé et suivis réassignés')
-      await reloadMembres()
+      await archiverMembre(m.id)
       setModal(null); setFd({})
     } catch (e) { showToast('⚠ ' + e.message) }
   }
 
   const handleSaveEnt = async () => {
-    const data = { membre_id: m.id, date_entretien: fd.date_entretien || today(), avec_qui: fd.avec_qui || null, sujet_id: fd.sujet_id || null, sujet_libre: fd.sujet_libre || null, statut: fd.statut || 'Réalisé', commentaires: fd.commentaires || '' }
+    const dateEnt = fd.date_entretien || today()
+    // Check: entretien avant inscription?
+    if (m.date_inscription && dateEnt < m.date_inscription) {
+      showToast('⚠ Date de l\'entretien antérieure à l\'inscription (' + fmt(m.date_inscription) + ')')
+      return
+    }
+    const data = { membre_id: m.id, date_entretien: dateEnt, avec_qui: fd.avec_qui || null, sujet_id: fd.sujet_id || null, sujet_libre: fd.sujet_libre || null, statut: fd.statut || h.defaultStatutEnt, commentaires: fd.commentaires || '' }
     if (editEntId) { await modifierEnt(editEntId, data) }
     else { await ajouterEnt(data) }
     setModal(null); setFd({}); setEditEntId(null)
   }
 
   const handleSaveDefi = async () => {
-    await ajouterDefi({ membre_id: m.id, type_defi: fd.type_defi || (refs.typesDefi[0]?.nom), description: fd.description || '', statut: fd.statut_defi || 'Identifié' })
+    await ajouterDefi({ membre_id: m.id, type_defi: fd.type_defi || (refs.typesDefi[0]?.nom), description: fd.description || '', statut: fd.statut_defi || h.defaultStatutDefi })
     setModal(null); setFd({})
   }
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: 5, marginBottom: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: 5, marginBottom: 10, alignItems: 'center', overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 4 }}>
         <button onClick={() => setPage('ames')} style={S.btn('#5a6480', true)}>← Liste</button>
         {[['id', 'Identité', ClipboardList], ['pr', 'Présences', BarChart3], ['en', 'Entretiens', MessageCircle], ['df', 'Défis', Zap], ['pt', 'Plan', BookOpen]].map(([id, label, Icon]) => (
           <button key={id} onClick={() => setFtab(id)} style={{ padding: '4px 12px', borderRadius: 14, border: '1px solid ' + (ftab === id ? '#0ea888' : '#e0e4ec'), background: ftab === id ? '#0ea88814' : '#f0f2f6', color: ftab === id ? '#0ea888' : '#5a6480', fontSize: 11, fontWeight: ftab === id ? 600 : 500, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4 }}><Icon size={12} /> {label}</button>
@@ -104,7 +110,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
           <div style={{ fontSize: 17, fontWeight: 700, fontFamily: 'Georgia, serif' }}>{m.prenom} {m.nom}</div>
           <div style={{ display: 'flex', gap: 5, marginTop: 3, flexWrap: 'wrap' }}>
             <span style={S.pill(getStatutColor(refs, m.statut))}>{m.statut}</span>
-            {m.role !== 'Membre' && <span style={S.pill(getRoleColor(refs, m.role))}>{m.role}</span>}
+            {m.role !== h.defaultRole && <span style={S.pill(getRoleColor(refs, m.role))}>{m.role}</span>}
             {m.est_retour && <span style={S.pill('#7040d0')}>Retour</span>}
             {spM && <span style={{ fontSize: 10, color: '#5a6480' }}>suivi par {spM.prenom} {spM.nom}</span>}
           </div>
@@ -190,12 +196,12 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
         <div style={S.card}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
             <div style={{ fontSize: 13, fontWeight: 600 }}>Entretiens ({mEn.length})</div>
-            <button onClick={() => { setFd({ statut: 'Réalisé' }); setEditEntId(null); setModal('ent') }} style={S.btn('#3060d0', false)}>+ Entretien</button>
+            <button onClick={() => { setFd({ statut: h.defaultStatutEnt }); setEditEntId(null); setModal('ent') }} style={S.btn('#3060d0', false)}>+ Entretien</button>
           </div>
-          {mEn.length === 0 ? <div style={{ color: '#8892a8', fontSize: 12, padding: 8 }}>Aucun entretien. <span onClick={() => { setFd({ statut: 'Réalisé' }); setModal('ent') }} style={{ color: '#3060d0', cursor: 'pointer', textDecoration: 'underline' }}>Créer le premier</span></div>
+          {mEn.length === 0 ? <div style={{ color: '#8892a8', fontSize: 12, padding: 8 }}>Aucun entretien. <span onClick={() => { setFd({ statut: h.defaultStatutEnt }); setModal('ent') }} style={{ color: '#3060d0', cursor: 'pointer', textDecoration: 'underline' }}>Créer le premier</span></div>
             : mEn.map(e => {
               const avecM = getSuiveur(e.avec_qui)
-              const sc = e.statut === 'Réalisé' ? '#1a9c60' : e.statut === 'Planifié' ? '#d48f00' : '#8892a8'
+              const sc = (() => { const found = (refs.statutsEntretien || []).find(s => s.nom === e.statut); return found?.couleur || '#8892a8' })()
               const sujet = e.sujet_libre || (refs.sujetsEntretien || []).find(s => s.id === e.sujet_id)?.nom || ''
               return (
                 <div key={e.id} style={{ padding: '10px 12px', borderRadius: 7, border: '1px solid #e0e4ec', marginBottom: 6 }}>
@@ -207,7 +213,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
                     <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
                       <span style={S.pill(sc)}>{e.statut}</span>
                       <button onClick={() => { setFd({ ...e }); setEditEntId(e.id); setModal('ent') }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, color: '#3060d0' }}><Pencil size={12} /></button>
-                      <button onClick={() => setConfirmAction({ msg: 'Supprimer cet entretien ?', fn: () => supprimerEnt(e.id) })} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: '#8892a8', padding: '0 2px' }}>✕</button>
+                      <button onClick={() => setConfirmAction({ msg: 'Supprimer cet entretien ?', fn: () => supprimerEnt(e.id) })} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: '#8892a8', padding: '4px 8px' }}>✕</button>
                     </div>
                   </div>
                   {e.commentaires && <div style={{ fontSize: 11, color: '#5a6480', lineHeight: 1.4, whiteSpace: 'pre-wrap', padding: '4px 8px', background: '#f0f2f6', borderRadius: 4, borderLeft: '3px solid ' + sc }}>{e.commentaires}</div>}
@@ -233,8 +239,8 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
                     <div style={{ display: 'flex', gap: 4, marginBottom: 3, flexWrap: 'wrap', alignItems: 'center' }}>
                       <span style={S.pill('#3060d0')}>{d.type_defi}</span>
                       <span style={S.pill(stColor)}>{d.statut}</span>
-                      <button onClick={() => { setFd({ _editDefiId: d.id, type_defi: d.type_defi, description: d.description, statut_defi: d.statut }); setModal('editDefi') }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#3060d0', padding: '0 2px' }}><Pencil size={13} /></button>
-                      <button onClick={() => setConfirmAction({ msg: 'Supprimer ce défi ?', fn: async () => { await supabase.from('defis').delete().eq('id', d.id); showToast('✓ Défi supprimé'); reloadMembres() } })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8892a8', padding: '0 2px', fontSize: 13 }}>✕</button>
+                      <button onClick={() => { setFd({ _editDefiId: d.id, type_defi: d.type_defi, description: d.description, statut_defi: d.statut }); setModal('editDefi') }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#3060d0', padding: '4px 8px' }}><Pencil size={13} /></button>
+                      <button onClick={() => setConfirmAction({ msg: 'Supprimer ce défi ?', fn: async () => { await supprimerDefi(d.id) } })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8892a8', padding: '4px 8px', fontSize: 13 }}>✕</button>
                     </div>
                     <div style={{ fontSize: 12, lineHeight: 1.4 }}>{d.description}</div>
                   </div>
@@ -295,8 +301,8 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, marginLeft: 8 }}>
                           <div style={{ flex: 1, height: 4, background: '#f0f2f6', borderRadius: 2, overflow: 'hidden' }}><div style={{ height: '100%', borderRadius: 2, background: allDone ? '#1a9c60' : '#7040d0', width: pct + '%' }} /></div>
                           <span style={{ fontSize: 10, fontWeight: 600, color: allDone ? '#1a9c60' : '#5a6480' }}>{vCount}/{modulesForDefi.length}</span>
-                          {allDone && d.statut !== 'Résolu' && <button onClick={e => { e.stopPropagation(); modifierDefi(d.id, { statut: 'Résolu' }) }} style={{ background: 'none', border: '1px solid #1a9c60', borderRadius: 5, padding: '2px 8px', fontSize: 10, color: '#1a9c60', fontWeight: 600, cursor: 'pointer' }}>Passer en Résolu</button>}
-                          {allDone && d.statut === 'Résolu' && <span style={{ fontSize: 10, color: '#1a9c60', fontWeight: 600 }}>Parcours terminé</span>}
+                          {allDone && !h.isStatutFinal(d.statut) && <button onClick={e => { e.stopPropagation(); modifierDefi(d.id, { statut: h.statutFinalDefi }) }} style={{ background: 'none', border: '1px solid #1a9c60', borderRadius: 5, padding: '2px 8px', fontSize: 10, color: '#1a9c60', fontWeight: 600, cursor: 'pointer' }}>Passer en Résolu</button>}
+                          {allDone && h.isStatutFinal(d.statut) && <span style={{ fontSize: 10, color: '#1a9c60', fontWeight: 600 }}>Parcours terminé</span>}
                         </div>
                       </div>
                     )}
@@ -337,9 +343,9 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
             <div style={{ padding: '16px 20px' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px' }}>
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Date</label><input value={fd.date_entretien || today()} onChange={e => uf('date_entretien', e.target.value)} style={S.inp} type="date" /></div>
-                <div style={{ marginBottom: 8 }}><label style={S.label}>Statut</label><select value={fd.statut || 'Réalisé'} onChange={e => uf('statut', e.target.value)} style={S.inp}>{(refs.statutsEntretien || []).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}</select></div>
+                <div style={{ marginBottom: 8 }}><label style={S.label}>Statut</label><select value={fd.statut || h.defaultStatutEnt} onChange={e => uf('statut', e.target.value)} style={S.inp}>{(refs.statutsEntretien || []).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}</select></div>
               </div>
-              <div style={{ marginBottom: 8 }}><label style={S.label}>Avec qui</label><select value={fd.avec_qui || ''} onChange={e => uf('avec_qui', e.target.value || null)} style={S.inp}><option value="">— Choisir —</option>{actifs.sort((a, b) => { const o = { 'Berger principal': 0, 'Pilier': 1 }; return (o[a.role] ?? 2) - (o[b.role] ?? 2) }).map(x => <option key={x.id} value={x.id}>{x.prenom} {x.nom}{x.role !== 'Membre' ? ' (' + x.role + ')' : ''}</option>)}</select></div>
+              <div style={{ marginBottom: 8 }}><label style={S.label}>Avec qui</label><select value={fd.avec_qui || ''} onChange={e => uf('avec_qui', e.target.value || null)} style={S.inp}><option value="">— Choisir —</option>{actifs.sort((a, b) => { const o = (() => { const m = {}; (refs.roles || []).forEach(r => m[r.nom] = r.niveau ?? 99); return m })(); return (o[a.role] ?? 2) - (o[b.role] ?? 2) }).map(x => <option key={x.id} value={x.id}>{x.prenom} {x.nom}{x.role !== h.defaultRole ? ' (' + x.role + ')' : ''}</option>)}</select></div>
               <div style={{ marginBottom: 8 }}><label style={S.label}>Sujet</label><select value={fd.sujet_id || ''} onChange={e => { uf('sujet_id', e.target.value || null); if (e.target.value) uf('sujet_libre', null) }} style={S.inp}><option value="">— Libre —</option>{(refs.sujetsEntretien || []).map(s => <option key={s.id} value={s.id}>{s.nom}</option>)}</select></div>
               {!fd.sujet_id && <div style={{ marginBottom: 8 }}><label style={S.label}>Sujet libre</label><input value={fd.sujet_libre || ''} onChange={e => uf('sujet_libre', e.target.value)} style={S.inp} /></div>}
               <div style={{ marginBottom: 8 }}><label style={S.label}>Commentaires</label><textarea value={fd.commentaires || ''} onChange={e => uf('commentaires', e.target.value)} rows={3} style={{ ...S.inp, resize: 'vertical' }} /></div>
@@ -360,7 +366,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
             <div style={{ padding: '16px 20px' }}>
               <div style={{ marginBottom: 8 }}><label style={S.label}>Type</label><select value={fd.type_defi || ''} onChange={e => uf('type_defi', e.target.value)} style={S.inp}>{(refs.typesDefi || []).map(t => <option key={t.nom} value={t.nom}>{t.nom}</option>)}</select></div>
               <div style={{ marginBottom: 8 }}><label style={S.label}>Description</label><textarea value={fd.description || ''} onChange={e => uf('description', e.target.value)} rows={3} style={{ ...S.inp, resize: 'vertical' }} /></div>
-              <div style={{ marginBottom: 8 }}><label style={S.label}>Statut</label><select value={fd.statut_defi || 'Identifié'} onChange={e => uf('statut_defi', e.target.value)} style={S.inp}>{(refs.statutsDefi || []).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}</select></div>
+              <div style={{ marginBottom: 8 }}><label style={S.label}>Statut</label><select value={fd.statut_defi || h.defaultStatutDefi} onChange={e => uf('statut_defi', e.target.value)} style={S.inp}>{(refs.statutsDefi || []).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}</select></div>
             </div>
             <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#8892a8', true)}>Annuler</button>
@@ -506,10 +512,10 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
               </div>
               <div style={{ marginBottom: 8 }}><label style={S.label}>Date d'inscription</label><input value={fd.date_inscription || ''} onChange={e => uf('date_inscription', e.target.value)} style={S.inp} type="date" /></div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px' }}>
-                <div style={{ marginBottom: 8 }}><label style={S.label}>Statut</label><select value={fd.statut || 'Nouveau'} onChange={e => uf('statut', e.target.value)} style={S.inp}>{(refs.statuts || []).filter(s => !s.est_archive).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}</select></div>
-                <div style={{ marginBottom: 8 }}><label style={S.label}>Rôle</label><select value={fd.role || 'Membre'} onChange={e => { uf('role', e.target.value); if (e.target.value === 'Berger principal') uf('suivi_par', null) }} style={S.inp}>{(refs.roles || []).map(r => <option key={r.nom} value={r.nom}>{r.nom}</option>)}</select></div>
+                <div style={{ marginBottom: 8 }}><label style={S.label}>Statut</label><select value={fd.statut || h.defaultStatut} onChange={e => uf('statut', e.target.value)} style={S.inp}>{(refs.statuts || []).filter(s => !s.est_archive).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}</select></div>
+                <div style={{ marginBottom: 8 }}><label style={S.label}>Rôle</label><select value={fd.role || h.defaultRole} onChange={e => { uf('role', e.target.value); if (h.isBergerRole(e.target.value)) uf('suivi_par', null) }} style={S.inp}>{(refs.roles || []).map(r => <option key={r.nom} value={r.nom}>{r.nom}</option>)}</select></div>
               </div>
-              {(fd.role !== 'Berger principal') && <div style={{ marginBottom: 8 }}><label style={S.label}>Suivi par</label><select value={fd.suivi_par || ''} onChange={e => uf('suivi_par', e.target.value || null)} style={S.inp}><option value="">— Aucun —</option>{leaders.filter(l => l.id !== m.id).map(l => <option key={l.id} value={l.id}>{l.prenom} {l.nom} ({l.role})</option>)}</select></div>}
+              {(!h.isBergerRole(fd.role)) && <div style={{ marginBottom: 8 }}><label style={S.label}>Suivi par</label><select value={fd.suivi_par || ''} onChange={e => uf('suivi_par', e.target.value || null)} style={S.inp}><option value="">— Aucun —</option>{leaders.filter(l => l.id !== m.id).map(l => <option key={l.id} value={l.id}>{l.prenom} {l.nom} ({l.role})</option>)}</select></div>}
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', marginBottom: 8 }}><input type="checkbox" checked={!!fd.est_retour} onChange={e => uf('est_retour', e.target.checked)} /><span style={{ fontSize: 12, color: '#5a6480', fontWeight: 600 }}>C'est un retour</span></label>
               {fd.est_retour && (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px' }}>
@@ -525,9 +531,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
               <button onClick={async () => {
                 try {
                   const { id, created_at, created_by, updated_at, updated_by, ...updates } = fd
-                  await supabase.from('membres').update(updates).eq('id', m.id)
-                  showToast('✓ Membre modifié')
-                  await reloadMembres()
+                  await modifierMembre(m.id, updates)
                   setModal(null); setFd({})
                 } catch (e) { showToast('⚠ ' + e.message) }
               }} style={S.btn('#0ea888', false)}>Enregistrer</button>

@@ -1,12 +1,10 @@
 import { useState } from 'react'
 import { useAuth } from './lib/auth'
-import { useMembres, usePresences, useEntretiens, useDefis, usePlanCroissance, useAlertes, useRefs } from './lib/data'
+import { useMembres, usePresences, useEntretiens, useDefis, usePlanCroissance, useAlertes, useRefs, refHelpers } from './lib/data'
 import { Toast, useToast, today } from './lib/ui'
 import LoginPage from './pages/Login'
 import AccessDenied from './pages/AccessDenied'
 import Layout from './components/Layout'
-
-// Pages (chargées directement pour simplifier le build)
 import HomePage from './pages/Home'
 import PresencesPage from './pages/Presences'
 import AmesPage from './pages/Ames'
@@ -26,51 +24,70 @@ export default function App() {
   const [page, setPage] = useState('home')
   const [selectedId, setSelectedId] = useState(null)
 
-  // Auth states
   if (auth.loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: 'Trebuchet MS, Gill Sans, Calibri, sans-serif' }}>
       <div style={{ color: '#5a6480', fontSize: 14 }}>Chargement...</div>
     </div>
   )
-
   if (!auth.session) return <LoginPage />
   if (!auth.isResponsable) return <AccessDenied />
 
-  // Data hooks (only loaded when authenticated + authorized)
   return <AuthorizedApp auth={auth} toast={toast} showToast={showToast} page={page} setPage={setPage} selectedId={selectedId} setSelectedId={setSelectedId} />
 }
 
 function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setSelectedId }) {
-  const { membres, actifs, reload: reloadMembres } = useMembres()
-  const { presences, sauver: sauverPresences, supprimerDate, reload: reloadPresences } = usePresences()
-  const { entretiens, ajouter: ajouterEnt, modifier: modifierEnt, supprimer: supprimerEnt } = useEntretiens()
-  const { defis, ajouter: ajouterDefi, modifier: modifierDefi } = useDefis()
-  const { plans, assigner: assignerModule, valider: validerModule, retirer: retirerModule } = usePlanCroissance()
-  const { alertes } = useAlertes()
-  const { refs } = useRefs()
+  const mb = useMembres()
+  const pr = usePresences()
+  const en = useEntretiens()
+  const df = useDefis()
+  const pt = usePlanCroissance()
+  const al = useAlertes()
+  const rf = useRefs()
+  const h = refHelpers(rf.refs)
+
+  const dataLoading = mb.loading || pr.loading || rf.loading
 
   const openFiche = (id) => { setSelectedId(id); setPage('fiche') }
-  const selectedMembre = membres.find(m => m.id === selectedId) || null
+  const selectedMembre = mb.membres.find(m => m.id === selectedId) || null
 
-  // Context passé à toutes les pages
+  // Wrappers avec toast
+  const w = (fn, msg) => async (...args) => { try { const r = await fn(...args); showToast(msg); return r } catch (e) { showToast('⚠ ' + (e.message || 'Erreur inattendue')) } }
+
   const ctx = {
-    membres, actifs, presences, entretiens, defis, plans, alertes, refs,
-    openFiche, showToast, selectedMembre, selectedId,
-    // CRUD wrappers avec toast
-    sauverPresences: async (aid, date, ids) => { try { await sauverPresences(aid, date, ids); showToast('✓ Présences enregistrées') } catch (e) { showToast('⚠ ' + e.message) } },
-    supprimerDate: async (aid, date) => { try { await supprimerDate(aid, date); showToast('✓ Date supprimée') } catch (e) { showToast('⚠ ' + e.message) } },
-    ajouterEnt: async (ent) => { try { await ajouterEnt(ent); showToast('✓ Entretien ajouté') } catch (e) { showToast('⚠ ' + e.message) } },
-    modifierEnt: async (id, u) => { try { await modifierEnt(id, u); showToast('✓ Entretien modifié') } catch (e) { showToast('⚠ ' + e.message) } },
-    supprimerEnt: async (id) => { try { await supprimerEnt(id); showToast('✓ Entretien supprimé') } catch (e) { showToast('⚠ ' + e.message) } },
-    ajouterDefi: async (d) => { try { await ajouterDefi(d); showToast('✓ Défi ajouté') } catch (e) { showToast('⚠ ' + e.message) } },
-    modifierDefi: async (id, u) => { try { await modifierDefi(id, u); showToast('✓ Défi mis à jour') } catch (e) { showToast('⚠ ' + e.message) } },
-    assignerModule: async (mid, modId, defiId) => { try { await assignerModule(mid, modId, defiId); showToast('✓ Module assigné') } catch (e) { showToast('⚠ ' + e.message) } },
-    validerModule: async (id, v) => { try { await validerModule(id, v) } catch (e) { showToast('⚠ ' + e.message) } },
-    retirerModule: async (id) => { try { await retirerModule(id) } catch (e) { showToast('⚠ ' + e.message) } },
-    reloadMembres,
-    reloadPresences,
-    auth,
+    membres: mb.membres, actifs: mb.actifs, presences: pr.presences,
+    entretiens: en.entretiens, defis: df.defis, plans: pt.plans,
+    alertes: al.alertes, refs: rf.refs, h,
+    openFiche, showToast, selectedMembre, selectedId, auth,
+    // Membres
+    ajouterMembre: w(mb.ajouter, '✓ Membre ajouté'),
+    modifierMembre: w(mb.modifier, '✓ Membre modifié'),
+    archiverMembre: w(mb.archiver, '✓ Membre archivé'),
+    importerCSV: w(mb.importerCSV, '✓ Import terminé'),
+    reloadMembres: mb.reload,
+    // Presences
+    sauverPresences: w(pr.sauver, '✓ Présences enregistrées'),
+    supprimerDate: w(pr.supprimerDate, '✓ Date supprimée'),
+    // Entretiens
+    ajouterEnt: w(en.ajouter, '✓ Entretien ajouté'),
+    modifierEnt: w(en.modifier, '✓ Entretien modifié'),
+    supprimerEnt: w(en.supprimer, '✓ Entretien supprimé'),
+    // Défis
+    ajouterDefi: w(df.ajouter, '✓ Défi ajouté'),
+    modifierDefi: w(df.modifier, '✓ Défi mis à jour'),
+    supprimerDefi: w(df.supprimer, '✓ Défi supprimé'),
+    // Plan
+    assignerModule: w(pt.assigner, '✓ Module assigné'),
+    validerModule: async (id, v) => { try { await pt.valider(id, v) } catch (e) { showToast('⚠ ' + (e.message || 'Erreur inattendue')) } },
+    retirerModule: w(pt.retirer, '✓ Module retiré'),
+    // Refs
+    reloadRefs: rf.reload,
   }
+
+  if (dataLoading) return (
+    <Layout page={page} setPage={setPage} alertCount={0} membreCount={0} selectedMembre={null}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 20px', color: '#8892a8', fontSize: 13 }}>Chargement des données...</div>
+    </Layout>
+  )
 
   let content
   switch (page) {
@@ -85,12 +102,12 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
     case 'filia': content = <FiliationPage {...ctx} />; break
     case 'export': content = <ExportPage {...ctx} />; break
     case 'params': content = auth.isAdmin ? <ParamsPage {...ctx} /> : null; break
-    case 'menu': content = <MenuMobile setPage={setPage} isAdmin={auth.isAdmin} />; break
+    case 'menu': content = <MenuMobile setPage={setPage} isAdmin={auth.isAdmin} selectedMembre={selectedMembre} />; break
     default: content = <HomePage {...ctx} setPage={setPage} />
   }
 
   return (
-    <Layout page={page} setPage={setPage} alertCount={alertes.length} membreCount={actifs.length} selectedMembre={selectedMembre}>
+    <Layout page={page} setPage={setPage} alertCount={al.alertes.length} membreCount={mb.actifs.length} selectedMembre={selectedMembre}>
       {content}
       <Toast message={toast} />
     </Layout>

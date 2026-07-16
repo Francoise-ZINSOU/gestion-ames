@@ -21,7 +21,7 @@ function RefTable({ table, label, fields, showToast }) {
   const handleAdd = async () => {
     if (!newNom.trim()) return
     try { await ajouter({ nom: newNom.trim() }); setNewNom(''); showToast('✓ Ajouté') }
-    catch (e) { showToast('⚠ ' + e.message) }
+    catch (e) { showToast(e.message?.includes('duplicate') ? '⚠ Ce nom existe déjà' : '⚠ ' + e.message) }
   }
 
   return (
@@ -49,7 +49,7 @@ function UsersTable({ showToast }) {
 
   const handleRole = async (id, resp, admin) => {
     try { await setRole(id, resp, admin); showToast('✓ Droits mis à jour') }
-    catch (e) { showToast('⚠ ' + e.message) }
+    catch (e) { showToast(e.message?.includes('duplicate') ? '⚠ Ce nom existe déjà' : '⚠ ' + e.message) }
   }
 
   return (

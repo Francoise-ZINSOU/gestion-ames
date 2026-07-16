@@ -1,26 +1,26 @@
 import { S, getStatutColor } from '../lib/ui'
 
-export default function FiliationPage({ actifs, refs, openFiche }) {
-  const bergers = actifs.filter(m => m.role === 'Berger principal')
-  const piliers = actifs.filter(m => m.role === 'Pilier')
+export default function FiliationPage({ actifs, refs, h, openFiche }) {
+  const bergers = actifs.filter(m => h.isBergerRole(m.role))
+  const piliers = actifs.filter(m => !h.isBergerRole(m.role) && (refs.roles || []).find(r => r.nom === m.role)?.peut_suivre)
   const getSuivis = (id) => actifs.filter(m => m.suivi_par === id)
 
   // Piliers sans berger (ont quand même des suivis à montrer)
-  const piliersOrphelins = piliers.filter(p => !p.suivi_par || !actifs.some(m => m.id === p.suivi_par && m.role === 'Berger principal'))
+  const piliersOrphelins = piliers.filter(p => !p.suivi_par || !actifs.some(m => m.id === p.suivi_par && h.isBergerRole(m.role)))
   
   // Vrais orphelins : ni Berger, ni Pilier rattaché, sans suiveur
   const orphelins = actifs.filter(m => {
-    if (m.role === 'Berger principal') return false
+    if (h.isBergerRole(m.role)) return false
     if (!m.suivi_par) return true
     // suiveur archivé ou inexistant
     const suiveur = actifs.find(x => x.id === m.suivi_par)
     return !suiveur
-  }).filter(m => m.role !== 'Pilier' || !piliersOrphelins.find(p => p.id === m.id))
+  }).filter(m => !h.isPilierRole(m.role) || !piliersOrphelins.find(p => p.id === m.id))
 
   // Membres sans suiveur (pas Berger, pas Pilier orphelin déjà affiché)
   const membresOrphelins = actifs.filter(m => {
-    if (m.role === 'Berger principal') return false
-    if (m.role === 'Pilier') return false
+    if (h.isBergerRole(m.role)) return false
+    if (!h.isBergerRole(m.role) && (refs.roles || []).find(r => r.nom === m.role)?.peut_suivre) return false
     if (!m.suivi_par) return true
     return !actifs.some(x => x.id === m.suivi_par)
   })
@@ -76,7 +76,7 @@ export default function FiliationPage({ actifs, refs, openFiche }) {
             {enfB.length > 0 && (
               <div style={{ marginLeft: 20, borderLeft: '2px solid #d48f0040', paddingLeft: 14 }}>
                 {enfB.map(e => {
-                  if (e.role === 'Pilier') return renderPilier(e)
+                  if (h.isPilierRole(e.role)) return renderPilier(e)
                   return renderMembre(e)
                 })}
               </div>
