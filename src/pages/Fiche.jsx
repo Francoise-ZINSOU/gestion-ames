@@ -354,6 +354,65 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
         </div>
       )}
 
+      {/* Tab Journal */}
+      {ftab === 'jn' && (
+        <div style={S.card}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <div style={{ fontSize: 13, fontWeight: 600 }}>Journal pastoral</div>
+            <button onClick={() => { setFd({ date_note: today(), type_note: 'note' }); setModal('journal') }} style={S.btn('#7040d0', false)}>+ Note</button>
+          </div>
+          {journalNotes.length === 0
+            ? <div style={{ padding: 12, textAlign: 'center', color: '#6b7280', fontSize: 12 }}>Aucune note. <span onClick={() => { setFd({ date_note: today(), type_note: 'note' }); setModal('journal') }} style={{ color: '#7040d0', cursor: 'pointer', textDecoration: 'underline' }}>Écrire la première</span></div>
+            : journalNotes.map(n => (
+              <div key={n.id} style={{ padding: '10px 0', borderBottom: '1px solid #e0e4ec' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontSize: 11, color: '#6b7280' }}>{fmt(n.date_note)}</span>
+                    {n.type && n.type !== 'note' && <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 8, background: '#7040d014', color: '#7040d0', fontWeight: 600 }}>{n.type}</span>}
+                  </div>
+                  <button onClick={() => setConfirmAction({ msg: 'Supprimer cette note ?', fn: async () => { try { await supprimerNote(n.id) } catch(e) { showToast('⚠ Erreur') } } })} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: '#6b7280', padding: '4px 8px' }}>✕</button>
+                </div>
+                <div style={{ fontSize: 12, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{n.contenu}</div>
+              </div>
+            ))}
+        </div>
+      )}
+
+      {/* Modal journal */}
+      {modal === 'journal' && (
+        <div className="modal-overlay">
+          <div className="modal-box" style={{ maxWidth: 420 }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid #e0e4ec' }}>
+              <div style={{ fontSize: 15, fontWeight: 700, fontFamily: "'Outfit', sans-serif" }}>Nouvelle note — {m.prenom}</div>
+            </div>
+            <div style={{ padding: '16px 20px' }}>
+              <div style={{ marginBottom: 8 }}><label style={S.label}>Date</label><input type="date" value={fd.date_note || today()} onChange={e => uf('date_note', e.target.value)} style={S.inp} /></div>
+              <div style={{ marginBottom: 8 }}><label style={S.label}>Type</label>
+                <select value={fd.type_note || 'note'} onChange={e => uf('type_note', e.target.value)} style={S.inp}>
+                  <option value="note">Note libre</option>
+                  <option value="appel">Appel téléphonique</option>
+                  <option value="visite">Visite</option>
+                  <option value="sms">SMS / Message</option>
+                  <option value="observation">Observation</option>
+                </select>
+              </div>
+              <div style={{ marginBottom: 8 }}><label style={S.label}>Contenu</label><textarea value={fd.contenu || ''} onChange={e => uf('contenu', e.target.value)} rows={4} placeholder="Qu'avez-vous observé ou échangé ?" style={{ ...S.inp, resize: 'vertical' }} /></div>
+            </div>
+            <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#6b7280', true)}>Annuler</button>
+              <button onClick={async () => {
+                if (!fd.contenu?.trim()) { showToast('⚠ Écrivez quelque chose'); return }
+                try {
+                  await ajouterNote({ date_note: fd.date_note || today(), contenu: fd.contenu.trim(), type: fd.type_note || 'note' })
+                  showToast('✓ Note ajoutée')
+                  setModal(null); setFd({})
+                } catch (e) { showToast('⚠ ' + (e.message || 'Erreur')) }
+              }} style={S.btn('#7040d0', false)}>Enregistrer</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modal entretien */}
       {modal === 'ent' && (
         <div className="modal-overlay">
