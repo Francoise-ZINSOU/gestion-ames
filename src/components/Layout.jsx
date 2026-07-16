@@ -126,8 +126,9 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
         .hide-scrollbar{scrollbar-width:none;-ms-overflow-style:none}
         .hide-scrollbar::-webkit-scrollbar{display:none;width:0;height:0}
         .modal-overlay.danger{background:rgba(0,0,0,.5);z-index:600}
-        .modal-box{width:100%;background:#fff;border-radius:12px;overflow:hidden;box-sizing:border-box;margin-top:4vh;max-height:92vh;max-height:92dvh;display:flex;flex-direction:column}
-        .modal-box>div:nth-child(2){overflow-y:auto;flex:1}
+        .modal-box{width:100%;background:#fff;border-radius:12px;overflow:hidden;overflow-x:hidden!important;box-sizing:border-box;margin-top:4vh;max-height:92vh;max-height:92dvh;display:flex;flex-direction:column}
+        .modal-box>div:nth-child(2){overflow-y:auto;overflow-x:hidden;flex:1}
+        .modal-box textarea,.modal-box input,.modal-box select{max-width:100%;box-sizing:border-box}
         @media(max-width:500px){
           .modal-overlay{padding:8px}
           .modal-box{margin-top:2vh;max-height:96vh;max-height:96dvh;border-radius:10px}
