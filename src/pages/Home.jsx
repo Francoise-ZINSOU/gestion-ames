@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { S, fmtS, dago, today, getStatutColor } from '../lib/ui'
+import { toLocalDate, S, fmtS, dago, today, getStatutColor } from '../lib/ui'
 import { AlertTriangle, Clock, BookOpen, CheckSquare, TrendingDown } from 'lucide-react'
 
 export default function HomePage({ actifs, alertes, presences, defis, plans, refs, h, openFiche, setPage, datesAnnulees }) {
@@ -26,8 +26,8 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
     const cur = new Date(nowD); cur.setDate(cur.getDate() - 30)
     while (cur <= nowD) {
       if (cur.getDay() === culteActivite.jour_semaine) {
-        const dStr = cur.toISOString().slice(0, 10)
-        if (!saved.has(dStr) && !cancelledCulteDates.has(dStr) && dStr <= nowD.toISOString().slice(0, 10)) {
+        const dStr = toLocalDate(cur)
+        if (!saved.has(dStr) && !cancelledCulteDates.has(dStr) && dStr <= toLocalDate(nowD)) {
           missing.push(dStr)
         }
       }
@@ -38,7 +38,7 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
 
   // Rappel présences : dernier dimanche saisi ?
   const lastSunday = (() => {
-    const d = new Date(); d.setDate(d.getDate() - d.getDay()); return d.toISOString().slice(0, 10)
+    const d = new Date(); d.setDate(d.getDate() - d.getDay()); return toLocalDate(d)
   })()
   const lastSundaySaved = culte ? presences.some(p => p.activite_id === culte.id && p.date_presence === lastSunday) : true
 

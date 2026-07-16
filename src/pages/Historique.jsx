@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { S, fmt, fmtS } from '../lib/ui'
+import { toLocalDate, S, fmt, fmtS } from '../lib/ui'
 
 export default function HistoriquePage({ presences, refs, datesAnnulees }) {
   const activites = refs.activites || []
@@ -27,7 +27,7 @@ export default function HistoriquePage({ presences, refs, datesAnnulees }) {
     const cur = new Date(start)
     while (cur <= end) {
       if (cur.getDay() === act.jour_semaine) {
-        expected.push(cur.toISOString().slice(0, 10))
+        expected.push(toLocalDate(cur))
       }
       cur.setDate(cur.getDate() + 1)
     }

@@ -67,7 +67,15 @@ export function dagoLabel(d) {
   return y + ' an' + (y > 1 ? 's' : '') + (m > 0 ? ' ' + m + 'm' : '')
 }
 
-export function today() { return new Date().toISOString().slice(0, 10) }
+// Retourne YYYY-MM-DD en local (évite le bug UTC de toISOString)
+export const toLocalDate = (d) => {
+  const y = d.getFullYear()
+  const m = ('0' + (d.getMonth() + 1)).slice(-2)
+  const day = ('0' + d.getDate()).slice(-2)
+  return y + '-' + m + '-' + day
+}
+
+export function today() { return toLocalDate(new Date()) }
 
 // ── Validation ──
 export const validEmail = (e) => !e || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)

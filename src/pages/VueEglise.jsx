@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { S, dago } from '../lib/ui'
+import { toLocalDate, S, dago } from '../lib/ui'
 import { supabase } from '../lib/supabase'
 import { Users, TrendingUp, AlertTriangle, UserPlus, TrendingDown } from 'lucide-react'
 
@@ -36,7 +36,7 @@ export default function VueEglisePage({ auth, refs, h }) {
       // Dernier dimanche
       const lastSunday = new Date(now)
       lastSunday.setDate(lastSunday.getDate() - lastSunday.getDay())
-      const lastSundayStr = lastSunday.toISOString().slice(0, 10)
+      const lastSundayStr = toLocalDate(lastSunday)
 
       ;(fam || []).forEach(f => {
         const famMembres = (membres || []).filter(m => m.famille_id === f.id)
