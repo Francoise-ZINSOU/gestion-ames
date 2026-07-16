@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react'
 import { S, fmt, fmtS } from '../lib/ui'
 
-export default function HistoriquePage({ presences, refs }) {
+export default function HistoriquePage({ presences, refs, datesAnnulees }) {
   const activites = refs.activites || []
   const [actId, setActId] = useState(activites[0]?.id || '')
   useEffect(() => { if (!actId && activites.length) setActId(activites[0].id) }, [activites])
   const act = activites.find(a => a.id === actId)
 
+  const cancelled = new Set((datesAnnulees || []).filter(d => d.activite_id === actId).map(d => d.date_annulee))
   const dates = {}
-  presences.filter(p => p.activite_id === actId).forEach(p => {
+  presences.filter(p => p.activite_id === actId && !cancelled.has(p.date_presence)).forEach(p => {
     if (!dates[p.date_presence]) dates[p.date_presence] = { date: p.date_presence, el: 0, pr: 0 }
     if (p.eligible) { dates[p.date_presence].el += 1; if (p.present) dates[p.date_presence].pr += 1 }
   })

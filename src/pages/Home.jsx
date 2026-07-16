@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { S, fmtS, dago, today, getStatutColor } from '../lib/ui'
 import { AlertTriangle, Clock, BookOpen, CheckSquare, TrendingDown } from 'lucide-react'
 
-export default function HomePage({ actifs, alertes, presences, defis, plans, refs, h, openFiche, setPage }) {
+export default function HomePage({ actifs, alertes, presences, defis, plans, refs, h, openFiche, setPage, datesAnnulees }) {
   const [showNotifs, setShowNotifs] = useState(true)
 
   // KPIs par statut — dynamiques basés sur les refs actifs
@@ -14,6 +14,7 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
 
   // Culte (utilisé pour taux et rappel)
   const culte = h.culteId ? { id: h.culteId } : null
+  const cancelledCulteDates = new Set(culte ? (datesAnnulees || []).filter(d => d.activite_id === culte.id).map(d => d.date_annulee) : [])
 
   // Rappel présences : dernier dimanche saisi ?
   const lastSunday = (() => {
@@ -25,7 +26,7 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
   let tG = 0
   if (culte) {
     const membresAvecTaux = actifs.map(m => {
-      const ps = presences.filter(p => p.membre_id === m.id && p.activite_id === culte.id && p.eligible)
+      const ps = presences.filter(p => p.membre_id === m.id && p.activite_id === culte.id && p.eligible && !cancelledCulteDates.has(p.date_presence))
       if (!ps.length) return null
       return Math.round(ps.filter(p => p.present).length / ps.length * 100)
     }).filter(t => t !== null)
@@ -79,7 +80,7 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
         const staleNouveau = actifs.filter(m => m.statut === h.defaultStatut && dago(m.date_inscription) > 90)
         const defisSansModule = defis.filter(d => !h.isStatutFinal(d.statut) && !plans.some(p => p.defi_id === d.id))
         const declining = culte ? actifs.filter(m => {
-          const ps = presences.filter(p => p.membre_id === m.id && p.activite_id === culte.id && p.eligible).sort((a, b) => new Date(b.date_presence) - new Date(a.date_presence))
+          const ps = presences.filter(p => p.membre_id === m.id && p.activite_id === culte.id && p.eligible && !cancelledCulteDates.has(p.date_presence)).sort((a, b) => new Date(b.date_presence) - new Date(a.date_presence))
           if (ps.length < 6) return false
           const recent4 = ps.slice(0, 4).filter(p => p.present).length
           const prev4 = ps.slice(4, 8).filter(p => p.present).length

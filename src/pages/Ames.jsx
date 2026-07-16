@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { S, fmtS, today, getStatutColor, getRoleColor, validEmail, validTel } from '../lib/ui'
 import { Upload, Search } from 'lucide-react'
 
-export default function AmesPage({ membres, actifs, refs, h, openFiche, showToast, reloadMembres, presences, entretiens, setPage, ajouterMembre, modifierMembre, importerCSV, auth }) {
+export default function AmesPage({ membres, actifs, refs, h, openFiche, showToast, reloadMembres, presences, entretiens, setPage, ajouterMembre, modifierMembre, importerCSV, auth, datesAnnulees }) {
   const [q, setQ] = useState('')
   const [fRole, setFRole] = useState('all')
   const [fSt, setFSt] = useState('actifs')
@@ -37,7 +37,8 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
   const taux = (id) => {
     const culte = h.culteId ? { id: h.culteId } : null
     if (!culte) return null
-    const ps = presences.filter(p => p.membre_id === id && p.activite_id === culte.id && p.eligible)
+    const cancelledDates = new Set((datesAnnulees || []).filter(d => d.activite_id === culte.id).map(d => d.date_annulee))
+    const ps = presences.filter(p => p.membre_id === id && p.activite_id === culte.id && p.eligible && !cancelledDates.has(p.date_presence))
     if (!ps.length) return null
     return Math.round(ps.filter(p => p.present).length / ps.length * 100)
   }

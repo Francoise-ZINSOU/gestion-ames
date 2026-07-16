@@ -3,7 +3,7 @@ import { S, fmt, fmtS, dago, dagoLabel, today, getStatutColor, getRoleColor } fr
 import { useHistoriqueStatuts, useJournal } from '../lib/data'
 import { ClipboardList, BarChart3, MessageCircle, Zap, BookOpen, Pencil, Archive, ArrowRightLeft, NotebookPen, Phone, Mail, CalendarDays, RotateCcw, Check, X, History } from 'lucide-react'
 
-export default function FichePage({ membres, actifs, presences, entretiens, defis, plans, refs, h, selectedMembre: m, selectedId, openFiche, showToast, ajouterEnt, modifierEnt, supprimerEnt, ajouterDefi, modifierDefi, supprimerDefi, assignerModule, validerModule, retirerModule, modifierMembre, archiverMembre, reloadMembres, setPage, prevPage, auth }) {
+export default function FichePage({ membres, actifs, presences, entretiens, defis, plans, refs, h, selectedMembre: m, selectedId, openFiche, showToast, ajouterEnt, modifierEnt, supprimerEnt, ajouterDefi, modifierDefi, supprimerDefi, assignerModule, validerModule, retirerModule, modifierMembre, archiverMembre, reloadMembres, setPage, prevPage, auth, datesAnnulees }) {
   const [ftab, setFtab] = useState('id')
   const [modal, setModal] = useState(null)
   const [showActionMenu, setShowActionMenu] = useState(false)
