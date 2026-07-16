@@ -2,7 +2,12 @@ import { S, getStatutColor } from '../lib/ui'
 
 export default function FiliationPage({ actifs, refs, h, openFiche }) {
   const bergers = actifs.filter(m => h.isBergerRole(m.role))
-  const getSuivis = (id) => actifs.filter(m => m.suivi_par === id)
+  const getSuivis = (id) => actifs.filter(m => m.suivi_par === id).sort((a, b) => {
+    const aLeader = h.canFollow(a.role) ? 0 : 1
+    const bLeader = h.canFollow(b.role) ? 0 : 1
+    if (aLeader !== bLeader) return aLeader - bLeader
+    return (a.nom + a.prenom).localeCompare(b.nom + b.prenom)
+  })
 
   // Trouver tous les membres rattachés à un Berger (directement ou via chaîne de Piliers)
   const rattaches = new Set()
