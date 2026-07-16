@@ -10,6 +10,8 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
   const [fd, setFd] = useState({})
   const [confirmAction, setConfirmAction] = useState(null)
   const [saving, setSaving] = useState(false)
+  const [bulkMode, setBulkMode] = useState(false)
+  const [bulkSel, setBulkSel] = useState({})
   const uf = (k, v) => setFd(prev => ({ ...prev, [k]: v }))
 
   // Trouver le membre lié au profil connecté (membre_id direct, sinon fallback email)
@@ -138,7 +140,46 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
         </select>
         <button onClick={() => { setFd({ statut: h.defaultStatut, role: h.defaultRole, date_inscription: today() }); setModal('add') }} style={{ ...S.btn('#0ea888', false), whiteSpace: 'nowrap', padding: '6px 12px', fontSize: 12 }}>+ Âme</button>
         <button onClick={() => setModal('import')} style={{ ...S.btn('#3060d0', true), display: 'flex', alignItems: 'center', gap: 3, whiteSpace: 'nowrap', padding: '6px 10px', fontSize: 11 }}><Upload size={12} /> CSV</button>
+        <button onClick={() => setBulkMode(!bulkMode)} style={{ ...S.btn(bulkMode ? '#7040d0' : '#6b7280', true), padding: '6px 10px', fontSize: 11 }}>{bulkMode ? '✓ Sélection' : '☐ Sélection'}</button>
       </div>
+
+      {/* Bulk actions */}
+      {bulkMode && (
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 8, padding: '8px 12px', background: '#7040d008', borderRadius: 7, border: '1px solid #7040d033', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 11, color: '#7040d0', fontWeight: 600 }}>{Object.values(bulkSel).filter(Boolean).length} sélectionné(s)</span>
+          <select id="bulk-statut" style={{ fontSize: 11, padding: '4px 6px', borderRadius: 4, border: '1px solid #e0e4ec' }}>
+            <option value="">Changer statut →</option>
+            {(refs.statuts || []).filter(s => !s.est_archive).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}
+          </select>
+          <button onClick={async () => {
+            const st = document.getElementById('bulk-statut')?.value
+            if (!st) { showToast('⚠ Choisissez un statut'); return }
+            const ids = Object.keys(bulkSel).filter(k => bulkSel[k])
+            if (!ids.length) return
+            try {
+              for (const id of ids) { await modifierMembre(id, { statut: st }) }
+              showToast('✓ ' + ids.length + ' membre(s) mis à jour')
+              setBulkSel({}); setBulkMode(false)
+            } catch (e) { showToast('⚠ ' + (e.message || 'Erreur')) }
+          }} style={S.btn('#7040d0', false)}>Appliquer</button>
+          <select id="bulk-suiveur" style={{ fontSize: 11, padding: '4px 6px', borderRadius: 4, border: '1px solid #e0e4ec' }}>
+            <option value="">Assigner à →</option>
+            {leaders.map(l => <option key={l.id} value={l.id}>{l.prenom} {l.nom}</option>)}
+          </select>
+          <button onClick={async () => {
+            const suivId = document.getElementById('bulk-suiveur')?.value
+            if (!suivId) { showToast('⚠ Choisissez un responsable'); return }
+            const ids = Object.keys(bulkSel).filter(k => bulkSel[k])
+            if (!ids.length) return
+            try {
+              for (const id of ids) { await modifierMembre(id, { suivi_par: suivId }) }
+              showToast('✓ ' + ids.length + ' membre(s) assigné(s)')
+              setBulkSel({}); setBulkMode(false)
+            } catch (e) { showToast('⚠ ' + (e.message || 'Erreur')) }
+          }} style={S.btn('#0ea888', false)}>Assigner</button>
+          <button onClick={() => { setBulkMode(false); setBulkSel({}) }} style={S.btn('#6b7280', true)}>Annuler</button>
+        </div>
+      )}
 
       {/* Liste — CARTES sur mobile, tableau sur desktop */}
       <div style={S.card}>
@@ -171,8 +212,9 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
               {filt.map(m => {
                 const t = taux(m.id)
                 return (
-                  <div key={m.id} onClick={() => openFiche(m.id)} style={{ padding: '12px 10px', borderBottom: '1px solid #e0e4ec', cursor: 'pointer', opacity: m.archive ? 0.5 : 1 }}>
+                  <div key={m.id} onClick={() => bulkMode ? setBulkSel(prev => ({ ...prev, [m.id]: !prev[m.id] })) : openFiche(m.id)} style={{ padding: '12px 10px', borderBottom: '1px solid #e0e4ec', cursor: 'pointer', opacity: m.archive ? 0.5 : 1, background: bulkSel[m.id] ? '#7040d008' : 'transparent' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                      {bulkMode && <input type="checkbox" checked={!!bulkSel[m.id]} readOnly style={{ marginRight: 4 }} />}
                       <span style={{ fontSize: 13, fontWeight: 600, color: '#0ea888', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.prenom} {m.nom}</span>
                       <span style={S.pill(getStatutColor(refs, m.statut))}>{m.statut}</span>
                     </div>
@@ -206,7 +248,10 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Téléphone</label><input value={fd.telephone || ''} onChange={e => uf('telephone', e.target.value)} style={{ ...S.inp, borderColor: fd.telephone && !validTel(fd.telephone) ? '#e03050' : '#c8cfe0' }} placeholder="+225 07..." /></div>
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Email</label><input value={fd.email || ''} onChange={e => uf('email', e.target.value)} style={{ ...S.inp, borderColor: fd.email && !validEmail(fd.email) ? '#e03050' : '#c8cfe0' }} type="email" /></div>
               </div>
-              <div style={{ marginBottom: 8 }}><label style={S.label}>Date d'inscription</label><input value={fd.date_inscription || ''} onChange={e => uf('date_inscription', e.target.value)} style={S.inp} type="date" /></div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px' }}>
+                <div style={{ marginBottom: 8 }}><label style={S.label}>Date d'inscription</label><input value={fd.date_inscription || ''} onChange={e => uf('date_inscription', e.target.value)} style={S.inp} type="date" /></div>
+                <div style={{ marginBottom: 8 }}><label style={S.label}>Date de naissance</label><input value={fd.date_naissance || ''} onChange={e => uf('date_naissance', e.target.value)} style={S.inp} type="date" /></div>
+              </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px' }}>
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Statut</label><select value={fd.statut || h.defaultStatut} onChange={e => uf('statut', e.target.value)} style={S.inp}>{(refs.statuts || []).filter(s => !s.est_archive).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}</select></div>
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Rôle</label><select value={fd.role || h.defaultRole} onChange={e => { uf('role', e.target.value); if (h.isBergerRole(e.target.value)) uf('suivi_par', null) }} style={S.inp}>{(refs.roles || []).map(r => <option key={r.nom} value={r.nom}>{r.nom}</option>)}</select></div>

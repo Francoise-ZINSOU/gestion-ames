@@ -319,3 +319,24 @@ export function useDatesAnnulees() {
   }
   return { dates, loading, ajouter, supprimer, reload: load }
 }
+
+// ── Journal pastoral ──
+export function useJournal(membreId) {
+  const [notes, setNotes] = useState([])
+  const [loading, setLoading] = useState(true)
+  const load = useCallback(async () => {
+    if (!membreId) return
+    const { data } = await supabase.from('journal_pastoral').select('*').eq('membre_id', membreId).order('date_note', { ascending: false })
+    setNotes(data || []); setLoading(false)
+  }, [membreId])
+  useEffect(() => { load() }, [load])
+  const ajouter = async (note) => {
+    const { error } = await supabase.from('journal_pastoral').insert({ ...note, membre_id: membreId })
+    if (error) throw error; await load()
+  }
+  const supprimer = async (id) => {
+    const { error } = await supabase.from('journal_pastoral').delete().eq('id', id)
+    if (error) throw error; await load()
+  }
+  return { notes, loading, ajouter, supprimer, reload: load }
+}

@@ -97,7 +97,7 @@ export default function PresencesPage({ actifs, presences, refs, enregistrerPres
               <button onClick={() => { const o = {}; eligible.forEach(m => { o[m.id] = true }); setChk(o); setSaved(false) }} style={S.btn('#0ea888', true)}>Tous</button>
               <button onClick={() => { setChk({}); setSaved(false) }} style={S.btn('#6b7280', true)}>Aucun</button>
               {existing.length > 0 && <button onClick={handleDelete} style={{ ...S.btn('#e03050', true), display: 'flex', alignItems: 'center', gap: 4 }}><Trash2 size={13} /> Suppr.</button>}
-              {!(datesAnnulees || []).some(d => d.activite_id === actId && d.date_annulee === date) && (
+{!(datesAnnulees || []).some(d => d.activite_id === actId && d.date_annulee === date) && (
                 <button onClick={() => setConfirmAction({ msg: 'Annuler cette date ? Les absences ne seront pas comptabilisées.', input: true, fn: async (motif) => { try { await ajouterDateAnnulee(actId, date, motif || null) } catch(e) {} } })} style={{ ...S.btn('#d48f00', true), fontSize: 10, padding: '4px 8px' }}>Annuler date</button>
               )}
             </div>

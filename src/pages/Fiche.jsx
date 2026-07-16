@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import { S, fmt, fmtS, dago, dagoLabel, today, getStatutColor, getRoleColor } from '../lib/ui'
-import { useHistoriqueStatuts } from '../lib/data'
-import { ClipboardList, BarChart3, MessageCircle, Zap, BookOpen, Pencil, Archive, Phone, Mail, CalendarDays, RotateCcw, Check, X, History } from 'lucide-react'
+import { useHistoriqueStatuts, useJournal } from '../lib/data'
+import { ClipboardList, BarChart3, MessageCircle, Zap, BookOpen, Pencil, Archive, ArrowRightLeft, NotebookPen, Phone, Mail, CalendarDays, RotateCcw, Check, X, History } from 'lucide-react'
 
-export default function FichePage({ membres, actifs, presences, entretiens, defis, plans, refs, h, selectedMembre: m, selectedId, openFiche, showToast, ajouterEnt, modifierEnt, supprimerEnt, ajouterDefi, modifierDefi, supprimerDefi, assignerModule, validerModule, retirerModule, modifierMembre, archiverMembre, reloadMembres, setPage, prevPage }) {
+export default function FichePage({ membres, actifs, presences, entretiens, defis, plans, refs, h, selectedMembre: m, selectedId, openFiche, showToast, ajouterEnt, modifierEnt, supprimerEnt, ajouterDefi, modifierDefi, supprimerDefi, assignerModule, validerModule, retirerModule, modifierMembre, archiverMembre, reloadMembres, setPage, prevPage, auth }) {
   const [ftab, setFtab] = useState('id')
   const [modal, setModal] = useState(null)
+  const [showActionMenu, setShowActionMenu] = useState(false)
   const [fd, setFd] = useState({})
   const [editEntId, setEditEntId] = useState(null)
   const { hist: historiqueStatuts } = useHistoriqueStatuts(m?.id)
+  const { notes: journalNotes, ajouter: ajouterNote, supprimer: supprimerNote } = useJournal(m?.id)
   const [confirmAction, setConfirmAction] = useState(null)
   const uf = (k, v) => setFd(prev => ({ ...prev, [k]: v }))
 
@@ -98,12 +100,25 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
     <div>
       <div style={{ display: 'flex', gap: 5, marginBottom: 10, alignItems: 'center', overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 4, position: 'sticky', top: 48, zIndex: 40, background: '#f4f6f9' }}>
         <button onClick={() => setPage(prevPage || 'ames')} style={S.btn('#5a6480', true)}>{({ alerts: '← Alertes', ames: '← Liste', ents: '← Entretiens', home: '← Accueil' })[prevPage] || '← Liste'}</button>
-        {[['id', 'Identité', ClipboardList], ['pr', 'Présences', BarChart3], ['en', 'Entretiens', MessageCircle], ['df', 'Défis', Zap], ['pt', 'Plan', BookOpen]].map(([id, label, Icon]) => (
+        {[['id', 'Identité', ClipboardList], ['pr', 'Présences', BarChart3], ['en', 'Entretiens', MessageCircle], ['df', 'Défis', Zap], ['pt', 'Plan', BookOpen], ['jn', 'Journal', NotebookPen]].map(([id, label, Icon]) => (
           <button key={id} onClick={() => setFtab(id)} style={{ padding: '4px 12px', borderRadius: 14, border: '1px solid ' + (ftab === id ? '#0ea888' : '#e0e4ec'), background: ftab === id ? '#0ea88814' : '#f0f2f6', color: ftab === id ? '#0ea888' : '#5a6480', fontSize: 11, fontWeight: ftab === id ? 600 : 500, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4 }}><Icon size={12} /> {label}</button>
         ))}
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 4 }}>
-          <button onClick={() => { setFd({ ...m }); setModal('edMb') }} style={{ ...S.btn('#5a6480', true), display: 'flex', alignItems: 'center', gap: 4 }}><Pencil size={13} /> Modifier</button>
-          {!m.archive && <button onClick={() => setConfirmAction({ msg: 'Archiver ce membre ?', fn: handleArchive })} style={{ ...S.btn('#6b7280', true), display: 'flex', alignItems: 'center', gap: 4 }}><Archive size={13} /> Archiver</button>}
+        <div style={{ marginLeft: 'auto', position: 'relative' }}>
+          <button onClick={() => setShowActionMenu(!showActionMenu)} style={{ ...S.btn('#5a6480', true), display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', fontSize: 13 }}>⋯ Actions</button>
+          {showActionMenu && (
+            <>
+              <div onClick={() => setShowActionMenu(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 99 }} />
+              <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e4ec', borderRadius: 7, boxShadow: '0 4px 12px rgba(0,0,0,.08)', zIndex: 100, minWidth: 160, overflow: 'hidden' }}>
+              <div onClick={() => { setFd({ ...m }); setModal('edMb'); setShowActionMenu(false) }} style={{ padding: '10px 14px', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #f0f2f6' }}><Pencil size={13} color="#5a6480" /> Modifier</div>
+              {!m.archive && <div onClick={() => { setConfirmAction({ msg: 'Archiver ce membre ?', fn: handleArchive }); setShowActionMenu(false) }} style={{ padding: '10px 14px', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #f0f2f6' }}><Archive size={13} color="#6b7280" /> Archiver</div>}
+              {auth?.isAdmin && <div onClick={async () => {
+                const { supabase } = await import('../lib/supabase')
+                const { data } = await supabase.from('familles_disciples').select('*, eglises(nom)').order('nom')
+                setFd({ _familles: data || [] }); setModal('transfer'); setShowActionMenu(false)
+              }} style={{ padding: '10px 14px', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, color: '#7040d0' }}><ArrowRightLeft size={13} /> Transférer</div>}
+            </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -458,6 +473,116 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
           </div>
         )
       })()}
+
+      {/* Modal transfert de famille */}
+      {modal === 'transfer' && (
+        <div className="modal-overlay">
+          <div className="modal-box" style={{ maxWidth: 460 }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid #e0e4ec' }}>
+              <div style={{ fontSize: 15, fontWeight: 700, fontFamily: "'Outfit', sans-serif" }}>Transférer {m.prenom} {m.nom}</div>
+            </div>
+            <div style={{ padding: '16px 20px' }}>
+              <div style={{ marginBottom: 10 }}><label style={S.label}>Nouvelle famille</label>
+                <select value={fd._transferFamilleId || ''} onChange={e => uf('_transferFamilleId', e.target.value || null)} style={S.inp}>
+                  <option value="">— Choisir une famille —</option>
+                  {(fd._familles || []).filter(f => f.id !== m.famille_id).map(f => (
+                    <option key={f.id} value={f.id}>{f.eglises?.nom || '?'} → {f.nom}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 6 }}>Données à conserver</div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, padding: '6px 0', cursor: 'pointer' }}>
+                <input type="checkbox" checked={fd._keepCulte !== false} onChange={e => uf('_keepCulte', e.target.checked)} />
+                Présences du Culte (dimanche)
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, padding: '6px 0', cursor: 'pointer' }}>
+                <input type="checkbox" checked={fd._keepOtherPres === true} onChange={e => uf('_keepOtherPres', e.target.checked)} />
+                Autres présences (enseignement, prière...)
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, padding: '6px 0', cursor: 'pointer' }}>
+                <input type="checkbox" checked={fd._keepEntretiens !== false} onChange={e => uf('_keepEntretiens', e.target.checked)} />
+                Entretiens
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, padding: '6px 0', cursor: 'pointer' }}>
+                <input type="checkbox" checked={fd._keepDefis !== false} onChange={e => uf('_keepDefis', e.target.checked)} />
+                Défis et plan de croissance
+              </label>
+
+              <div style={{ marginTop: 10, marginBottom: 8 }}><label style={S.label}>Date d'inscription dans la nouvelle famille</label>
+                <input type="date" value={fd._transferDate || today()} onChange={e => uf('_transferDate', e.target.value)} style={S.inp} />
+              </div>
+
+              <div style={{ padding: '8px 10px', background: '#d48f0008', borderRadius: 6, border: '1px solid #d48f0033', fontSize: 11, color: '#d48f00', lineHeight: 1.5 }}>
+                ⚠ Le "Suivi par" sera réinitialisé. Le statut passera à "{h.defaultStatut}".
+              </div>
+            </div>
+            <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#6b7280', true)}>Annuler</button>
+              <button disabled={!fd._transferFamilleId} onClick={async () => {
+                try {
+                  const fid = fd._transferFamilleId
+                  const newDate = fd._transferDate || today()
+                  const { supabase } = await import('../lib/supabase')
+
+                  // 1. Mettre à jour le membre
+                  await supabase.from('membres').update({
+                    famille_id: fid,
+                    date_inscription: newDate,
+                    suivi_par: null,
+                    statut: h.defaultStatut
+                  }).eq('id', m.id)
+
+                  // 2. Présences culte
+                  const culteActs = (refs.activites || []).filter(a => a.code === 'culte')
+                  const culteIds = culteActs.map(a => a.id)
+                  if (fd._keepCulte !== false && culteIds.length > 0) {
+                    await supabase.from('presences').update({ famille_id: fid }).eq('membre_id', m.id).in('activite_id', culteIds)
+                  }
+                  // Supprimer les présences culte si non conservées
+                  if (fd._keepCulte === false && culteIds.length > 0) {
+                    await supabase.from('presences').delete().eq('membre_id', m.id).in('activite_id', culteIds)
+                  }
+
+                  // 3. Autres présences
+                  if (fd._keepOtherPres) {
+                    await supabase.from('presences').update({ famille_id: fid }).eq('membre_id', m.id).not('activite_id', 'in', '(' + culteIds.join(',') + ')')
+                  } else {
+                    // Supprimer les présences non-culte
+                    if (culteIds.length > 0) {
+                      await supabase.from('presences').delete().eq('membre_id', m.id).not('activite_id', 'in', '(' + culteIds.join(',') + ')')
+                    } else {
+                      await supabase.from('presences').delete().eq('membre_id', m.id)
+                    }
+                  }
+
+                  // 4. Entretiens
+                  if (fd._keepEntretiens !== false) {
+                    await supabase.from('entretiens').update({ famille_id: fid }).eq('membre_id', m.id)
+                  } else {
+                    await supabase.from('entretiens').delete().eq('membre_id', m.id)
+                  }
+
+                  // 5. Défis + plan
+                  if (fd._keepDefis !== false) {
+                    await supabase.from('defis').update({ famille_id: fid }).eq('membre_id', m.id)
+                    await supabase.from('plan_croissance').update({ famille_id: fid }).eq('membre_id', m.id)
+                  } else {
+                    await supabase.from('plan_croissance').delete().eq('membre_id', m.id)
+                    await supabase.from('defis').delete().eq('membre_id', m.id)
+                  }
+
+                  // 6. Historique statuts
+                  await supabase.from('historique_statuts').update({ famille_id: fid }).eq('membre_id', m.id)
+
+                  showToast('✓ Membre transféré')
+                  setModal(null); setFd({})
+                } catch (e) { showToast('⚠ ' + (e.message || 'Erreur')) }
+              }} style={{ ...S.btn('#7040d0', false), opacity: fd._transferFamilleId ? 1 : 0.5 }}>Transférer</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Confirmation modal */}
       {confirmAction && (

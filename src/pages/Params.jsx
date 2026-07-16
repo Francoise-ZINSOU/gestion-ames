@@ -58,7 +58,7 @@ function RefTable({ table, label, fields, showToast }) {
   )
 }
 
-function UsersTable({ showToast, actifs }) {
+function UsersTable({ showToast, actifs, refs }) {
   const { profils, setRole, reload: reloadProfils } = useProfils()
   const [familles, setFamilles] = useState([])
 
@@ -111,7 +111,12 @@ function UsersTable({ showToast, actifs }) {
             <div style={{ marginTop: 4 }}>
               <select value={p.membre_id || ''} onChange={e => linkMembre(p.id, e.target.value || null)} style={{ fontSize: 10, padding: '3px 6px', border: '1px solid #e0e4ec', borderRadius: 4, background: '#f0f2f6', color: '#5a6480', fontFamily: 'inherit', width: '100%', maxWidth: 250 }}>
                 <option value="">— Lier à un membre —</option>
-                {(actifs || []).filter(m => !p.famille_id || !m.famille_id || m.famille_id === p.famille_id).sort((a, b) => a.nom.localeCompare(b.nom)).map(m => <option key={m.id} value={m.id}>{m.prenom} {m.nom} ({m.role})</option>)}
+                {(actifs || []).filter(m => {
+                    const role = (refs?.roles || []).find(r => r.nom === m.role)
+                    if (!role?.peut_suivre) return false
+                    if (p.famille_id && m.famille_id && m.famille_id !== p.famille_id) return false
+                    return true
+                  }).sort((a, b) => a.nom.localeCompare(b.nom)).map(m => <option key={m.id} value={m.id}>{m.prenom} {m.nom} ({m.role})</option>)}
               </select>
               {linkedMembre && <span style={{ fontSize: 10, color: '#0ea888', marginLeft: 6 }}>→ {linkedMembre.prenom} {linkedMembre.nom}</span>}
             </div>
@@ -210,7 +215,7 @@ function EglisePanel({ showToast }) {
   )
 }
 
-export default function ParamsPage({ showToast, actifs }) {
+export default function ParamsPage({ showToast, actifs, refs }) {
   const [tab, setTab] = useState('refs')
 
   return (
@@ -221,7 +226,7 @@ export default function ParamsPage({ showToast, actifs }) {
         <button onClick={() => setTab('eglise')} style={{ ...S.btn(tab === 'eglise' ? '#0ea888' : '#6b7280', tab !== 'eglise'), fontFamily: 'inherit' }}>Église</button>
       </div>
       <div style={S.card}>
-        {tab === 'users' ? <UsersTable showToast={showToast} actifs={actifs} />
+        {tab === 'users' ? <UsersTable showToast={showToast} actifs={actifs} refs={refs} />
           : tab === 'eglise' ? <EglisePanel showToast={showToast} />
           : REF_TABLES.map(t => <AccordionRefTable key={t.key} table={t.key} label={t.label} fields={t.fields} showToast={showToast} />)}
       </div>

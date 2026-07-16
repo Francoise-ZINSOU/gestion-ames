@@ -1,7 +1,10 @@
+import { useState } from 'react'
 import { S, fmtS, dago, today, getStatutColor } from '../lib/ui'
-import { AlertTriangle, Clock, BookOpen, CheckSquare } from 'lucide-react'
+import { AlertTriangle, Clock, BookOpen, CheckSquare, TrendingDown } from 'lucide-react'
 
 export default function HomePage({ actifs, alertes, presences, defis, plans, refs, h, openFiche, setPage }) {
+  const [showNotifs, setShowNotifs] = useState(true)
+
   // KPIs par statut — dynamiques basés sur les refs actifs
   const statutCounts = {}
   ;(refs.statuts || []).filter(s => !s.est_archive).forEach(s => {
@@ -62,30 +65,70 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
         </div>
       )}
 
-      {alertes.length > 0 && (
-        <div onClick={() => setPage('alerts')} style={{ padding: '8px 12px', borderRadius: 7, border: '1px solid #e0305033', background: '#e0305008', marginBottom: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <AlertTriangle size={14} color="#e03050" />
-          <strong style={{ color: '#e03050', fontSize: 12 }}>{alertes.length} alerte(s)</strong>
-          <span style={{ fontSize: 11, color: '#0ea888', marginLeft: 'auto', textDecoration: 'underline' }}>Voir</span>
-        </div>
-      )}
-
       {(() => {
+        // Anniversaires cette semaine
+        const now = new Date()
+        const thisWeekBdays = actifs.filter(m => {
+          if (!m.date_naissance) return false
+          const bd = new Date(m.date_naissance)
+          const thisYear = new Date(now.getFullYear(), bd.getMonth(), bd.getDate())
+          const diff = (thisYear - now) / 864e5
+          return diff >= -1 && diff <= 6
+        })
+
         const staleNouveau = actifs.filter(m => m.statut === h.defaultStatut && dago(m.date_inscription) > 90)
         const defisSansModule = defis.filter(d => !h.isStatutFinal(d.statut) && !plans.some(p => p.defi_id === d.id))
-        if (!staleNouveau.length && !defisSansModule.length) return null
+        const declining = culte ? actifs.filter(m => {
+          const ps = presences.filter(p => p.membre_id === m.id && p.activite_id === culte.id && p.eligible).sort((a, b) => new Date(b.date_presence) - new Date(a.date_presence))
+          if (ps.length < 6) return false
+          const recent4 = ps.slice(0, 4).filter(p => p.present).length
+          const prev4 = ps.slice(4, 8).filter(p => p.present).length
+          return prev4 >= 3 && recent4 <= 1
+        }) : []
+
+        const totalNotif = alertes.length + thisWeekBdays.length + staleNouveau.length + declining.length + defisSansModule.length
+        if (totalNotif === 0) return null
+
         return (
-          <div style={{ marginBottom: 14 }}>
-            {staleNouveau.length > 0 && (
-              <div style={{ padding: '8px 12px', borderRadius: 7, border: '1px solid #d48f0033', background: '#d48f0008', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Clock size={14} color="#d48f00" />
-                <span style={{ fontSize: 12, color: '#d48f00' }}><strong>{staleNouveau.length}</strong> membre(s) "Nouveau" depuis + de 3 mois — penser à mettre à jour leur statut</span>
-              </div>
-            )}
-            {defisSansModule.length > 0 && (
-              <div style={{ padding: '8px 12px', borderRadius: 7, border: '1px solid #7040d033', background: '#7040d008', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
-                <BookOpen size={14} color="#7040d0" />
-                <span style={{ fontSize: 12, color: '#7040d0' }}><strong>{defisSansModule.length}</strong> défi(s) sans module de croissance assigné</span>
+          <div style={{ marginBottom: 14, border: '1px solid #e0e4ec', borderRadius: 8, background: '#fff', overflow: 'hidden' }}>
+            <div onClick={() => setShowNotifs(!showNotifs)} style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', background: '#f4f6f9' }}>
+              <span style={{ fontSize: 16 }}>🔔</span>
+              <strong style={{ fontSize: 13 }}>{totalNotif} notification(s)</strong>
+              <span style={{ marginLeft: 'auto', fontSize: 11, color: '#6b7280' }}>{showNotifs ? '▲' : '▼'}</span>
+            </div>
+            {showNotifs && (
+              <div style={{ padding: '4px 14px 10px' }}>
+                {alertes.length > 0 && (
+                  <div onClick={() => setPage('alerts')} style={{ padding: '8px 10px', borderRadius: 6, background: '#e0305008', borderLeft: '3px solid #e03050', marginTop: 6, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <AlertTriangle size={13} color="#e03050" />
+                    <span style={{ fontSize: 12, color: '#e03050' }}><strong>{alertes.length}</strong> alerte(s) de suivi</span>
+                    <span style={{ marginLeft: 'auto', fontSize: 10, color: '#0ea888' }}>Voir →</span>
+                  </div>
+                )}
+                {thisWeekBdays.length > 0 && (
+                  <div style={{ padding: '8px 10px', borderRadius: 6, background: '#FFD70008', borderLeft: '3px solid #FFD700', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontSize: 13 }}>🎂</span>
+                    <span style={{ fontSize: 12, color: '#8B6914' }}><strong>{thisWeekBdays.length}</strong> anniversaire(s) : {thisWeekBdays.map(m => m.prenom).join(', ')}</span>
+                  </div>
+                )}
+                {declining.length > 0 && (
+                  <div style={{ padding: '8px 10px', borderRadius: 6, background: '#e0305008', borderLeft: '3px solid #e03050', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <TrendingDown size={13} color="#e03050" />
+                    <span style={{ fontSize: 12, color: '#e03050' }}><strong>{declining.length}</strong> membre(s) avec présence en baisse</span>
+                  </div>
+                )}
+                {staleNouveau.length > 0 && (
+                  <div style={{ padding: '8px 10px', borderRadius: 6, background: '#d48f0008', borderLeft: '3px solid #d48f00', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Clock size={13} color="#d48f00" />
+                    <span style={{ fontSize: 12, color: '#d48f00' }}><strong>{staleNouveau.length}</strong> "Nouveau" depuis + de 3 mois</span>
+                  </div>
+                )}
+                {defisSansModule.length > 0 && (
+                  <div style={{ padding: '8px 10px', borderRadius: 6, background: '#7040d008', borderLeft: '3px solid #7040d0', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <BookOpen size={13} color="#7040d0" />
+                    <span style={{ fontSize: 12, color: '#7040d0' }}><strong>{defisSansModule.length}</strong> défi(s) sans module assigné</span>
+                  </div>
+                )}
               </div>
             )}
           </div>
