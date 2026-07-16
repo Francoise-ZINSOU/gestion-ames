@@ -114,6 +114,7 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
     case 'timeline': content = <HistoriquePage {...ctx} />; break
     case 'filia': content = <FiliationPage {...ctx} />; break
     case 'export': content = <ExportPage {...ctx} />; break
+    case 'vueEglise': content = (auth.isBergerEglise || auth.isAdmin) ? <VueEglisePage auth={auth} refs={rf.refs} h={h} /> : null; break
     case 'params': content = auth.isAdmin ? <ParamsPage {...ctx} /> : null; break
     case 'menu': content = <MenuMobile setPage={setPage} isAdmin={auth.isAdmin} selectedMembre={selectedMembre} />; break
     default: content = <HomePage {...ctx} setPage={setPage} />
