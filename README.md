@@ -120,6 +120,11 @@ src/
 ### Détection de tendances
 - Présence en baisse : 3+/4 dimanches passés vs 0-1/4 récents → alerte préventive
 
+### Détection des dates manquantes
+- Activités récurrentes : chaque activité peut avoir un jour de la semaine (`jour_semaine`)
+- Historique : 3 états visuels distincts (saisie / annulée / non saisie)
+- Dashboard : notification "X culte(s) non saisi(s) sur les 30 derniers jours" 
+
 ### PWA
 - Installable sur écran d'accueil (mobile + desktop)
 - Icône dédiée, plein écran, theme-color
@@ -178,6 +183,7 @@ Les évolutions sont fournies en fichiers séparés à exécuter dans Supabase S
 - `evolution-v1.3-multi-eglise.sql` : Multi-église complet (RLS, triggers, indexes)
 - `evolution-v1.4-activites-famille.sql` : Activités par famille, date_naissance, journal pastoral
 - `evolution-v1.5-berger-eglise.sql` : Berger d'église (RLS lecture cross-famille)
+- `evolution-v1.6-frequence-activites.sql` : Fréquence des activités (jour_semaine), détection dates manquantes
 
 ---
 

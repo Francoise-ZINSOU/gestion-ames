@@ -10,7 +10,7 @@ const navIcons = {
 export default function Layout({ page, setPage, alertCount, membreCount, selectedMembre, children, auth }) {
   const familleName = auth?.profil?.famille_nom || null
   const egliseName = auth?.profil?.eglise_nom || null
-  const { logout, profil, isAdmin } = useAuth()
+  const { logout, profil, isAdmin, isBergerEglise } = useAuth()
 
   const navBtn = (id, label, badge) => {
     const Icon = navIcons[id] || Home
@@ -62,6 +62,13 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
           {navBtn('protos', 'Plan de croissance', 0)}
           {navBtn('export', 'Export', 0)}
         </div>
+
+        {(isBergerEglise || isAdmin) && (
+          <div style={{ padding: '8px 6px 2px' }}>
+            <div style={{ fontSize: 9, letterSpacing: 2, textTransform: 'uppercase', color: '#6b7280', fontWeight: 600, padding: '0 6px', marginBottom: 2 }}>ÉGLISE</div>
+            {navBtn('vueEglise', 'Vue église', 0)}
+          </div>
+        )}
 
         {isAdmin && (
           <div style={{ padding: '8px 6px 2px' }}>

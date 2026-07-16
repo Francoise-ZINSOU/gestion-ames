@@ -6,7 +6,7 @@ import { useRefAdmin, useProfils } from '../lib/data'
 const REF_TABLES = [
   { key: 'ref_statuts', label: 'Statuts des membres', fields: ['nom', 'couleur'] },
   { key: 'ref_roles', label: 'Rôles des membres', fields: ['nom', 'couleur'] },
-  { key: 'activites', label: 'Activités', fields: ['nom', 'code', 'icone', 'couleur'] },
+  { key: 'activites', label: 'Activités', fields: ['nom', 'code', 'icone', 'couleur', 'jour_semaine'] },
   { key: 'modules', label: 'Modules de croissance', fields: ['nom'] },
   { key: 'sujets_entretien', label: "Sujets d'entretien", fields: ['nom'] },
   { key: 'ref_types_defi', label: 'Types de défis', fields: ['nom'] },
@@ -45,6 +45,25 @@ function RefTable({ table, label, fields, showToast }) {
         <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0', borderBottom: '1px solid #e0e4ec', opacity: r.actif ? 1 : 0.4 }}>
           {r.couleur && <div style={{ width: 12, height: 12, borderRadius: 3, background: r.couleur, flexShrink: 0 }} />}
           <span style={{ flex: 1, fontSize: 12 }}>{r.nom}</span>
+          {fields.includes('jour_semaine') && (
+            <select value={r.jour_semaine ?? ''} onChange={async e => {
+              const v = e.target.value === '' ? null : parseInt(e.target.value)
+              try {
+                const { error } = await supabase.from(table).update({ jour_semaine: v, est_recurrente: v !== null }).eq('id', r.id)
+                if (error) throw error
+                showToast('✓ Mis à jour'); load()
+              } catch (err) { showToast('⚠ ' + err.message) }
+            }} style={{ fontSize: 10, padding: '3px 6px', border: '1px solid #e0e4ec', borderRadius: 4, background: '#f0f2f6', fontFamily: 'inherit' }}>
+              <option value="">Ponctuelle</option>
+              <option value="0">Dimanche</option>
+              <option value="1">Lundi</option>
+              <option value="2">Mardi</option>
+              <option value="3">Mercredi</option>
+              <option value="4">Jeudi</option>
+              <option value="5">Vendredi</option>
+              <option value="6">Samedi</option>
+            </select>
+          )}
           <button onClick={() => desactiver(r.id, !r.actif)} style={{ background: 'none', border: 'none', fontSize: 10, color: r.actif ? '#6b7280' : '#0ea888', cursor: 'pointer' }}>
             {r.actif ? 'Désactiver' : 'Réactiver'}
           </button>

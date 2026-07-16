@@ -16,6 +16,26 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
   const culte = h.culteId ? { id: h.culteId } : null
   const cancelledCulteDates = new Set(culte ? (datesAnnulees || []).filter(d => d.activite_id === culte.id).map(d => d.date_annulee) : [])
 
+  // Dimanches de culte manquants dans les 30 derniers jours (activité récurrente)
+  const culteActivite = (refs.activites || []).find(a => a.code === 'culte')
+  const missingCulteDates = (() => {
+    if (!culteActivite || !culteActivite.est_recurrente || culteActivite.jour_semaine === null || culteActivite.jour_semaine === undefined) return []
+    const nowD = new Date()
+    const saved = new Set(presences.filter(p => p.activite_id === culteActivite.id).map(p => p.date_presence))
+    const missing = []
+    const cur = new Date(nowD); cur.setDate(cur.getDate() - 30)
+    while (cur <= nowD) {
+      if (cur.getDay() === culteActivite.jour_semaine) {
+        const dStr = cur.toISOString().slice(0, 10)
+        if (!saved.has(dStr) && !cancelledCulteDates.has(dStr) && dStr <= nowD.toISOString().slice(0, 10)) {
+          missing.push(dStr)
+        }
+      }
+      cur.setDate(cur.getDate() + 1)
+    }
+    return missing
+  })()
+
   // Rappel présences : dernier dimanche saisi ?
   const lastSunday = (() => {
     const d = new Date(); d.setDate(d.getDate() - d.getDay()); return d.toISOString().slice(0, 10)
@@ -87,7 +107,7 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
           return prev4 >= 3 && recent4 <= 1
         }) : []
 
-        const totalNotif = alertes.length + thisWeekBdays.length + staleNouveau.length + declining.length + defisSansModule.length
+        const totalNotif = alertes.length + thisWeekBdays.length + staleNouveau.length + declining.length + defisSansModule.length + missingCulteDates.length
         if (totalNotif === 0) return null
 
         return (
@@ -99,6 +119,13 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
             </div>
             {showNotifs && (
               <div style={{ padding: '4px 14px 10px' }}>
+                {missingCulteDates.length > 0 && (
+                  <div onClick={() => setPage('pres')} style={{ padding: '8px 10px', borderRadius: 6, background: '#e0305008', borderLeft: '3px solid #e03050', marginTop: 6, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <AlertTriangle size={13} color="#e03050" />
+                    <span style={{ fontSize: 12, color: '#e03050' }}><strong>{missingCulteDates.length}</strong> culte(s) non saisi(s) sur les 30 derniers jours</span>
+                    <span style={{ marginLeft: 'auto', fontSize: 10, color: '#0ea888' }}>Saisir →</span>
+                  </div>
+                )}
                 {alertes.length > 0 && (
                   <div onClick={() => setPage('alerts')} style={{ padding: '8px 10px', borderRadius: 6, background: '#e0305008', borderLeft: '3px solid #e03050', marginTop: 6, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                     <AlertTriangle size={13} color="#e03050" />
