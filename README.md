@@ -79,6 +79,14 @@ src/
 - Score = absences (3pts) + jours sans entretien (2pts) + défis ouverts (1pt)
 - Détail par pill coloré : "3 abs. consécutives (+3) · 25j sans entretien (+2)"
 - Seuils configurables via `ref_parametres`
+- Filtrage intelligent : les membres avec un entretien planifié dans les 30 prochains jours sont masqués (le pilier a pris en charge)
+
+### Désactivation églises et familles
+- Soft-delete via `actif = false` (préserve l'historique)
+- Cascade automatique : désactiver une église → désactive ses familles
+- Réactivation manuelle des familles (pour éviter surprises)
+- Bandeau "Famille désactivée" affiché aux utilisateurs concernés
+- Données consultables mais alertes/détections gelées
 
 ### Entretiens
 - Création depuis la Fiche ou la page globale
@@ -184,6 +192,7 @@ Les évolutions sont fournies en fichiers séparés à exécuter dans Supabase S
 - `evolution-v1.4-activites-famille.sql` : Activités par famille, date_naissance, journal pastoral
 - `evolution-v1.5-berger-eglise.sql` : Berger d'église (RLS lecture cross-famille)
 - `evolution-v1.6-frequence-activites.sql` : Fréquence des activités (jour_semaine), détection dates manquantes
+- `evolution-v1.7-desactivation.sql` : Flag actif sur eglises et familles_disciples (soft-delete)
 
 ---
 

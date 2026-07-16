@@ -43,7 +43,7 @@ export function AuthProvider({ children }) {
     try {
       const { data } = await supabase
         .from('profils')
-        .select('*, familles_disciples(nom, eglises(nom))')
+        .select('*, familles_disciples(nom, actif, eglises(nom, actif))')
         .eq('id', userId)
         .single()
       if (data) {
@@ -96,6 +96,7 @@ export function AuthProvider({ children }) {
     isResponsable: profil?.est_responsable === true || profil?.est_admin === true,
     isSuperAdmin: profil?.est_super_admin === true,
     isBergerEglise: profil?.est_berger_eglise === true,
+    isFamilleActive: profil?.familles_disciples ? profil.familles_disciples.actif !== false && profil.familles_disciples.eglises?.actif !== false : true,
     reloadProfil: () => session && loadProfil(session.user.id)
   }
 

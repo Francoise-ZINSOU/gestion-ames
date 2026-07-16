@@ -115,7 +115,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
               {!m.archive && <div onClick={() => { setConfirmAction({ msg: 'Archiver ce membre ?', fn: handleArchive }); setShowActionMenu(false) }} style={{ padding: '10px 14px', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #f0f2f6' }}><Archive size={13} color="#6b7280" /> Archiver</div>}
               {auth?.isAdmin && <div onClick={async () => {
                 const { supabase } = await import('../lib/supabase')
-                const { data } = await supabase.from('familles_disciples').select('*, eglises(nom)').order('nom')
+                const { data } = await supabase.from('familles_disciples').select('*, eglises(nom, actif)').eq('actif', true).order('nom')
                 setFd({ _familles: data || [] }); setModal('transfer'); setShowActionMenu(false)
               }} style={{ padding: '10px 14px', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, color: '#7040d0' }}><ArrowRightLeft size={13} /> Transférer</div>}
             </div>

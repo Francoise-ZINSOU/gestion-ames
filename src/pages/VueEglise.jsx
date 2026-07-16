@@ -7,14 +7,19 @@ export default function VueEglisePage({ auth, refs, h }) {
   const [familles, setFamilles] = useState([])
   const [stats, setStats] = useState({})
   const [loading, setLoading] = useState(true)
+  const [egliseActive, setEgliseActive] = useState(true)
 
   useEffect(() => {
     (async () => {
       const egliseId = auth?.profil?.eglise_id
       if (!egliseId) { setLoading(false); return }
 
-      // Charger toutes les familles de l'église
-      const { data: fam } = await supabase.from('familles_disciples').select('*').eq('eglise_id', egliseId).order('nom')
+      // Vérifier si l'église est active
+      const { data: eglise } = await supabase.from('eglises').select('*').eq('id', egliseId).single()
+      setEgliseActive(eglise?.actif !== false)
+
+      // Charger toutes les familles ACTIVES de l'église
+      const { data: fam } = await supabase.from('familles_disciples').select('*').eq('eglise_id', egliseId).eq('actif', true).order('nom')
       setFamilles(fam || [])
 
       // Charger toutes les données en parallèle
@@ -23,7 +28,7 @@ export default function VueEglisePage({ auth, refs, h }) {
         supabase.from('membres').select('*').in('famille_id', famIds).eq('archive', false),
         supabase.from('presences').select('*').in('famille_id', famIds),
         supabase.from('entretiens').select('*').in('famille_id', famIds),
-        supabase.from('activites').select('*').in('famille_id', famIds).eq('code', 'culte')
+        supabase.from('activites').select('*').eq('code', 'culte').or('famille_id.is.null,famille_id.in.(' + famIds.join(',') + ')')
       ])
 
       // Calculer les stats par famille
@@ -40,8 +45,10 @@ export default function VueEglisePage({ auth, refs, h }) {
 
       ;(fam || []).forEach(f => {
         const famMembres = (membres || []).filter(m => m.famille_id === f.id)
-        const culteAct = (activites || []).find(a => a.famille_id === f.id)
-        const famPresences = culteAct ? (presences || []).filter(p => p.famille_id === f.id && p.activite_id === culteAct.id && p.eligible) : []
+        // Priorité : activité de la famille, sinon activité partagée (famille_id NULL, legacy)
+        const culteAct = (activites || []).find(a => a.famille_id === f.id) || (activites || []).find(a => !a.famille_id)
+        // Présences : celles de la famille (ou legacy sans famille_id)
+        const famPresences = culteAct ? (presences || []).filter(p => (p.famille_id === f.id || !p.famille_id) && p.activite_id === culteAct.id && p.eligible) : []
 
         // Moyenne culte 4 dernières semaines
         const recentPres = famPresences.filter(p => new Date(p.date_presence) >= fourWeeksAgo)
@@ -106,6 +113,14 @@ export default function VueEglisePage({ auth, refs, h }) {
   }, [auth, h])
 
   if (loading) return <div style={{ padding: 40, textAlign: 'center', color: '#6b7280' }}>Chargement...</div>
+  if (!egliseActive) return (
+    <div style={{ ...S.card, borderLeft: '3px solid #6b7280', background: '#f4f6f9' }}>
+      <div style={{ fontSize: 15, fontWeight: 700, fontFamily: "'Outfit', sans-serif", marginBottom: 6 }}>Église désactivée</div>
+      <div style={{ fontSize: 12, color: '#5a6480', lineHeight: 1.6 }}>
+        Cette église a été désactivée. Les données historiques sont conservées mais aucune analyse n'est effectuée. Contactez un administrateur pour la réactiver.
+      </div>
+    </div>
+  )
   if (!familles.length) return <div style={{ ...S.card, textAlign: 'center', color: '#6b7280' }}>Aucune famille dans cette église.</div>
 
   // Agrégats globaux
@@ -134,14 +149,11 @@ export default function VueEglisePage({ auth, refs, h }) {
   return (
     <div>
       {/* KPIs globaux */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 8 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 16 }}>
         {kpi(Users, 'Total actifs', totalMembres, familles.length + ' famille(s)', '#0ea888')}
         {kpi(TrendingUp, 'Taux culte moyen', avgCulte !== null ? avgCulte + '%' : '—', '4 derniers dimanches', '#3060d0')}
         {kpi(UserPlus, 'Nouveaux 30j', totalNouveaux, 'toutes familles', '#1a9c60')}
         {kpi(AlertTriangle, 'Familles à risque', critiques.length, '< 80% dimanche dernier', critiques.length > 0 ? '#e03050' : '#6b7280')}
-      </div>
-      <div style={{ fontSize: 10, color: '#6b7280', marginBottom: 14, fontStyle: 'italic' }}>
-        💡 <strong>Tendance</strong> : évolution du taux de présence sur les 4 derniers dimanches vs 4 précédents. +10 pts = croissance, -10 pts = alerte.
       </div>
 
       {/* Familles à risque - critique */}

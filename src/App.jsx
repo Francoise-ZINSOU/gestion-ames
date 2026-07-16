@@ -63,10 +63,24 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
   // Wrappers avec toast
   const w = (fn, msg) => async (...args) => { try { const r = await fn(...args); showToast(msg); return r } catch (e) { showToast('⚠ ' + (e.message || 'Erreur inattendue')) } }
 
+  // Alertes filtrées (masquer les membres avec entretien planifié dans les 30j)
+  const _todayStr = new Date().toISOString().slice(0, 10)
+  const _in30 = new Date(); _in30.setDate(_in30.getDate() + 30)
+  const _in30Str = _in30.toISOString().slice(0, 10)
+  const _statutPlanifie = (rf.refs?.statutsEntretien || []).find(s => s.nom?.toLowerCase().includes('planif'))?.nom || 'Planifié'
+  const alertesFiltrees = al.alertes.filter(a => {
+    const hasPlanned = (en.entretiens || []).some(e =>
+      e.membre_id === a.membre_id && e.statut === _statutPlanifie
+      && e.date_entretien >= _todayStr && e.date_entretien <= _in30Str
+    )
+    if (!hasPlanned) return true
+    return a.absences >= 3 || a.defis_ouverts > 0
+  })
+
   const ctx = {
     membres: mb.membres, actifs: mb.actifs, presences: pr.presences,
     entretiens: en.entretiens, defis: df.defis, plans: pt.plans,
-    alertes: al.alertes, refs: rf.refs, h,
+    alertes: alertesFiltrees, refs: rf.refs, h,
     openFiche, showToast, selectedMembre, selectedId, auth, prevPage,
     // Membres
     ajouterMembre: w(mb.ajouter, '✓ Membre ajouté'),
@@ -121,7 +135,7 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
   }
 
   return (
-    <Layout page={page} setPage={setPage} alertCount={al.alertes.length} membreCount={mb.actifs.length} selectedMembre={selectedMembre} auth={auth}>
+    <Layout page={page} setPage={setPage} alertCount={alertesFiltrees.length} membreCount={mb.actifs.length} selectedMembre={selectedMembre} auth={auth}>
       {content}
       <Toast message={toast} />
     </Layout>

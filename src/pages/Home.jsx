@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { toLocalDate, S, fmtS, dago, today, getStatutColor } from '../lib/ui'
 import { AlertTriangle, Clock, BookOpen, CheckSquare, TrendingDown } from 'lucide-react'
 
-export default function HomePage({ actifs, alertes, presences, defis, plans, refs, h, openFiche, setPage, datesAnnulees }) {
+export default function HomePage({ actifs, alertes, presences, defis, plans, refs, h, openFiche, setPage, datesAnnulees, auth }) {
   const [showNotifs, setShowNotifs] = useState(true)
 
   // KPIs par statut — dynamiques basés sur les refs actifs
@@ -56,8 +56,16 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
   const recent = actifs.filter(m => { const d = dago(m.date_inscription); return d !== null && d <= 30 })
     .sort((a, b) => new Date(b.date_inscription || 0) - new Date(a.date_inscription || 0)).slice(0, 8)
 
+  const familleInactive = auth?.profil?.familles_disciples && (auth.profil.familles_disciples.actif === false || auth.profil.familles_disciples.eglises?.actif === false)
+
   return (
     <div>
+      {familleInactive && (
+        <div style={{ ...S.card, borderLeft: '3px solid #6b7280', background: '#f4f6f9', marginBottom: 12 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Famille désactivée</div>
+          <div style={{ fontSize: 11, color: '#5a6480' }}>Les données restent consultables mais aucune alerte ou détection n'est calculée.</div>
+        </div>
+      )}
       {actifs.length === 0 && (
         <div style={{ ...S.card, marginBottom: 16, border: '1px solid #0ea88833', background: '#0ea88808' }}>
           <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 8, color: '#0ea888' }}>Bienvenue dans Gestion des Âmes</div>

@@ -82,7 +82,7 @@ function UsersTable({ showToast, actifs, refs }) {
   const [familles, setFamilles] = useState([])
 
   useState(() => {
-    supabase.from('familles_disciples').select('*, eglises(nom)').order('nom').then(({ data }) => setFamilles(data || []))
+    supabase.from('familles_disciples').select('*, eglises(nom, actif)').order('nom').then(({ data }) => setFamilles(data || []))
   })
 
   const handleRole = async (id, resp, admin) => {
@@ -161,7 +161,7 @@ function UsersTable({ showToast, actifs, refs }) {
               <div style={{ marginTop: 4 }}>
                 <select value={p.famille_id || ''} onChange={e => linkFamille(p.id, e.target.value || null)} style={{ fontSize: 10, padding: '3px 6px', border: '1px solid #e0e4ec', borderRadius: 4, background: p.famille_id ? '#0ea88808' : '#e0305008', color: '#5a6480', fontFamily: 'inherit', width: '100%', maxWidth: 250 }}>
                   <option value="">— Assigner à une famille —</option>
-                  {familles.map(f => <option key={f.id} value={f.id}>{f.eglises?.nom} → {f.nom}</option>)}
+                  {familles.filter(f => f.actif !== false && (!f.eglises || f.eglises.actif !== false)).map(f => <option key={f.id} value={f.id}>{f.eglises?.nom} → {f.nom}</option>)}
                 </select>
               </div>
             )}
@@ -208,12 +208,33 @@ function EglisePanel({ showToast }) {
     <div>
       <div style={{ marginBottom: 16 }}>
         <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 6 }}>Églises</div>
-        {eglises.map(e => (
-          <div key={e.id} style={{ padding: '6px 0', borderBottom: '1px solid #e0e4ec', fontSize: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontWeight: 600 }}>{e.nom}</span>
-            <span style={{ fontSize: 10, color: '#6b7280' }}>({familles.filter(f => f.eglise_id === e.id).length} famille(s))</span>
-          </div>
-        ))}
+        {eglises.map(e => {
+          const nbFam = familles.filter(f => f.eglise_id === e.id).length
+          const nbFamActives = familles.filter(f => f.eglise_id === e.id && f.actif !== false).length
+          return (
+            <div key={e.id} style={{ padding: '6px 0', borderBottom: '1px solid #e0e4ec', fontSize: 12, display: 'flex', alignItems: 'center', gap: 6, opacity: e.actif === false ? 0.4 : 1 }}>
+              <span style={{ fontWeight: 600, flex: 1 }}>{e.nom}{e.actif === false && <span style={{ fontSize: 9, marginLeft: 6, color: '#6b7280' }}>(désactivée)</span>}</span>
+              <span style={{ fontSize: 10, color: '#6b7280' }}>{nbFamActives}/{nbFam} famille(s)</span>
+              <button onClick={async () => {
+                try {
+                  const willDisable = e.actif !== false
+                  const { error } = await supabase.from('eglises').update({ actif: !willDisable }).eq('id', e.id)
+                  if (error) throw error
+                  // Cascade : désactiver toutes les familles de cette église (mais pas les réactiver au retour)
+                  if (willDisable) {
+                    await supabase.from('familles_disciples').update({ actif: false }).eq('eglise_id', e.id)
+                    showToast('✓ Église et ses familles désactivées')
+                  } else {
+                    showToast('✓ Église réactivée. Réactivez ses familles individuellement.')
+                  }
+                  loadAll()
+                } catch (err) { showToast('⚠ ' + err.message) }
+              }} style={{ background: 'none', border: 'none', fontSize: 10, color: e.actif !== false ? '#6b7280' : '#0ea888', cursor: 'pointer' }}>
+                {e.actif !== false ? 'Désactiver' : 'Réactiver'}
+              </button>
+            </div>
+          )
+        })}
         <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
           <input value={newEglise} onChange={e => setNewEglise(e.target.value)} placeholder="Nom de l'église..." style={{ ...S.inp, flex: 1, fontSize: 11 }} />
           <button onClick={addEglise} style={S.btn('#0ea888', false)}>+</button>
@@ -225,9 +246,21 @@ function EglisePanel({ showToast }) {
         {familles.map(f => {
           const eg = eglises.find(e => e.id === f.eglise_id)
           return (
-            <div key={f.id} style={{ padding: '6px 0', borderBottom: '1px solid #e0e4ec', fontSize: 12 }}>
-              <span style={{ fontWeight: 600 }}>{f.nom}</span>
-              <span style={{ fontSize: 10, color: '#6b7280', marginLeft: 6 }}>({eg?.nom})</span>
+            <div key={f.id} style={{ padding: '6px 0', borderBottom: '1px solid #e0e4ec', fontSize: 12, display: 'flex', alignItems: 'center', gap: 6, opacity: f.actif === false ? 0.4 : 1 }}>
+              <div style={{ flex: 1 }}>
+                <span style={{ fontWeight: 600 }}>{f.nom}</span>
+                <span style={{ fontSize: 10, color: '#6b7280', marginLeft: 6 }}>({eg?.nom}){f.actif === false && ' (désactivée)'}</span>
+              </div>
+              <button onClick={async () => {
+                try {
+                  const { error } = await supabase.from('familles_disciples').update({ actif: !(f.actif !== false) }).eq('id', f.id)
+                  if (error) throw error
+                  showToast(f.actif !== false ? '✓ Famille désactivée' : '✓ Famille réactivée')
+                  loadAll()
+                } catch (err) { showToast('⚠ ' + err.message) }
+              }} style={{ background: 'none', border: 'none', fontSize: 10, color: f.actif !== false ? '#6b7280' : '#0ea888', cursor: 'pointer' }}>
+                {f.actif !== false ? 'Désactiver' : 'Réactiver'}
+              </button>
             </div>
           )
         })}
