@@ -14,7 +14,7 @@ export default function AccessDenied() {
           Votre compte n'a pas encore été activé par un administrateur pour accéder aux données pastorales.<br /><br />
           Contactez le Berger principal pour obtenir l'accès.
         </div>
-        <button onClick={logout} style={S.btn('#8892a8', true)}>Se déconnecter</button>
+        <button onClick={logout} style={S.btn('#6b7280', true)}>Se déconnecter</button>
       </div>
     </div>
   )

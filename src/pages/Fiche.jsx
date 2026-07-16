@@ -12,7 +12,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
   const [confirmAction, setConfirmAction] = useState(null)
   const uf = (k, v) => setFd(prev => ({ ...prev, [k]: v }))
 
-  if (!m) return <div style={{ padding: 24, textAlign: 'center', color: '#8892a8' }}>Sélectionnez une âme depuis la liste</div>
+  if (!m) return <div style={{ padding: 24, textAlign: 'center', color: '#6b7280' }}>Sélectionnez une âme depuis la liste</div>
 
   const mEn = entretiens.filter(e => e.membre_id === m.id).sort((a, b) => new Date(b.date_entretien) - new Date(a.date_entretien))
   const mDf = defis.filter(d => d.membre_id === m.id)
@@ -96,14 +96,14 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: 5, marginBottom: 10, alignItems: 'center', overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 4 }}>
+      <div style={{ display: 'flex', gap: 5, marginBottom: 10, alignItems: 'center', overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 4, position: 'sticky', top: 48, zIndex: 40, background: '#f4f6f9' }}>
         <button onClick={() => setPage(prevPage || 'ames')} style={S.btn('#5a6480', true)}>{({ alerts: '← Alertes', ames: '← Liste', ents: '← Entretiens', home: '← Accueil' })[prevPage] || '← Liste'}</button>
         {[['id', 'Identité', ClipboardList], ['pr', 'Présences', BarChart3], ['en', 'Entretiens', MessageCircle], ['df', 'Défis', Zap], ['pt', 'Plan', BookOpen]].map(([id, label, Icon]) => (
           <button key={id} onClick={() => setFtab(id)} style={{ padding: '4px 12px', borderRadius: 14, border: '1px solid ' + (ftab === id ? '#0ea888' : '#e0e4ec'), background: ftab === id ? '#0ea88814' : '#f0f2f6', color: ftab === id ? '#0ea888' : '#5a6480', fontSize: 11, fontWeight: ftab === id ? 600 : 500, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4 }}><Icon size={12} /> {label}</button>
         ))}
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 4 }}>
           <button onClick={() => { setFd({ ...m }); setModal('edMb') }} style={{ ...S.btn('#5a6480', true), display: 'flex', alignItems: 'center', gap: 4 }}><Pencil size={13} /> Modifier</button>
-          {!m.archive && <button onClick={() => setConfirmAction({ msg: 'Archiver ce membre ?', fn: handleArchive })} style={{ ...S.btn('#8892a8', true), display: 'flex', alignItems: 'center', gap: 4 }}><Archive size={13} /> Archiver</button>}
+          {!m.archive && <button onClick={() => setConfirmAction({ msg: 'Archiver ce membre ?', fn: handleArchive })} style={{ ...S.btn('#6b7280', true), display: 'flex', alignItems: 'center', gap: 4 }}><Archive size={13} /> Archiver</button>}
         </div>
       </div>
 
@@ -111,7 +111,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
       <div style={{ ...S.card, display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
         <div style={{ width: 44, height: 44, borderRadius: '50%', background: getStatutColor(refs, m.statut) + '18', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 700, color: getStatutColor(refs, m.statut), border: '2px solid ' + getStatutColor(refs, m.statut), flexShrink: 0 }}>{(m.prenom || m.nom || '?').charAt(0)}</div>
         <div style={{ flex: '1 1 200px', minWidth: 0 }}>
-          <div style={{ fontSize: 17, fontWeight: 700, fontFamily: "'Outfit', sans-serif" }}>{m.prenom} {m.nom}</div>
+          <div style={{ fontSize: 15, fontWeight: 700, fontFamily: "'Outfit', sans-serif" }}>{m.prenom} {m.nom}</div>
           <div style={{ display: 'flex', gap: 5, marginTop: 3, flexWrap: 'wrap' }}>
             <span style={S.pill(getStatutColor(refs, m.statut))}>{m.statut}</span>
             {m.role !== h.defaultRole && <span style={S.pill(getRoleColor(refs, m.role))}>{m.role}</span>}
@@ -123,7 +123,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
           {[{ v: dagoLabel(m.date_inscription), l: 'Inscription', c: '#0ea888' }, { v: ca, l: 'Abs.', c: ca >= 3 ? '#e03050' : '#1a9c60' }, { v: mEn.length, l: 'Entretiens', c: '#3060d0' }, { v: pv + '/' + mPt.length, l: 'Plan', c: '#7040d0' }].map((x, i) => (
             <div key={i} style={{ textAlign: 'center', padding: 6, background: '#f0f2f6', borderRadius: 6 }}>
               <div style={{ fontSize: 16, fontWeight: 700, color: x.c, fontFamily: "'Outfit', sans-serif" }}>{x.v}</div>
-              <div style={{ fontSize: 8, color: '#8892a8', fontWeight: 600, textTransform: 'uppercase' }}>{x.l}</div>
+              <div style={{ fontSize: 9, color: '#6b7280', fontWeight: 600, textTransform: 'uppercase' }}>{x.l}</div>
             </div>
           ))}
         </div>
@@ -156,9 +156,9 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
               <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, color: '#5a6480', marginBottom: 4 }}><History size={12} /> Historique des statuts</div>
               {historiqueStatuts.slice(0, 8).map(h => (
                 <div key={h.id} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, padding: '3px 0', borderBottom: '1px solid #e0e4ec' }}>
-                  <span style={{ color: '#8892a8', width: 70, flexShrink: 0 }}>{fmtS(h.date_changement)}</span>
+                  <span style={{ color: '#6b7280', width: 70, flexShrink: 0 }}>{fmtS(h.date_changement)}</span>
                   <span style={S.pill(getStatutColor(refs, h.ancien_statut))}>{h.ancien_statut}</span>
-                  <span style={{ color: '#8892a8' }}>→</span>
+                  <span style={{ color: '#6b7280' }}>→</span>
                   <span style={S.pill(getStatutColor(refs, h.nouveau_statut))}>{h.nouveau_statut}</span>
                 </div>
               ))}
@@ -178,13 +178,13 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
               <div key={a.id} style={{ marginBottom: 12 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
                   <span style={{ fontSize: 12, fontWeight: 600, color: a.couleur }}>{a.icone} {a.nom}</span>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: t !== null ? (t >= 80 ? '#1a9c60' : t >= 50 ? '#d48f00' : '#e03050') : '#8892a8' }}>{t !== null ? t + '%' : '—'}</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: t !== null ? (t >= 80 ? '#1a9c60' : t >= 50 ? '#d48f00' : '#e03050') : '#6b7280' }}>{t !== null ? t + '%' : '—'}</span>
                 </div>
                 <div style={{ height: 5, background: '#f0f2f6', borderRadius: 3, overflow: 'hidden', marginBottom: 6 }}><div style={{ height: '100%', borderRadius: 3, background: t !== null ? (t >= 80 ? '#1a9c60' : t >= 50 ? '#d48f00' : '#e03050') : '#e0e4ec', width: (t || 0) + '%' }} /></div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
-                  {mp.length === 0 ? <span style={{ fontSize: 11, color: '#8892a8' }}>Aucune</span> : mp.map(p => (
+                  {mp.length === 0 ? <span style={{ fontSize: 11, color: '#6b7280' }}>Aucune</span> : mp.map(p => (
                     <div key={p.id} style={{ textAlign: 'center', padding: '3px 2px', borderRadius: 4, border: '1px solid ' + (p.present ? '#1a9c60' : p.eligible ? '#e03050' : '#e0e4ec'), background: p.present ? '#1a9c6008' : p.eligible ? '#e0305008' : '#f0f2f6', minWidth: 42 }}>
-                      <div style={{ fontSize: 8, color: '#8892a8' }}>{fmtS(p.date_presence)}</div>
+                      <div style={{ fontSize: 9, color: '#6b7280' }}>{fmtS(p.date_presence)}</div>
                       <div style={{ fontSize: 12 }}>{p.present ? <Check size={14} color="#1a9c60" /> : p.eligible ? <X size={14} color="#e03050" /> : '—'}</div>
                     </div>
                   ))}
@@ -202,22 +202,22 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
             <div style={{ fontSize: 13, fontWeight: 600 }}>Entretiens ({mEn.length})</div>
             <button onClick={() => { setFd({ statut: h.defaultStatutEnt }); setEditEntId(null); setModal('ent') }} style={S.btn('#3060d0', false)}>+ Entretien</button>
           </div>
-          {mEn.length === 0 ? <div style={{ color: '#8892a8', fontSize: 12, padding: 8 }}>Aucun entretien. <span onClick={() => { setFd({ statut: h.defaultStatutEnt }); setModal('ent') }} style={{ color: '#3060d0', cursor: 'pointer', textDecoration: 'underline' }}>Créer le premier</span></div>
+          {mEn.length === 0 ? <div style={{ color: '#6b7280', fontSize: 12, padding: 8 }}>Aucun entretien. <span onClick={() => { setFd({ statut: h.defaultStatutEnt }); setModal('ent') }} style={{ color: '#3060d0', cursor: 'pointer', textDecoration: 'underline' }}>Créer le premier</span></div>
             : mEn.map(e => {
               const avecM = getSuiveur(e.avec_qui)
-              const sc = (() => { const found = (refs.statutsEntretien || []).find(s => s.nom === e.statut); return found?.couleur || '#8892a8' })()
+              const sc = (() => { const found = (refs.statutsEntretien || []).find(s => s.nom === e.statut); return found?.couleur || '#6b7280' })()
               const sujet = e.sujet_libre || (refs.sujetsEntretien || []).find(s => s.id === e.sujet_id)?.nom || ''
               return (
                 <div key={e.id} style={{ padding: '10px 12px', borderRadius: 7, border: '1px solid #e0e4ec', marginBottom: 6 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
                     <div>
                       <div style={{ fontSize: 12, fontWeight: 600 }}>{sujet}</div>
-                      <div style={{ fontSize: 10, color: '#8892a8' }}>{fmt(e.date_entretien)} · {avecM ? avecM.prenom + ' ' + avecM.nom : '—'}</div>
+                      <div style={{ fontSize: 10, color: '#6b7280' }}>{fmt(e.date_entretien)} · {avecM ? avecM.prenom + ' ' + avecM.nom : '—'}</div>
                     </div>
                     <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
                       <span style={S.pill(sc)}>{e.statut}</span>
                       <button onClick={() => { setFd({ ...e }); setEditEntId(e.id); setModal('ent') }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, color: '#3060d0' }}><Pencil size={12} /></button>
-                      <button onClick={() => setConfirmAction({ msg: 'Supprimer cet entretien ?', fn: () => supprimerEnt(e.id) })} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: '#8892a8', padding: '4px 8px' }}>✕</button>
+                      <button onClick={() => setConfirmAction({ msg: 'Supprimer cet entretien ?', fn: () => supprimerEnt(e.id) })} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: '#6b7280', padding: '4px 8px' }}>✕</button>
                     </div>
                   </div>
                   {e.commentaires && <div style={{ fontSize: 11, color: '#5a6480', lineHeight: 1.4, whiteSpace: 'pre-wrap', padding: '4px 8px', background: '#f0f2f6', borderRadius: 4, borderLeft: '3px solid ' + sc }}>{e.commentaires}</div>}
@@ -231,12 +231,12 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
       {ftab === 'df' && (
         <div style={S.card}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-            <div><div style={{ fontSize: 13, fontWeight: 600 }}>Défis</div><div style={{ fontSize: 11, color: '#8892a8' }}>identifié → en cours → résolu</div></div>
+            <div><div style={{ fontSize: 13, fontWeight: 600 }}>Défis</div><div style={{ fontSize: 11, color: '#6b7280' }}>identifié → en cours → résolu</div></div>
             <button onClick={() => { setFd({}); setModal('defi') }} style={S.btn('#d86820', false)}>+ Défi</button>
           </div>
-          {mDf.length === 0 ? <div style={{ color: '#8892a8', fontSize: 12, padding: 8 }}>Aucun défi. <span onClick={() => { setFd({}); setModal('defi') }} style={{ color: '#d86820', cursor: 'pointer', textDecoration: 'underline' }}>Ajouter le premier</span></div>
+          {mDf.length === 0 ? <div style={{ color: '#6b7280', fontSize: 12, padding: 8 }}>Aucun défi. <span onClick={() => { setFd({}); setModal('defi') }} style={{ color: '#d86820', cursor: 'pointer', textDecoration: 'underline' }}>Ajouter le premier</span></div>
             : mDf.map(d => {
-              const stColor = (refs.statutsDefi || []).find(s => s.nom === d.statut)?.couleur || '#8892a8'
+              const stColor = (refs.statutsDefi || []).find(s => s.nom === d.statut)?.couleur || '#6b7280'
               return (
                 <div key={d.id} style={{ padding: '10px 12px', borderRadius: 7, border: '1px solid #e0e4ec', marginBottom: 6, display: 'flex', gap: 8 }}>
                   <div style={{ flex: 1 }}>
@@ -244,7 +244,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
                       <span style={S.pill('#3060d0')}>{d.type_defi}</span>
                       <span style={S.pill(stColor)}>{d.statut}</span>
                       <button onClick={() => { setFd({ _editDefiId: d.id, type_defi: d.type_defi, description: d.description, statut_defi: d.statut }); setModal('editDefi') }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#3060d0', padding: '4px 8px' }}><Pencil size={13} /></button>
-                      <button onClick={() => setConfirmAction({ msg: 'Supprimer ce défi ?', fn: async () => { await supprimerDefi(d.id) } })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8892a8', padding: '4px 8px', fontSize: 13 }}>✕</button>
+                      <button onClick={() => setConfirmAction({ msg: 'Supprimer ce défi ?', fn: async () => { await supprimerDefi(d.id) } })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', padding: '4px 8px', fontSize: 13 }}>✕</button>
                     </div>
                     <div style={{ fontSize: 12, lineHeight: 1.4 }}>{d.description}</div>
                   </div>
@@ -265,14 +265,14 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
             {mDf.length > 0 && <button onClick={() => { setFd({ _asDefiId: mDf[0]?.id }); setModal('asMod') }} style={S.btn('#7040d0', false)}>+ Assigner</button>}
           </div>
           {mDf.length === 0 ? (
-            <div style={{ color: '#8892a8', fontSize: 12, padding: 8 }}>Créez d'abord un défi dans l'onglet Défis, puis assignez des modules pour y répondre.</div>
+            <div style={{ color: '#6b7280', fontSize: 12, padding: 8 }}>Créez d'abord un défi dans l'onglet Défis, puis assignez des modules pour y répondre.</div>
           ) : mPt.length === 0 ? (
-            <div style={{ color: '#8892a8', fontSize: 12, padding: 8 }}>Aucun module assigné. <span onClick={() => { setFd({ _asDefiId: mDf[0]?.id }); setModal('asMod') }} style={{ color: '#7040d0', cursor: 'pointer', textDecoration: 'underline' }}>Assigner le premier</span></div>
+            <div style={{ color: '#6b7280', fontSize: 12, padding: 8 }}>Aucun module assigné. <span onClick={() => { setFd({ _asDefiId: mDf[0]?.id }); setModal('asMod') }} style={{ color: '#7040d0', cursor: 'pointer', textDecoration: 'underline' }}>Assigner le premier</span></div>
           ) : (
             <div>
               {mDf.map(d => {
                 const modulesForDefi = mPt.filter(p => p.defi_id === d.id)
-                const stColor = (refs.statutsDefi || []).find(s => s.nom === d.statut)?.couleur || '#8892a8'
+                const stColor = (refs.statutsDefi || []).find(s => s.nom === d.statut)?.couleur || '#6b7280'
                 const vCount = modulesForDefi.filter(p => p.valide).length
                 const pct = modulesForDefi.length ? Math.round(vCount / modulesForDefi.length * 100) : 0
                 const allDone = modulesForDefi.length > 0 && vCount === modulesForDefi.length
@@ -285,20 +285,20 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
                       <button onClick={() => { setFd({ _asDefiId: d.id }); setModal('asMod') }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 10, color: '#7040d0', fontWeight: 600 }}>+ Module</button>
                     </div>
                     {modulesForDefi.length === 0 ? (
-                      <div style={{ fontSize: 11, color: '#8892a8', padding: '4px 0 0 12px' }}>Aucun module assigné — <span onClick={() => { setFd({ _asDefiId: d.id }); setModal('asMod') }} style={{ color: '#7040d0', cursor: 'pointer', textDecoration: 'underline' }}>assigner</span></div>
+                      <div style={{ fontSize: 11, color: '#6b7280', padding: '4px 0 0 12px' }}>Aucun module assigné — <span onClick={() => { setFd({ _asDefiId: d.id }); setModal('asMod') }} style={{ color: '#7040d0', cursor: 'pointer', textDecoration: 'underline' }}>assigner</span></div>
                     ) : (
                       <div>
                         {modulesForDefi.map(p => {
                           const mod = (refs.modules || []).find(mod => mod.id === p.module_id)
                           return (
                             <div key={p.id} onClick={() => validerModule(p.id, !p.valide)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', borderRadius: 6, border: '1px solid ' + (p.valide ? '#1a9c60' : '#e0e4ec'), background: p.valide ? '#1a9c6008' : '#fff', marginBottom: 3, cursor: 'pointer', marginLeft: 8 }}>
-                              <div style={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid ' + (p.valide ? '#1a9c60' : '#e0e4ec'), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: p.valide ? '#1a9c60' : '#8892a8' }}>{p.valide ? '✓' : ''}</div>
+                              <div style={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid ' + (p.valide ? '#1a9c60' : '#e0e4ec'), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: p.valide ? '#1a9c60' : '#6b7280' }}>{p.valide ? '✓' : ''}</div>
                               <div style={{ flex: 1 }}>
                                 <div style={{ fontSize: 12, fontWeight: 600, color: p.valide ? '#1a9c60' : '#1a1e2e' }}>{mod?.nom || '?'}</div>
-                                {p.valide && p.date_validation && <div style={{ fontSize: 9, color: '#8892a8' }}>Validé le {fmt(p.date_validation)}</div>}
+                                {p.valide && p.date_validation && <div style={{ fontSize: 9, color: '#6b7280' }}>Validé le {fmt(p.date_validation)}</div>}
                               </div>
-                              <span style={S.pill(p.valide ? '#1a9c60' : '#8892a8')}>{p.valide ? 'Validé' : 'En attente'}</span>
-                              <button onClick={e => { e.stopPropagation(); retirerModule(p.id) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 10, color: '#8892a8' }}>✕</button>
+                              <span style={S.pill(p.valide ? '#1a9c60' : '#6b7280')}>{p.valide ? 'Validé' : 'En attente'}</span>
+                              <button onClick={e => { e.stopPropagation(); retirerModule(p.id) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 10, color: '#6b7280' }}>✕</button>
                             </div>
                           )
                         })}
@@ -316,15 +316,15 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
               {/* Modules sans défi (anciens) */}
               {mPt.filter(p => !p.defi_id).length > 0 && (
                 <div style={{ marginBottom: 12 }}>
-                  <div style={{ fontSize: 11, color: '#8892a8', fontWeight: 600, marginBottom: 6 }}>Non liés à un défi</div>
+                  <div style={{ fontSize: 11, color: '#6b7280', fontWeight: 600, marginBottom: 6 }}>Non liés à un défi</div>
                   {mPt.filter(p => !p.defi_id).map(p => {
                     const mod = (refs.modules || []).find(mod => mod.id === p.module_id)
                     return (
                       <div key={p.id} onClick={() => validerModule(p.id, !p.valide)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 6, border: '1px solid ' + (p.valide ? '#1a9c60' : '#e0e4ec'), background: p.valide ? '#1a9c6008' : '#fff', marginBottom: 4, cursor: 'pointer' }}>
-                        <div style={{ width: 20, height: 20, borderRadius: '50%', border: '2px solid ' + (p.valide ? '#1a9c60' : '#e0e4ec'), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: p.valide ? '#1a9c60' : '#8892a8' }}>{p.valide ? '✓' : ''}</div>
+                        <div style={{ width: 20, height: 20, borderRadius: '50%', border: '2px solid ' + (p.valide ? '#1a9c60' : '#e0e4ec'), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: p.valide ? '#1a9c60' : '#6b7280' }}>{p.valide ? '✓' : ''}</div>
                         <div style={{ flex: 1 }}><div style={{ fontSize: 12, fontWeight: 600, color: p.valide ? '#1a9c60' : '#1a1e2e' }}>{mod?.nom || '?'}</div></div>
-                        <span style={S.pill(p.valide ? '#1a9c60' : '#8892a8')}>{p.valide ? 'Validé' : 'En attente'}</span>
-                        <button onClick={e => { e.stopPropagation(); retirerModule(p.id) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 10, color: '#8892a8' }}>✕</button>
+                        <span style={S.pill(p.valide ? '#1a9c60' : '#6b7280')}>{p.valide ? 'Validé' : 'En attente'}</span>
+                        <button onClick={e => { e.stopPropagation(); retirerModule(p.id) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 10, color: '#6b7280' }}>✕</button>
                       </div>
                     )
                   })}
@@ -355,7 +355,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
               <div style={{ marginBottom: 8 }}><label style={S.label}>Commentaires</label><textarea value={fd.commentaires || ''} onChange={e => uf('commentaires', e.target.value)} rows={3} style={{ ...S.inp, resize: 'vertical' }} /></div>
             </div>
             <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => { setModal(null); setFd({}); setEditEntId(null) }} style={S.btn('#8892a8', true)}>Annuler</button>
+              <button onClick={() => { setModal(null); setFd({}); setEditEntId(null) }} style={S.btn('#6b7280', true)}>Annuler</button>
               <button onClick={handleSaveEnt} style={S.btn('#3060d0', false)}>{editEntId ? 'Modifier' : 'Enregistrer'}</button>
             </div>
           </div>
@@ -373,7 +373,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
               <div style={{ marginBottom: 8 }}><label style={S.label}>Statut</label><select value={fd.statut_defi || h.defaultStatutDefi} onChange={e => uf('statut_defi', e.target.value)} style={S.inp}>{(refs.statutsDefi || []).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}</select></div>
             </div>
             <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#8892a8', true)}>Annuler</button>
+              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#6b7280', true)}>Annuler</button>
               <button onClick={handleSaveDefi} style={S.btn('#d86820', false)}>Enregistrer</button>
             </div>
           </div>
@@ -391,7 +391,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
               <div style={{ marginBottom: 8 }}><label style={S.label}>Statut</label><select value={fd.statut_defi || ''} onChange={e => uf('statut_defi', e.target.value)} style={S.inp}>{(refs.statutsDefi || []).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}</select></div>
             </div>
             <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#8892a8', true)}>Annuler</button>
+              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#6b7280', true)}>Annuler</button>
               <button onClick={async () => {
                 try {
                   await modifierDefi(fd._editDefiId, { type_defi: fd.type_defi, description: fd.description, statut: fd.statut_defi })
@@ -430,13 +430,13 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
                   </select>
                 </div>
                 {!fd._asDefiId ? (
-                  <div style={{ padding: 12, textAlign: 'center', color: '#8892a8', fontSize: 12 }}>Sélectionnez d'abord un défi ci-dessus.</div>
+                  <div style={{ padding: 12, textAlign: 'center', color: '#6b7280', fontSize: 12 }}>Sélectionnez d'abord un défi ci-dessus.</div>
                 ) : avail.length === 0 ? (
                   <div style={{ padding: 12, textAlign: 'center', color: '#1a9c60', fontSize: 12 }}>Tous les modules sont déjà assignés pour ce défi.</div>
                 ) : (
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <span style={{ fontSize: 11, color: '#8892a8' }}>Cochez les modules à assigner</span>
+                      <span style={{ fontSize: 11, color: '#6b7280' }}>Cochez les modules à assigner</span>
                       <button onClick={() => { const all = {}; avail.forEach(mod => { all[mod.id] = true }); setFd(prev => ({ ...prev, _asModIds: all })) }} style={{ background: 'none', border: 'none', fontSize: 11, color: '#0ea888', cursor: 'pointer', fontWeight: 600 }}>Tout cocher</button>
                     </div>
                     {avail.map(mod => (
@@ -451,7 +451,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
                 )}
               </div>
               <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#8892a8', true)}>Annuler</button>
+                <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#6b7280', true)}>Annuler</button>
                 {nSel > 0 && <button onClick={doAssignAll} style={S.btn('#7040d0', false)}>Assigner {nSel} module{nSel > 1 ? 's' : ''}</button>}
               </div>
             </div>
@@ -465,7 +465,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
           <div className="modal-box" style={{ maxWidth: 380 }}>
             <div style={{ padding: '20px 24px' }}><div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Confirmation</div><div style={{ fontSize: 13, color: '#5a6480', lineHeight: 1.6 }}>{confirmAction.msg}</div></div>
             <div style={{ padding: '12px 24px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => setConfirmAction(null)} style={S.btn('#8892a8', true)}>Annuler</button>
+              <button onClick={() => setConfirmAction(null)} style={S.btn('#6b7280', true)}>Annuler</button>
               <button onClick={() => { confirmAction.fn(); setConfirmAction(null) }} style={S.btn('#e03050', false)}>Confirmer</button>
             </div>
           </div>
@@ -493,7 +493,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
               </div>
             </div>
             <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#8892a8', true)}>Annuler</button>
+              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#6b7280', true)}>Annuler</button>
               <button onClick={doArchiveReassign} style={S.btn('#d48f00', false)}>Réassigner et archiver</button>
             </div>
           </div>
@@ -533,7 +533,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
               <div style={{ marginBottom: 8 }}><label style={S.label}>Notes</label><textarea value={fd.notes || ''} onChange={e => uf('notes', e.target.value)} rows={2} style={{ ...S.inp, resize: 'vertical' }} /></div>
             </div>
             <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#8892a8', true)}>Annuler</button>
+              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#6b7280', true)}>Annuler</button>
               <button onClick={async () => {
                 try {
                   const { id, created_at, created_by, updated_at, updated_by, ...updates } = fd

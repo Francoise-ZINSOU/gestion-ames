@@ -35,7 +35,7 @@ export default function FiliationPage({ actifs, refs, h, openFiche }) {
           <div style={{ width: 24, height: 24, borderRadius: '50%', background: color + '18', border: '2px solid ' + color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color, flexShrink: 0 }}>{(m.prenom || '?').charAt(0)}</div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 12, fontWeight: 600, color }}>{m.prenom} {m.nom}</div>
-            {isLeader && <div style={{ fontSize: 9, color: '#8892a8' }}>{m.role} · {enfants.length} suivi(s)</div>}
+            {isLeader && <div style={{ fontSize: 9, color: '#6b7280' }}>{m.role} · {enfants.length} suivi(s)</div>}
           </div>
           <span style={S.pill(getStatutColor(refs, m.statut))}>{m.statut}</span>
         </div>
@@ -53,9 +53,9 @@ export default function FiliationPage({ actifs, refs, h, openFiche }) {
   return (
     <div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 14 }}>
-        <div style={S.kpi('#d48f00')}><div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#8892a8', marginBottom: 6 }}>Bergers</div><div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: '#d48f00' }}>{bergers.length}</div></div>
-        <div style={S.kpi('#7040d0')}><div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#8892a8', marginBottom: 6 }}>Piliers</div><div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: '#7040d0' }}>{piliers.length}</div></div>
-        <div style={S.kpi('#e03050')}><div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#8892a8', marginBottom: 6 }}>Sans suiveur</div><div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: '#e03050' }}>{orphelinsMembres.length}</div></div>
+        <div style={S.kpi('#d48f00')}><div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }}>Bergers</div><div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: '#d48f00' }}>{bergers.length}</div></div>
+        <div style={S.kpi('#7040d0')}><div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }}>Piliers</div><div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: '#7040d0' }}>{piliers.length}</div></div>
+        <div style={S.kpi('#e03050')}><div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }}>Sans suiveur</div><div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: '#e03050' }}>{orphelinsMembres.length}</div></div>
       </div>
 
       {/* Arbres des Bergers — récursif */}
@@ -67,7 +67,7 @@ export default function FiliationPage({ actifs, refs, h, openFiche }) {
               <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#d48f0018', border: '2px solid #d48f00', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 700, color: '#d48f00' }}>{(b.prenom || '?').charAt(0)}</div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: '#d48f00' }}>{b.prenom} {b.nom}</div>
-                <div style={{ fontSize: 10, color: '#8892a8' }}>Berger principal · {enfB.length} suivi(s) directs</div>
+                <div style={{ fontSize: 10, color: '#6b7280' }}>Berger principal · {enfB.length} suivi(s) directs</div>
               </div>
             </div>
             {enfB.length > 0 && (
@@ -83,7 +83,7 @@ export default function FiliationPage({ actifs, refs, h, openFiche }) {
       {orphelinsPiliers.length > 0 && (
         <div style={S.card}>
           <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8, color: '#d48f00' }}>Piliers sans suiveur ({orphelinsPiliers.length})</div>
-          <div style={{ fontSize: 11, color: '#8892a8', marginBottom: 8 }}>Ces piliers n'ont pas de "Suivi par" — assignez-les au Berger ou à un autre Pilier.</div>
+          <div style={{ fontSize: 11, color: '#6b7280', marginBottom: 8 }}>Ces piliers n'ont pas de "Suivi par" — assignez-les au Berger ou à un autre Pilier.</div>
           {orphelinsPiliers.map(p => renderMembre(p, 0))}
         </div>
       )}
@@ -102,7 +102,7 @@ export default function FiliationPage({ actifs, refs, h, openFiche }) {
       )}
 
       {bergers.length === 0 && orphelinsPiliers.length === 0 && orphelinsMembres.length === 0 && (
-        <div style={{ ...S.card, textAlign: 'center', color: '#8892a8' }}>Aucun membre. Créez des membres et assignez des rôles.</div>
+        <div style={{ ...S.card, textAlign: 'center', color: '#6b7280' }}>Aucun membre. Créez des membres et assignez des rôles.</div>
       )}
     </div>
   )

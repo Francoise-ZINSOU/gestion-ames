@@ -21,7 +21,7 @@ export default function EntretiensPage({ entretiens, membres, actifs, refs, h, o
   // Entretiens planifiés en retard
   const planifiesRetard = plannedStatus ? all.filter(e => e.statut === plannedStatus && e.date_entretien && new Date(e.date_entretien) < new Date(today())) : []
 
-  const stColor = (s) => (refs.statutsEntretien || []).find(x => x.nom === s)?.couleur || '#8892a8'
+  const stColor = (s) => (refs.statutsEntretien || []).find(x => x.nom === s)?.couleur || '#6b7280'
 
   const handleSave = async () => {
     if (!fd.membre_id) { showToast('⚠ Sélectionnez un membre'); return }
@@ -51,7 +51,7 @@ export default function EntretiensPage({ entretiens, membres, actifs, refs, h, o
           <div style={{ fontSize: 13, fontWeight: 600 }}>Tous les entretiens ({all.length})</div>
           <button onClick={() => { setFd({ statut: h.defaultStatutEnt, date_entretien: today() }); setModal('new') }} style={{ ...S.btn('#3060d0', false), display: 'flex', alignItems: 'center', gap: 4 }}><Plus size={13} /> Entretien</button>
         </div>
-        {all.length === 0 ? <div style={{ padding: 12, textAlign: 'center', color: '#8892a8', fontSize: 12 }}>Aucun entretien enregistré.</div>
+        {all.length === 0 ? <div style={{ padding: 12, textAlign: 'center', color: '#6b7280', fontSize: 12 }}>Aucun entretien enregistré. <span onClick={() => { setFd({ statut: h.defaultStatutEnt, date_entretien: today() }); setModal('new') }} style={{ color: '#3060d0', cursor: 'pointer', textDecoration: 'underline' }}>Créer le premier</span></div>
           : <div>
             {/* Desktop */}
             <div className="desk-only">
@@ -76,7 +76,7 @@ export default function EntretiensPage({ entretiens, membres, actifs, refs, h, o
                     <span style={{ fontSize: 13, fontWeight: 600, color: '#0ea888' }}>{e.mn}</span>
                     <span style={S.pill(stColor(e.statut))}>{e.statut}</span>
                   </div>
-                  <div style={{ fontSize: 11, color: '#8892a8' }}>{fmtS(e.date_entretien)} · {e.avecNom}{e.sujet ? ' · ' + e.sujet : ''}</div>
+                  <div style={{ fontSize: 11, color: '#6b7280' }}>{fmtS(e.date_entretien)} · {e.avecNom}{e.sujet ? ' · ' + e.sujet : ''}</div>
                 </div>
               ))}
             </div>
@@ -104,7 +104,7 @@ export default function EntretiensPage({ entretiens, membres, actifs, refs, h, o
               <div style={{ marginBottom: 8 }}><label style={S.label}>Commentaires</label><textarea value={fd.commentaires || ''} onChange={e => uf('commentaires', e.target.value)} rows={3} style={{ ...S.inp, resize: 'vertical' }} /></div>
             </div>
             <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#8892a8', true)}>Annuler</button>
+              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#6b7280', true)}>Annuler</button>
               <button onClick={handleSave} style={S.btn('#3060d0', false)}>Enregistrer</button>
             </div>
           </div>

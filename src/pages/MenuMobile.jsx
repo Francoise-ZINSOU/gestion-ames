@@ -26,7 +26,7 @@ export default function MenuMobile({ setPage, isAdmin, selectedMembre }) {
             <Search size={18} strokeWidth={1.8} color="#0ea888" />
             <div>
               <div style={{ fontSize: 13, fontWeight: 600, color: '#0ea888' }}>Fiche — {selectedMembre.prenom} {selectedMembre.nom}</div>
-              <div style={{ fontSize: 10, color: '#8892a8' }}>Dernière fiche consultée</div>
+              <div style={{ fontSize: 10, color: '#6b7280' }}>Dernière fiche consultée</div>
             </div>
           </div>
         </div>

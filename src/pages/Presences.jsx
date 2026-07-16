@@ -89,19 +89,16 @@ export default function PresencesPage({ actifs, presences, refs, enregistrerPres
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 6 }}>
             <div>
               <div style={{ fontSize: 13, fontWeight: 600 }}>{act?.icone} {act?.nom} — {fmt(date)}</div>
-              <div style={{ fontSize: 11, color: '#8892a8', marginTop: 2 }}>
+              <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2 }}>
                 {nChecked}/{eligible.length} coché(s){existing.length > 0 ? ' · Déjà enregistré' : ''}
               </div>
             </div>
             <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
               <button onClick={() => { const o = {}; eligible.forEach(m => { o[m.id] = true }); setChk(o); setSaved(false) }} style={S.btn('#0ea888', true)}>Tous</button>
-              <button onClick={() => { setChk({}); setSaved(false) }} style={S.btn('#8892a8', true)}>Aucun</button>
+              <button onClick={() => { setChk({}); setSaved(false) }} style={S.btn('#6b7280', true)}>Aucun</button>
               {existing.length > 0 && <button onClick={handleDelete} style={{ ...S.btn('#e03050', true), display: 'flex', alignItems: 'center', gap: 4 }}><Trash2 size={13} /> Suppr.</button>}
               {!(datesAnnulees || []).some(d => d.activite_id === actId && d.date_annulee === date) && (
-                <button onClick={async () => {
-                  const motif = prompt('Motif d\'annulation (optionnel) :')
-                  try { await ajouterDateAnnulee(actId, date, motif || null) } catch(e) {}
-                }} style={{ ...S.btn('#d48f00', true), fontSize: 10, padding: '4px 8px' }}>Annuler date</button>
+                <button onClick={() => setConfirmAction({ msg: 'Annuler cette date ? Les absences ne seront pas comptabilisées.', input: true, fn: async (motif) => { try { await ajouterDateAnnulee(actId, date, motif || null) } catch(e) {} } })} style={{ ...S.btn('#d48f00', true), fontSize: 10, padding: '4px 8px' }}>Annuler date</button>
               )}
             </div>
           </div>
@@ -118,7 +115,7 @@ export default function PresencesPage({ actifs, presences, refs, enregistrerPres
           )}
 
           <div style={{ position: 'relative', marginBottom: 8 }}>
-            <Search size={14} style={{ position: 'absolute', left: 10, top: 9, color: '#8892a8' }} />
+            <Search size={14} style={{ position: 'absolute', left: 10, top: 9, color: '#6b7280' }} />
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Filtrer..."
               style={{ ...S.inp, paddingLeft: 30 }} />
           </div>
@@ -131,10 +128,10 @@ export default function PresencesPage({ actifs, presences, refs, enregistrerPres
                   {chk[m.id] ? '✓' : ''}
                 </div>
                 <span style={{ fontSize: 12, flex: 1 }}>{m.prenom} {m.nom}</span>
-                <span style={{ fontSize: 10, color: '#8892a8' }}>{m.role}</span>
+                <span style={{ fontSize: 10, color: '#6b7280' }}>{m.role}</span>
               </div>
             ))}
-            {filtered.length === 0 && <div style={{ padding: 14, textAlign: 'center', color: '#8892a8', fontSize: 12 }}>Aucun membre éligible</div>}
+            {filtered.length === 0 && <div style={{ padding: 14, textAlign: 'center', color: '#6b7280', fontSize: 12 }}>Aucun membre éligible</div>}
           </div>
 
           {/* Barre sticky en bas — Enregistrer */}
@@ -142,7 +139,7 @@ export default function PresencesPage({ actifs, presences, refs, enregistrerPres
             <div style={{ fontSize: 12, color: '#5a6480' }}>
               <strong style={{ fontSize: 16, color: '#1a1e2e' }}>{nChecked}</strong> / {eligible.length}
             </div>
-            <button onClick={handleSave} style={{ ...S.btn(saved ? '#8892a8' : '#1a9c60', false), display: 'flex', alignItems: 'center', gap: 5, padding: '10px 20px', fontSize: 13 }}>
+            <button onClick={handleSave} style={{ ...S.btn(saved ? '#6b7280' : '#1a9c60', false), display: 'flex', alignItems: 'center', gap: 5, padding: '10px 20px', fontSize: 13 }}>
               {saved ? <><CheckSquare size={15} /> Enregistré</> : <><Save size={15} /> Enregistrer</>}
             </button>
           </div>
@@ -154,7 +151,7 @@ export default function PresencesPage({ actifs, presences, refs, enregistrerPres
           <div className="modal-box" style={{ maxWidth: 380 }}>
             <div style={{ padding: '20px 24px' }}><div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Confirmation</div><div style={{ fontSize: 13, color: '#5a6480', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{confirmAction.msg}</div></div>
             <div style={{ padding: '12px 24px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => setConfirmAction(null)} style={S.btn('#8892a8', true)}>Annuler</button>
+              <button onClick={() => setConfirmAction(null)} style={S.btn('#6b7280', true)}>Annuler</button>
               <button onClick={() => { confirmAction.fn(); setConfirmAction(null) }} style={S.btn('#e03050', false)}>Confirmer</button>
             </div>
           </div>

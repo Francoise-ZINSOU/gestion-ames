@@ -96,8 +96,8 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
   }
 
   if (dataLoading) return (
-    <Layout page={page} setPage={setPage} alertCount={0} membreCount={0} selectedMembre={null}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 20px', color: '#8892a8', fontSize: 13 }}>Chargement des données...</div>
+    <Layout page={page} setPage={setPage} alertCount={0} membreCount={0} selectedMembre={null} auth={auth}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 20px', color: '#6b7280', fontSize: 13 }}>Chargement des données...</div>
     </Layout>
   )
 
@@ -119,7 +119,7 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
   }
 
   return (
-    <Layout page={page} setPage={setPage} alertCount={al.alertes.length} membreCount={mb.actifs.length} selectedMembre={selectedMembre}>
+    <Layout page={page} setPage={setPage} alertCount={al.alertes.length} membreCount={mb.actifs.length} selectedMembre={selectedMembre} auth={auth}>
       {content}
       <Toast message={toast} />
     </Layout>

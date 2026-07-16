@@ -22,7 +22,7 @@ export default function LoginPage() {
       <div style={{ width: '100%', maxWidth: 400, background: '#fff', borderRadius: 16, overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,.06)' }}>
         <div style={{ padding: '28px 28px 20px', borderBottom: '1px solid #e0e4ec', textAlign: 'center' }}>
           <div style={{ fontSize: 9, letterSpacing: 3, textTransform: 'uppercase', color: '#0ea888', fontWeight: 700, marginBottom: 6 }}>LES ENRACINÉES</div>
-          <div style={{ fontSize: 22, fontWeight: 700, fontFamily: "'Outfit', sans-serif", marginBottom: 4 }}>Gestion des Âmes</div>
+          <div style={{ fontSize: 18, fontWeight: 700, fontFamily: "'Outfit', sans-serif", marginBottom: 4 }}>Gestion des Âmes</div>
           <div style={{ fontSize: 12, color: '#5a6480' }}>Connectez-vous pour continuer</div>
         </div>
 
@@ -42,7 +42,7 @@ export default function LoginPage() {
             {loading ? 'Connexion...' : 'Se connecter'}
           </button>
 
-          <div style={{ textAlign: 'center', marginTop: 14, fontSize: 11, color: '#8892a8' }}>
+          <div style={{ textAlign: 'center', marginTop: 14, fontSize: 11, color: '#6b7280' }}>
             Accès réservé aux responsables.<br />Contactez l'administrateur pour obtenir un compte.
           </div>
         </form>

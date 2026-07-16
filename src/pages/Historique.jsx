@@ -25,8 +25,8 @@ export default function HistoriquePage({ presences, refs }) {
       </div>
       <div style={S.card}>
         <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Taux par date — {act?.icone} {act?.nom}</div>
-        {tl.length > 0 && <div style={{ fontSize: 11, color: '#8892a8', marginBottom: 8 }}>{tl.length} date(s) saisie(s) · du {fmtS(firstDate)} au {fmtS(lastDate)}</div>}
-        {tl.length === 0 ? <div style={{ padding: 20, textAlign: 'center', color: '#8892a8', fontSize: 12 }}>Aucune donnée</div>
+        {tl.length > 0 && <div style={{ fontSize: 11, color: '#6b7280', marginBottom: 8 }}>{tl.length} date(s) saisie(s) · du {fmtS(firstDate)} au {fmtS(lastDate)}</div>}
+        {tl.length === 0 ? <div style={{ padding: 20, textAlign: 'center', color: '#6b7280', fontSize: 12 }}>Aucune donnée</div>
           : <div>
             <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', marginBottom: 8 }}>
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 150, minWidth: Math.max(300, tl.length * 32) }}>
@@ -38,7 +38,7 @@ export default function HistoriquePage({ presences, refs }) {
                     <div key={t.date} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: '1 0 28px', maxWidth: 36 }}>
                       <div style={{ fontSize: 9, color: '#5a6480', marginBottom: 2, fontWeight: 600 }}>{pct}%</div>
                       <div style={{ width: '70%', background: pct >= 80 ? '#1a9c60' : pct >= 50 ? '#d48f00' : '#e03050', borderRadius: '3px 3px 0 0', height: Math.max(6, pct * 1.2) + 'px' }} />
-                      <div style={{ fontSize: 7, color: '#8892a8', marginTop: 2, transform: 'rotate(-45deg)', transformOrigin: 'center', whiteSpace: 'nowrap' }}>{label}</div>
+                      <div style={{ fontSize: 7, color: '#6b7280', marginTop: 2, transform: 'rotate(-45deg)', transformOrigin: 'center', whiteSpace: 'nowrap' }}>{label}</div>
                     </div>
                   )
                 })}

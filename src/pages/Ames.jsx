@@ -116,7 +116,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
     <div>
       {/* Barre de recherche */}
       <div style={{ position: 'relative', marginBottom: 8 }}>
-        <Search size={14} style={{ position: 'absolute', left: 10, top: 9, color: '#8892a8' }} />
+        <Search size={14} style={{ position: 'absolute', left: 10, top: 9, color: '#6b7280' }} />
         <input value={q} onChange={e => setQ(e.target.value)} placeholder="Rechercher..." style={{ ...S.inp, paddingLeft: 30, width: '100%', boxSizing: 'border-box' }} />
       </div>
       {/* Filtres + actions — une seule ligne */}
@@ -139,7 +139,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
       {/* Liste — CARTES sur mobile, tableau sur desktop */}
       <div style={S.card}>
         {filt.length === 0 ? (
-          <div style={{ padding: 16, textAlign: 'center', color: '#8892a8' }}>Aucune âme. <span onClick={() => { setFd({ statut: h.defaultStatut, role: h.defaultRole, date_inscription: today() }); setModal('add') }} style={{ color: '#0ea888', cursor: 'pointer', textDecoration: 'underline' }}>+ Ajouter</span></div>
+          <div style={{ padding: 16, textAlign: 'center', color: '#6b7280' }}>Aucune âme. <span onClick={() => { setFd({ statut: h.defaultStatut, role: h.defaultRole, date_inscription: today() }); setModal('add') }} style={{ color: '#0ea888', cursor: 'pointer', textDecoration: 'underline' }}>+ Ajouter</span></div>
         ) : (
           <div>
             {/* Desktop: tableau */}
@@ -155,8 +155,8 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                       <td style={{ ...S.td, color: '#5a6480' }}>{fmtS(m.date_inscription)}</td>
                       <td style={{ ...S.td, color: '#5a6480' }}>{getSuiveur(m.suivi_par)}</td>
                       <td style={S.td}><span style={S.pill(getStatutColor(refs, m.statut))}>{m.statut}</span></td>
-                      <td style={{ ...S.td, fontWeight: 600, color: t !== null ? (t >= 80 ? '#1a9c60' : t >= 50 ? '#d48f00' : '#e03050') : '#8892a8' }}>{t !== null ? t + '%' : '—'}</td>
-                      <td style={{ ...S.td, fontWeight: 600, color: mEn(m.id) ? '#3060d0' : '#8892a8' }}>{mEn(m.id)}</td>
+                      <td style={{ ...S.td, fontWeight: 600, color: t !== null ? (t >= 80 ? '#1a9c60' : t >= 50 ? '#d48f00' : '#e03050') : '#6b7280' }}>{t !== null ? t + '%' : '—'}</td>
+                      <td style={{ ...S.td, fontWeight: 600, color: mEn(m.id) ? '#3060d0' : '#6b7280' }}>{mEn(m.id)}</td>
                     </tr>
                   )
                 })}</tbody>
@@ -172,7 +172,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                       <span style={{ fontSize: 13, fontWeight: 600, color: '#0ea888', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.prenom} {m.nom}</span>
                       <span style={S.pill(getStatutColor(refs, m.statut))}>{m.statut}</span>
                     </div>
-                    <div style={{ display: 'flex', gap: 8, fontSize: 11, color: '#8892a8', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', gap: 8, fontSize: 11, color: '#6b7280', flexWrap: 'wrap' }}>
                       <span style={S.pill(getRoleColor(refs, m.role))}>{m.role}</span>
                       {t !== null && <span style={{ fontWeight: 600, color: t >= 80 ? '#1a9c60' : t >= 50 ? '#d48f00' : '#e03050' }}>{t}%</span>}
                       {mEn(m.id) > 0 && <span style={{ color: '#3060d0' }}>{mEn(m.id)} ent.</span>}
@@ -211,7 +211,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
               <div style={{ marginBottom: 8 }}><label style={S.label}>Notes</label><textarea value={fd.notes || ''} onChange={e => uf('notes', e.target.value)} rows={2} style={{ ...S.inp, resize: 'vertical' }} /></div>
             </div>
             <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#8892a8', true)}>Annuler</button>
+              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#6b7280', true)}>Annuler</button>
               <button onClick={handleSave} disabled={saving} style={{ ...S.btn('#0ea888', false), opacity: saving ? 0.6 : 1 }}>{saving ? 'Enregistrement...' : 'Enregistrer'}</button>
             </div>
           </div>
@@ -233,7 +233,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
               <div style={{ marginBottom: 8 }}><label style={S.label}>Nouveau responsable</label><select value={fd._newSuivId || ''} onChange={e => uf('_newSuivId', e.target.value || null)} style={S.inp}><option value="">— Choisir —</option>{leaders.filter(l => l.id !== fd._reassignFrom).map(l => <option key={l.id} value={l.id}>{l.prenom} {l.nom} ({l.role})</option>)}</select></div>
             </div>
             <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#8892a8', true)}>Annuler</button>
+              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#6b7280', true)}>Annuler</button>
               <button onClick={doReassign} style={S.btn('#d48f00', false)}>Réassigner et modifier</button>
             </div>
           </div>
@@ -252,7 +252,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                   <div style={{ padding: '8px 12px', background: '#f0f2f6', borderRadius: 6, fontSize: 11, fontFamily: "'Roboto Mono', monospace", marginBottom: 12, lineHeight: 1.8 }}>
                     Prénom,Nom,Téléphone,Email<br/>Marina,N'GUESSAN,+225 07 12 34 56,marina@email.com<br/>David,Mensah,+225 05 33 44 55,
                   </div>
-                  <div style={{ fontSize: 11, color: '#8892a8', marginBottom: 10 }}>Seuls Prénom et Nom sont obligatoires. Statut = Nouveau, Rôle = Membre par défaut.</div>
+                  <div style={{ fontSize: 11, color: '#6b7280', marginBottom: 10 }}>Seuls Prénom et Nom sont obligatoires. Statut = Nouveau, Rôle = Membre par défaut.</div>
                   <input type="file" accept=".csv,.txt" onChange={e => {
                     const file = e.target.files?.[0]; if (!file) return
                     const parseCSV = (text) => {
@@ -306,7 +306,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                         <input type="checkbox" checked={!r._skip} onChange={() => { const rows = [...fd._csvRows]; rows[i] = { ...rows[i], _skip: !rows[i]._skip }; setFd(prev => ({ ...prev, _csvRows: rows })) }} />
                         <div style={{ flex: 1 }}>
                           <div style={{ fontSize: 12, fontWeight: 600 }}>{r.prenom} {r.nom}</div>
-                          <div style={{ fontSize: 10, color: '#8892a8' }}>{[r.telephone, r.email].filter(Boolean).join(' · ')}</div>
+                          <div style={{ fontSize: 10, color: '#6b7280' }}>{[r.telephone, r.email].filter(Boolean).join(' · ')}</div>
                         </div>
                       </div>
                     ))}
@@ -315,7 +315,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
               )}
             </div>
             <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#8892a8', true)}>Annuler</button>
+              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#6b7280', true)}>Annuler</button>
               {fd._csvRows && (() => {
                 const toImport = fd._csvRows.filter(r => !r._skip)
                 return toImport.length > 0 && (
@@ -343,7 +343,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
           <div className="modal-box" style={{ maxWidth: 380 }}>
             <div style={{ padding: '20px 24px' }}><div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Confirmation</div><div style={{ fontSize: 13, color: '#5a6480', lineHeight: 1.6 }}>{confirmAction.msg}</div></div>
             <div style={{ padding: '12px 24px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => setConfirmAction(null)} style={S.btn('#8892a8', true)}>Annuler</button>
+              <button onClick={() => setConfirmAction(null)} style={S.btn('#6b7280', true)}>Annuler</button>
               <button onClick={() => { confirmAction.fn(); setConfirmAction(null) }} style={S.btn('#e03050', false)}>Confirmer</button>
             </div>
           </div>

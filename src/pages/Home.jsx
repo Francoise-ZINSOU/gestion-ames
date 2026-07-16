@@ -47,11 +47,11 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
       )}
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 16 }}>
-        <div style={S.kpi('#0ea888')}><div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#8892a8', marginBottom: 6 }}>Total actifs</div><div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: '#0ea888' }}>{actifs.length}</div></div>
+        <div style={S.kpi('#0ea888')}><div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }}>Total actifs</div><div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: '#0ea888' }}>{actifs.length}</div></div>
         {kpiStatuts.map(([nom, { count, couleur }]) => (
-          <div key={nom} style={S.kpi(couleur)}><div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#8892a8', marginBottom: 6 }}>{nom}</div><div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: couleur }}>{count}</div></div>
+          <div key={nom} onClick={() => setPage('ames')} style={{ ...S.kpi(couleur), cursor: 'pointer' }}><div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }}>{nom}</div><div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: couleur }}>{count}</div></div>
         ))}
-        <div style={S.kpi(tG >= 80 ? '#1a9c60' : tG >= 50 ? '#d48f00' : '#e03050')}><div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#8892a8', marginBottom: 6 }}>Taux culte</div><div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: tG >= 80 ? '#1a9c60' : tG >= 50 ? '#d48f00' : '#e03050' }}>{tG}%</div></div>
+        <div style={S.kpi(tG >= 80 ? '#1a9c60' : tG >= 50 ? '#d48f00' : '#e03050')}><div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }}>Taux culte</div><div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: tG >= 80 ? '#1a9c60' : tG >= 50 ? '#d48f00' : '#e03050' }}>{tG}%</div></div>
       </div>
 
       {!lastSundaySaved && (
@@ -100,11 +100,11 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
       <div style={S.card}>
         <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 10 }}>Inscriptions récentes</div>
         {recent.length === 0
-          ? <div style={{ color: '#8892a8', fontSize: 12 }}>Aucune inscription récente.</div>
+          ? <div style={{ color: '#6b7280', fontSize: 12 }}>Aucune inscription récente.</div>
           : recent.map(m => (
             <div key={m.id} onClick={() => openFiche(m.id)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 0', borderBottom: '1px solid #e0e4ec', cursor: 'pointer' }}>
               <div style={{ flex: 1 }}><span style={{ fontSize: 11, fontWeight: 600 }}>{m.prenom} {m.nom}</span></div>
-              <span style={{ fontSize: 10, color: '#8892a8' }}>{fmtS(m.date_inscription)}</span>
+              <span style={{ fontSize: 10, color: '#6b7280' }}>{fmtS(m.date_inscription)}</span>
               <span style={S.pill(getStatutColor(refs, m.statut))}>{m.statut}</span>
             </div>
           ))

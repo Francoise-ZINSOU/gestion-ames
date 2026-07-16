@@ -10,7 +10,7 @@ export const S = {
   },
   th: {
     textAlign: 'left', padding: '6px 8px', fontSize: 9, fontWeight: 600,
-    letterSpacing: 1, textTransform: 'uppercase', color: '#8892a8',
+    letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280',
     borderBottom: '2px solid #e0e4ec', background: '#f0f2f6'
   },
   td: { padding: '7px 8px', borderBottom: '1px solid #e0e4ec', fontSize: 12 },
@@ -28,7 +28,7 @@ export const S = {
     border: outline ? '1px solid ' + c : 'none',
     background: outline ? 'transparent' : c,
     color: outline ? c : '#fff',
-    fontFamily: 'inherit', fontSize: 12, fontWeight: 600, cursor: 'pointer'
+    fontFamily: 'inherit', fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'opacity 0.15s'
   }),
   kpi: (c) => ({
     background: '#fff', border: '1px solid #e0e4ec', borderRadius: 10,
@@ -76,12 +76,12 @@ export const validTel = (t) => !t || /^[+\d\s()-]{6,}$/.test(t)
 // ── Couleur par statut ──
 export function getStatutColor(refs, statut) {
   const found = (refs.statuts || []).find(s => s.nom === statut)
-  return found?.couleur || '#8892a8'
+  return found?.couleur || '#6b7280'
 }
 
 export function getRoleColor(refs, role) {
   const found = (refs.roles || []).find(r => r.nom === role)
-  return found?.couleur || '#8892a8'
+  return found?.couleur || '#6b7280'
 }
 
 // ── Toast ──
@@ -102,6 +102,6 @@ import { useState, useCallback } from 'react'
 
 export function useToast() {
   const [msg, setMsg] = useState('')
-  const show = useCallback((m) => { setMsg(m); setTimeout(() => setMsg(''), 2500) }, [])
+  const show = useCallback((m) => { setMsg(m); setTimeout(() => setMsg(''), 3500) }, [])
   return { toast: msg, showToast: show }
 }

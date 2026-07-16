@@ -51,14 +51,14 @@ export default function ExportPage({ membres, presences, entretiens, defis, refs
         {items.map(({ t, Icon, l, n, c }) => (
           <div key={t} onClick={() => doExport(t)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', borderRadius: 8, border: '1px solid #e0e4ec', cursor: 'pointer', marginBottom: 6 }}>
             <div style={{ width: 32, height: 32, borderRadius: '50%', background: c + '14', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon size={16} color={c} /></div>
-            <div style={{ flex: 1 }}><div style={{ fontSize: 13, fontWeight: 600 }}>{l}</div><div style={{ fontSize: 10, color: '#8892a8' }}>{n} enregistrement(s)</div></div>
+            <div style={{ flex: 1 }}><div style={{ fontSize: 13, fontWeight: 600 }}>{l}</div><div style={{ fontSize: 10, color: '#6b7280' }}>{n} enregistrement(s)</div></div>
             <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: c, fontWeight: 600 }}><Download size={13} /> CSV</span>
           </div>
         ))}
       </div>
       <div style={{ ...S.card, marginTop: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, marginBottom: 4, color: '#e03050' }}><Trash2 size={14} /> Réinitialiser</div>
-        <div style={{ fontSize: 11, color: '#8892a8', marginBottom: 10 }}>Supprime tous les membres, présences, entretiens et défis. Les tables de référence sont conservées.</div>
+        <div style={{ fontSize: 11, color: '#6b7280', marginBottom: 10 }}>Supprime tous les membres, présences, entretiens et défis. Les tables de référence sont conservées.</div>
         <button onClick={() => setConfirmAction({ msg: 'Supprimer TOUTES les données pastorales ?\n\nCette action est irréversible.', fn: doReset })} style={S.btn('#e03050', true)}>Réinitialiser</button>
       </div>
       {confirmAction && (
@@ -66,7 +66,7 @@ export default function ExportPage({ membres, presences, entretiens, defis, refs
           <div className="modal-box" style={{ maxWidth: 380 }}>
             <div style={{ padding: '20px 24px' }}><div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Confirmation</div><div style={{ fontSize: 13, color: '#5a6480', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{confirmAction.msg}</div></div>
             <div style={{ padding: '12px 24px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => setConfirmAction(null)} style={S.btn('#8892a8', true)}>Annuler</button>
+              <button onClick={() => setConfirmAction(null)} style={S.btn('#6b7280', true)}>Annuler</button>
               <button onClick={() => { confirmAction.fn(); setConfirmAction(null) }} disabled={resetting} style={{ ...S.btn('#e03050', false), opacity: resetting ? 0.6 : 1 }}>{resetting ? 'Suppression...' : 'Confirmer'}</button>
             </div>
           </div>

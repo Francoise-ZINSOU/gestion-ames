@@ -43,12 +43,21 @@ export function AuthProvider({ children }) {
     try {
       const { data } = await supabase
         .from('profils')
-        .select('*')
+        .select('*, familles_disciples(nom, eglises(nom))')
         .eq('id', userId)
         .single()
-      if (data) setProfil(data)
+      if (data) {
+        // Flatten famille/église names for easy access
+        data.famille_nom = data.familles_disciples?.nom || null
+        data.eglise_nom = data.familles_disciples?.eglises?.nom || null
+        setProfil(data)
+      }
     } catch (e) {
-      console.error('Erreur chargement profil:', e)
+      // Fallback: load without join if tables don't exist yet
+      try {
+        const { data } = await supabase.from('profils').select('*').eq('id', userId).single()
+        if (data) setProfil(data)
+      } catch (e2) { console.error('Erreur chargement profil:', e2) }
     }
     profilLoading.current = false
     setLoading(false)

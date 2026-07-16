@@ -21,7 +21,7 @@ function AccordionRefTable({ table, label, fields, showToast }) {
     <div style={{ marginBottom: 4 }}>
       <div onClick={() => setOpen(!open)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: open ? '#0ea88808' : '#f0f2f6', borderRadius: 7, cursor: 'pointer', border: '1px solid ' + (open ? '#0ea88833' : '#e0e4ec') }}>
         <span style={{ fontSize: 12, fontWeight: 600, color: open ? '#0ea888' : '#5a6480' }}>{label}</span>
-        <span style={{ fontSize: 11, color: '#8892a8' }}>{open ? '▲' : '▼'}</span>
+        <span style={{ fontSize: 11, color: '#6b7280' }}>{open ? '▲' : '▼'}</span>
       </div>
       {open && <div style={{ padding: '10px 4px' }}><RefTable table={table} label={label} fields={fields} showToast={showToast} /></div>}
     </div>
@@ -45,7 +45,7 @@ function RefTable({ table, label, fields, showToast }) {
         <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0', borderBottom: '1px solid #e0e4ec', opacity: r.actif ? 1 : 0.4 }}>
           {r.couleur && <div style={{ width: 12, height: 12, borderRadius: 3, background: r.couleur, flexShrink: 0 }} />}
           <span style={{ flex: 1, fontSize: 12 }}>{r.nom}</span>
-          <button onClick={() => desactiver(r.id, !r.actif)} style={{ background: 'none', border: 'none', fontSize: 10, color: r.actif ? '#8892a8' : '#0ea888', cursor: 'pointer' }}>
+          <button onClick={() => desactiver(r.id, !r.actif)} style={{ background: 'none', border: 'none', fontSize: 10, color: r.actif ? '#6b7280' : '#0ea888', cursor: 'pointer' }}>
             {r.actif ? 'Désactiver' : 'Réactiver'}
           </button>
         </div>
@@ -97,7 +97,7 @@ function UsersTable({ showToast, actifs }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
               <div style={{ flex: 1, minWidth: 120 }}>
                 <div style={{ fontSize: 12, fontWeight: 600 }}>{p.nom_affiche || p.email}</div>
-                <div style={{ fontSize: 10, color: '#8892a8' }}>{p.email}</div>
+                <div style={{ fontSize: 10, color: '#6b7280' }}>{p.email}</div>
               </div>
               <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, cursor: 'pointer' }}>
                 <input type="checkbox" checked={p.est_responsable || false} onChange={e => handleRole(p.id, e.target.checked, p.est_admin)} />
@@ -169,7 +169,7 @@ function EglisePanel({ showToast }) {
         {eglises.map(e => (
           <div key={e.id} style={{ padding: '6px 0', borderBottom: '1px solid #e0e4ec', fontSize: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{ fontWeight: 600 }}>{e.nom}</span>
-            <span style={{ fontSize: 10, color: '#8892a8' }}>({familles.filter(f => f.eglise_id === e.id).length} famille(s))</span>
+            <span style={{ fontSize: 10, color: '#6b7280' }}>({familles.filter(f => f.eglise_id === e.id).length} famille(s))</span>
           </div>
         ))}
         <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
@@ -185,7 +185,7 @@ function EglisePanel({ showToast }) {
           return (
             <div key={f.id} style={{ padding: '6px 0', borderBottom: '1px solid #e0e4ec', fontSize: 12 }}>
               <span style={{ fontWeight: 600 }}>{f.nom}</span>
-              <span style={{ fontSize: 10, color: '#8892a8', marginLeft: 6 }}>({eg?.nom})</span>
+              <span style={{ fontSize: 10, color: '#6b7280', marginLeft: 6 }}>({eg?.nom})</span>
             </div>
           )
         })}
@@ -202,7 +202,7 @@ function EglisePanel({ showToast }) {
       </div>
 
       {eglises.length === 0 && (
-        <div style={{ padding: 12, textAlign: 'center', color: '#8892a8', fontSize: 11 }}>
+        <div style={{ padding: 12, textAlign: 'center', color: '#6b7280', fontSize: 11 }}>
           Créez une église pour commencer. Les familles de disciples permettront ensuite de séparer les données par groupe.
         </div>
       )}
@@ -216,9 +216,9 @@ export default function ParamsPage({ showToast, actifs }) {
   return (
     <div>
       <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
-        <button onClick={() => setTab('refs')} style={{ ...S.btn(tab === 'refs' ? '#0ea888' : '#8892a8', tab !== 'refs'), fontFamily: 'inherit' }}>Références</button>
-        <button onClick={() => setTab('users')} style={{ ...S.btn(tab === 'users' ? '#0ea888' : '#8892a8', tab !== 'users'), fontFamily: 'inherit' }}>Utilisateurs</button>
-        <button onClick={() => setTab('eglise')} style={{ ...S.btn(tab === 'eglise' ? '#0ea888' : '#8892a8', tab !== 'eglise'), fontFamily: 'inherit' }}>Église</button>
+        <button onClick={() => setTab('refs')} style={{ ...S.btn(tab === 'refs' ? '#0ea888' : '#6b7280', tab !== 'refs'), fontFamily: 'inherit' }}>Références</button>
+        <button onClick={() => setTab('users')} style={{ ...S.btn(tab === 'users' ? '#0ea888' : '#6b7280', tab !== 'users'), fontFamily: 'inherit' }}>Utilisateurs</button>
+        <button onClick={() => setTab('eglise')} style={{ ...S.btn(tab === 'eglise' ? '#0ea888' : '#6b7280', tab !== 'eglise'), fontFamily: 'inherit' }}>Église</button>
       </div>
       <div style={S.card}>
         {tab === 'users' ? <UsersTable showToast={showToast} actifs={actifs} />
