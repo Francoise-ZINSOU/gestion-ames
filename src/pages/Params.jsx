@@ -59,7 +59,12 @@ function RefTable({ table, label, fields, showToast }) {
 }
 
 function UsersTable({ showToast, actifs }) {
-  const { profils, setRole } = useProfils()
+  const { profils, setRole, reload: reloadProfils } = useProfils()
+  const [familles, setFamilles] = useState([])
+
+  useState(() => {
+    supabase.from('familles_disciples').select('*, eglises(nom)').order('nom').then(({ data }) => setFamilles(data || []))
+  })
 
   const handleRole = async (id, resp, admin) => {
     try { await setRole(id, resp, admin); showToast('✓ Droits mis à jour') }
@@ -70,7 +75,15 @@ function UsersTable({ showToast, actifs }) {
     try {
       const { error } = await supabase.from('profils').update({ membre_id: membreId || null }).eq('id', profilId)
       if (error) throw error
-      showToast('✓ Membre lié')
+      showToast('✓ Membre lié'); reloadProfils()
+    } catch (e) { showToast('⚠ ' + e.message) }
+  }
+
+  const linkFamille = async (profilId, familleId) => {
+    try {
+      const { error } = await supabase.from('profils').update({ famille_id: familleId || null }).eq('id', profilId)
+      if (error) throw error
+      showToast('✓ Famille assignée'); reloadProfils()
     } catch (e) { showToast('⚠ ' + e.message) }
   }
 
@@ -102,6 +115,14 @@ function UsersTable({ showToast, actifs }) {
               </select>
               {linkedMembre && <span style={{ fontSize: 10, color: '#0ea888', marginLeft: 6 }}>→ {linkedMembre.prenom} {linkedMembre.nom}</span>}
             </div>
+            {familles.length > 0 && (
+              <div style={{ marginTop: 4 }}>
+                <select value={p.famille_id || ''} onChange={e => linkFamille(p.id, e.target.value || null)} style={{ fontSize: 10, padding: '3px 6px', border: '1px solid #e0e4ec', borderRadius: 4, background: p.famille_id ? '#0ea88808' : '#e0305008', color: '#5a6480', fontFamily: 'inherit', width: '100%', maxWidth: 250 }}>
+                  <option value="">— Assigner à une famille —</option>
+                  {familles.map(f => <option key={f.id} value={f.id}>{f.eglises?.nom} → {f.nom}</option>)}
+                </select>
+              </div>
+            )}
           </div>
         )
       })}

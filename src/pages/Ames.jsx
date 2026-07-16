@@ -121,11 +121,11 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
       </div>
       {/* Filtres + actions — une seule ligne */}
       <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 12, flexWrap: 'wrap' }}>
-        <select value={fRole} onChange={e => setFRole(e.target.value)} style={{ ...S.inp, flex: '1 1 0', minWidth: 90, fontSize: 11, padding: '6px 4px' }}>
+        <select value={fRole} onChange={e => setFRole(e.target.value)} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #c8cfe0', background: '#f0f2f6', fontFamily: 'inherit', fontSize: 11, color: '#1a1e2e', outline: 'none' }}>
           <option value="all">Tous rôles</option>
           {(refs.roles || []).map(r => <option key={r.nom} value={r.nom}>{r.nom}</option>)}
         </select>
-        <select value={fSt} onChange={e => setFSt(e.target.value)} style={{ ...S.inp, flex: '1 1 0', minWidth: 90, fontSize: 11, padding: '6px 4px' }}>
+        <select value={fSt} onChange={e => setFSt(e.target.value)} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #c8cfe0', background: '#f0f2f6', fontFamily: 'inherit', fontSize: 11, color: '#1a1e2e', outline: 'none' }}>
           <option value="actifs">Actifs</option>
           <option value="all">Tous</option>
           <option value="__archived">Archivés</option>

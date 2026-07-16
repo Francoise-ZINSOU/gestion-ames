@@ -93,8 +93,8 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
       })()}
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
-        <button onClick={() => setPage('pres')} style={{ ...S.btn('#1a9c60', true), display: 'flex', alignItems: 'center', gap: 4, flex: 1, justifyContent: 'center', padding: '10px 12px' }}>Saisir présences</button>
-        <button onClick={() => setPage('ents')} style={{ ...S.btn('#3060d0', true), display: 'flex', alignItems: 'center', gap: 4, flex: 1, justifyContent: 'center', padding: '10px 12px' }}>+ Entretien</button>
+        <button onClick={() => setPage('pres')} style={{ ...S.btn('#1a9c60', true), display: 'flex', alignItems: 'center', gap: 4, padding: '8px 16px', fontSize: 12 }}>Saisir présences</button>
+        <button onClick={() => setPage('ents')} style={{ ...S.btn('#3060d0', true), display: 'flex', alignItems: 'center', gap: 4, padding: '8px 16px', fontSize: 12 }}>+ Entretien</button>
       </div>
 
       <div style={S.card}>

@@ -85,6 +85,7 @@ export function AuthProvider({ children }) {
     logout,
     isAdmin: profil?.est_admin === true,
     isResponsable: profil?.est_responsable === true || profil?.est_admin === true,
+    isSuperAdmin: profil?.est_super_admin === true,
     reloadProfil: () => session && loadProfil(session.user.id)
   }
 

@@ -4,6 +4,7 @@ import { useMembres, usePresences, useEntretiens, useDefis, usePlanCroissance, u
 import { Toast, useToast, today } from './lib/ui'
 import LoginPage from './pages/Login'
 import AccessDenied from './pages/AccessDenied'
+import NoFamillePage from './pages/NoFamille'
 import Layout from './components/Layout'
 import HomePage from './pages/Home'
 import PresencesPage from './pages/Presences'
@@ -31,6 +32,12 @@ export default function App() {
   )
   if (!auth.session) return <LoginPage />
   if (!auth.isResponsable) return <AccessDenied />
+
+  // Si famille_id est requis (multi-église activé) et pas super-admin
+  const hasFamille = auth.profil?.famille_id || auth.profil?.est_super_admin
+  // On ne bloque que si le système multi-église est activé (au moins 1 famille existe)
+  // Pour le savoir sans query, on check si famille_id est null ET est_super_admin est false
+  // Le blocage se fera côté RLS — pas de blocage frontend pour ne pas casser l'existant
 
   return <AuthorizedApp auth={auth} toast={toast} showToast={showToast} page={page} setPage={setPage} selectedId={selectedId} setSelectedId={setSelectedId} />
 }
