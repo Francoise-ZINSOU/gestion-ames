@@ -146,7 +146,12 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
       {/* Bulk actions */}
       {bulkMode && (
         <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 8, padding: '8px 12px', background: '#7040d008', borderRadius: 7, border: '1px solid #7040d033', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 11, color: '#7040d0', fontWeight: 600 }}>{Object.values(bulkSel).filter(Boolean).length} sélectionné(s)</span>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, cursor: 'pointer' }}>
+            <input type="checkbox" checked={filt.length > 0 && filt.every(m => bulkSel[m.id])} onChange={e => {
+              const newSel = {}; if (e.target.checked) { filt.forEach(m => { newSel[m.id] = true }) }; setBulkSel(newSel)
+            }} />
+            <span style={{ color: '#7040d0', fontWeight: 600 }}>{Object.values(bulkSel).filter(Boolean).length}/{filt.length}</span>
+          </label>
           <select id="bulk-statut" style={{ fontSize: 11, padding: '4px 6px', borderRadius: 4, border: '1px solid #e0e4ec' }}>
             <option value="">Changer statut →</option>
             {(refs.statuts || []).filter(s => !s.est_archive).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}
@@ -160,6 +165,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
               for (const id of ids) { await modifierMembre(id, { statut: st }) }
               showToast('✓ ' + ids.length + ' membre(s) mis à jour')
               setBulkSel({}); setBulkMode(false)
+              reloadMembres()
             } catch (e) { showToast('⚠ ' + (e.message || 'Erreur')) }
           }} style={S.btn('#7040d0', false)}>Appliquer</button>
           <select id="bulk-suiveur" style={{ fontSize: 11, padding: '4px 6px', borderRadius: 4, border: '1px solid #e0e4ec' }}>
@@ -175,6 +181,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
               for (const id of ids) { await modifierMembre(id, { suivi_par: suivId }) }
               showToast('✓ ' + ids.length + ' membre(s) assigné(s)')
               setBulkSel({}); setBulkMode(false)
+              reloadMembres()
             } catch (e) { showToast('⚠ ' + (e.message || 'Erreur')) }
           }} style={S.btn('#0ea888', false)}>Assigner</button>
           <button onClick={() => { setBulkMode(false); setBulkSel({}) }} style={S.btn('#6b7280', true)}>Annuler</button>
@@ -190,11 +197,15 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
             {/* Desktop: tableau */}
             <div className="desk-only">
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead><tr>{['Nom', 'Rôle', 'Inscr.', 'Suivi par', 'Statut', 'Prés.', 'Ent.'].map(h => <th key={h} style={S.th}>{h}</th>)}</tr></thead>
+                <thead><tr>
+                  {bulkMode && <th style={{ ...S.th, width: 32 }}></th>}
+                  {['Nom', 'Rôle', 'Inscr.', 'Suivi par', 'Statut', 'Prés.', 'Ent.'].map(h => <th key={h} style={S.th}>{h}</th>)}
+                </tr></thead>
                 <tbody>{filt.map(m => {
                   const t = taux(m.id)
                   return (
-                    <tr key={m.id} onClick={() => openFiche(m.id)} style={{ cursor: 'pointer', opacity: m.archive ? 0.5 : 1 }}>
+                    <tr key={m.id} onClick={() => bulkMode ? setBulkSel(prev => ({ ...prev, [m.id]: !prev[m.id] })) : openFiche(m.id)} style={{ cursor: 'pointer', opacity: m.archive ? 0.5 : 1, background: bulkSel[m.id] ? '#7040d008' : 'transparent' }}>
+                      {bulkMode && <td style={S.td}><input type="checkbox" checked={!!bulkSel[m.id]} readOnly /></td>}
                       <td style={S.td}><span style={{ fontWeight: 600, color: '#0ea888' }}>{m.prenom} {m.nom}</span></td>
                       <td style={S.td}><span style={S.pill(getRoleColor(refs, m.role))}>{m.role}</span></td>
                       <td style={{ ...S.td, color: '#5a6480' }}>{fmtS(m.date_inscription)}</td>

@@ -17,6 +17,7 @@ import HistoriquePage from './pages/Historique'
 import FiliationPage from './pages/Filiation'
 import ExportPage from './pages/Export'
 import ParamsPage from './pages/Params'
+import VueEglisePage from './pages/VueEglise'
 import MenuMobile from './pages/MenuMobile'
 
 export default function App() {

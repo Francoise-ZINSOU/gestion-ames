@@ -4,7 +4,7 @@ import { Home, CheckSquare, TrendingUp, Users, GitBranch, Bell, MessageCircle, B
 const navIcons = {
   home: Home, pres: CheckSquare, timeline: TrendingUp, ames: Users,
   filia: GitBranch, alerts: Bell, ents: MessageCircle, protos: BookOpen,
-  export: Download, params: Settings, fiche: Search, menu: Menu
+  export: Download, params: Settings, fiche: Search, menu: Menu, vueEglise: Building2
 }
 
 export default function Layout({ page, setPage, alertCount, membreCount, selectedMembre, children, auth }) {
@@ -29,7 +29,7 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
   }
 
   const titles = {
-    home: 'Tableau de bord', pres: 'Saisie des présences', ames: 'Liste des âmes',
+    home: 'Tableau de bord', pres: 'Saisie des présences', ames: 'Liste des âmes', vueEglise: 'Vue église',
     fiche: 'Fiche 360°', alerts: 'Alertes croisées', ents: 'Entretiens',
     protos: 'Plan de croissance', timeline: 'Historique', filia: 'Arbre de suivi',
     export: 'Export', params: 'Paramètres', menu: 'Menu'
@@ -123,6 +123,8 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
         }
         .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:500;display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;box-sizing:border-box;-webkit-overflow-scrolling:touch}
         body:has(.modal-overlay){overflow:hidden!important}
+        .hide-scrollbar{scrollbar-width:none;-ms-overflow-style:none}
+        .hide-scrollbar::-webkit-scrollbar{display:none;width:0;height:0}
         .modal-overlay.danger{background:rgba(0,0,0,.5);z-index:600}
         .modal-box{width:100%;background:#fff;border-radius:12px;overflow:hidden;box-sizing:border-box;margin-top:4vh;max-height:92vh;max-height:92dvh;display:flex;flex-direction:column}
         .modal-box>div:nth-child(2){overflow-y:auto;flex:1}

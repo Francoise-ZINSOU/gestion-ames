@@ -98,12 +98,14 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: 5, marginBottom: 10, alignItems: 'center', overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 4, position: 'sticky', top: 48, zIndex: 40, background: '#f4f6f9' }}>
-        <button onClick={() => setPage(prevPage || 'ames')} style={S.btn('#5a6480', true)}>{({ alerts: '← Alertes', ames: '← Liste', ents: '← Entretiens', home: '← Accueil' })[prevPage] || '← Liste'}</button>
-        {[['id', 'Identité', ClipboardList], ['pr', 'Présences', BarChart3], ['en', 'Entretiens', MessageCircle], ['df', 'Défis', Zap], ['pt', 'Plan', BookOpen], ['jn', 'Journal', NotebookPen]].map(([id, label, Icon]) => (
-          <button key={id} onClick={() => setFtab(id)} style={{ padding: '4px 12px', borderRadius: 14, border: '1px solid ' + (ftab === id ? '#0ea888' : '#e0e4ec'), background: ftab === id ? '#0ea88814' : '#f0f2f6', color: ftab === id ? '#0ea888' : '#5a6480', fontSize: 11, fontWeight: ftab === id ? 600 : 500, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4 }}><Icon size={12} /> {label}</button>
-        ))}
-        <div style={{ marginLeft: 'auto', position: 'relative' }}>
+      <div style={{ display: 'flex', gap: 5, marginBottom: 10, alignItems: 'center', position: 'sticky', top: 48, zIndex: 40, background: '#f4f6f9', paddingBottom: 4 }}>
+        <button onClick={() => setPage(prevPage || 'ames')} style={{ ...S.btn('#5a6480', true), flexShrink: 0 }}>{({ alerts: '← Alertes', ames: '← Liste', ents: '← Entretiens', home: '← Accueil' })[prevPage] || '← Liste'}</button>
+        <div className="hide-scrollbar" style={{ display: 'flex', gap: 5, alignItems: 'center', overflowX: 'auto', WebkitOverflowScrolling: 'touch', flex: 1, minWidth: 0 }}>
+          {[['id', 'Identité', ClipboardList], ['pr', 'Présences', BarChart3], ['en', 'Entretiens', MessageCircle], ['df', 'Défis', Zap], ['pt', 'Plan', BookOpen], ['jn', 'Journal', NotebookPen]].map(([id, label, Icon]) => (
+            <button key={id} onClick={() => setFtab(id)} style={{ padding: '4px 12px', borderRadius: 14, border: '1px solid ' + (ftab === id ? '#0ea888' : '#e0e4ec'), background: ftab === id ? '#0ea88814' : '#f0f2f6', color: ftab === id ? '#0ea888' : '#5a6480', fontSize: 11, fontWeight: ftab === id ? 600 : 500, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap', flexShrink: 0 }}><Icon size={12} /> {label}</button>
+          ))}
+        </div>
+        <div style={{ position: 'relative', flexShrink: 0 }}>
           <button onClick={() => setShowActionMenu(!showActionMenu)} style={{ ...S.btn('#5a6480', true), display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', fontSize: 13 }}>⋯ Actions</button>
           {showActionMenu && (
             <>
@@ -577,6 +579,8 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
 
                   showToast('✓ Membre transféré')
                   setModal(null); setFd({})
+                  reloadMembres()
+                  setPage(prevPage || 'ames')
                 } catch (e) { showToast('⚠ ' + (e.message || 'Erreur')) }
               }} style={{ ...S.btn('#7040d0', false), opacity: fd._transferFamilleId ? 1 : 0.5 }}>Transférer</button>
             </div>

@@ -95,6 +95,7 @@ export function AuthProvider({ children }) {
     isAdmin: profil?.est_admin === true,
     isResponsable: profil?.est_responsable === true || profil?.est_admin === true,
     isSuperAdmin: profil?.est_super_admin === true,
+    isBergerEglise: profil?.est_berger_eglise === true,
     reloadProfil: () => session && loadProfil(session.user.id)
   }
 

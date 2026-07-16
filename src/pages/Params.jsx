@@ -79,6 +79,17 @@ function UsersTable({ showToast, actifs, refs }) {
     } catch (e) { showToast('⚠ ' + e.message) }
   }
 
+  const linkBergerEglise = async (profilId, checked, egliseId) => {
+    try {
+      const updates = { est_berger_eglise: checked }
+      if (checked && egliseId) updates.eglise_id = egliseId
+      const { error } = await supabase.from('profils').update(updates).eq('id', profilId)
+      if (error) throw error
+      showToast(checked ? '✓ Berger d\'église assigné' : '✓ Retiré')
+      reloadProfils()
+    } catch (e) { showToast('⚠ ' + e.message) }
+  }
+
   const linkFamille = async (profilId, familleId) => {
     try {
       const { error } = await supabase.from('profils').update({ famille_id: familleId || null }).eq('id', profilId)
@@ -106,6 +117,13 @@ function UsersTable({ showToast, actifs, refs }) {
               <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, cursor: 'pointer' }}>
                 <input type="checkbox" checked={p.est_admin || false} onChange={e => handleRole(p.id, p.est_responsable, e.target.checked)} />
                 Admin
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, cursor: 'pointer', color: '#7040d0' }}>
+                <input type="checkbox" checked={p.est_berger_eglise || false} onChange={e => {
+                  const famille = familles.find(f => f.id === p.famille_id)
+                  linkBergerEglise(p.id, e.target.checked, famille?.eglise_id)
+                }} />
+                Berger d'église
               </label>
             </div>
             <div style={{ marginTop: 4 }}>
