@@ -9,6 +9,9 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
   })
   const kpiStatuts = Object.entries(statutCounts).filter(([, v]) => v.count > 0 || v.ordre <= 3).sort((a, b) => a[1].ordre - b[1].ordre)
 
+  // Culte (utilisé pour taux et rappel)
+  const culte = h.culteId ? { id: h.culteId } : null
+
   // Rappel présences : dernier dimanche saisi ?
   const lastSunday = (() => {
     const d = new Date(); d.setDate(d.getDate() - d.getDay()); return d.toISOString().slice(0, 10)
@@ -16,7 +19,6 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
   const lastSundaySaved = culte ? presences.some(p => p.activite_id === culte.id && p.date_presence === lastSunday) : true
 
   // Taux culte global (moyenne des taux individuels, chaque âme compte)
-  const culte = h.culteId ? { id: h.culteId } : null
   let tG = 0
   if (culte) {
     const membresAvecTaux = actifs.map(m => {

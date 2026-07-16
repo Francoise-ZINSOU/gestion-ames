@@ -39,8 +39,10 @@ export default function PresencesPage({ actifs, presences, refs, sauverPresences
 
   const handleSave = async () => {
     const presentIds = Object.keys(chk).filter(k => chk[k])
-    await sauverPresences(actId, date, presentIds)
-    setSaved(true)
+    try {
+      await sauverPresences(actId, date, presentIds)
+      setSaved(true)
+    } catch (e) { /* w() gère le toast */ }
   }
 
   const handleDelete = () => {

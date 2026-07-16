@@ -25,8 +25,10 @@ export default function EntretiensPage({ entretiens, membres, actifs, refs, h, o
 
   const handleSave = async () => {
     if (!fd.membre_id) { showToast('⚠ Sélectionnez un membre'); return }
-    await ajouterEnt({ membre_id: fd.membre_id, date_entretien: fd.date_entretien || today(), avec_qui: fd.avec_qui || null, sujet_id: fd.sujet_id || null, sujet_libre: fd.sujet_libre || null, statut: fd.statut || h.defaultStatutEnt, commentaires: fd.commentaires || '' })
-    setModal(null); setFd({})
+    try {
+      await ajouterEnt({ membre_id: fd.membre_id, date_entretien: fd.date_entretien || today(), avec_qui: fd.avec_qui || null, sujet_id: fd.sujet_id || null, sujet_libre: fd.sujet_libre || null, statut: fd.statut || h.defaultStatutEnt, commentaires: fd.commentaires || '' })
+      setModal(null); setFd({})
+    } catch (e) { showToast('⚠ ' + (e.message || 'Erreur')) }
   }
 
   return (

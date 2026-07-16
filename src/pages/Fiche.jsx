@@ -80,14 +80,18 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
       return
     }
     const data = { membre_id: m.id, date_entretien: dateEnt, avec_qui: fd.avec_qui || null, sujet_id: fd.sujet_id || null, sujet_libre: fd.sujet_libre || null, statut: fd.statut || h.defaultStatutEnt, commentaires: fd.commentaires || '' }
-    if (editEntId) { await modifierEnt(editEntId, data) }
-    else { await ajouterEnt(data) }
-    setModal(null); setFd({}); setEditEntId(null)
+    try {
+      if (editEntId) { await modifierEnt(editEntId, data) }
+      else { await ajouterEnt(data) }
+      setModal(null); setFd({}); setEditEntId(null)
+    } catch (e) { showToast('⚠ ' + (e.message || 'Erreur')) }
   }
 
   const handleSaveDefi = async () => {
-    await ajouterDefi({ membre_id: m.id, type_defi: fd.type_defi || (refs.typesDefi[0]?.nom), description: fd.description || '', statut: fd.statut_defi || h.defaultStatutDefi })
-    setModal(null); setFd({})
+    try {
+      await ajouterDefi({ membre_id: m.id, type_defi: fd.type_defi || (refs.typesDefi[0]?.nom), description: fd.description || '', statut: fd.statut_defi || h.defaultStatutDefi })
+      setModal(null); setFd({})
+    } catch (e) { showToast('⚠ ' + (e.message || 'Erreur')) }
   }
 
   return (
@@ -407,9 +411,11 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
         const nSel = Object.keys(sel).filter(k => sel[k]).length
         const toggleMod = (id) => setFd(prev => ({ ...prev, _asModIds: { ...(prev._asModIds || {}), [id]: !(prev._asModIds || {})[id] } }))
         const doAssignAll = async () => {
-          const ids = Object.keys(sel).filter(k => sel[k])
-          for (const modId of ids) { await assignerModule(m.id, modId, fd._asDefiId) }
-          setModal(null); setFd({})
+          try {
+            const ids = Object.keys(sel).filter(k => sel[k])
+            for (const modId of ids) { await assignerModule(m.id, modId, fd._asDefiId) }
+            setModal(null); setFd({})
+          } catch (e) { showToast('⚠ ' + (e.message || 'Erreur')) }
         }
         return (
           <div className="modal-overlay">
