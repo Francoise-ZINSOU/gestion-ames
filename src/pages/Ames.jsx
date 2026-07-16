@@ -127,10 +127,14 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
         </select>
         <select value={fSt} onChange={e => setFSt(e.target.value)} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #c8cfe0', background: '#f0f2f6', fontFamily: 'inherit', fontSize: 11, color: '#1a1e2e', outline: 'none' }}>
           <option value="actifs">Actifs</option>
-          <option value="all">Tous</option>
-          <option value="__archived">Archivés</option>
-          {myMembre && <option value="__mysuivis">Mes suivis</option>}
-          {(refs.statuts || []).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}
+          {myMembre && <option value="__mysuivis">★ Mes suivis</option>}
+          <optgroup label="— Par statut —">
+            {(refs.statuts || []).filter(s => !s.est_archive).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}
+          </optgroup>
+          <optgroup label="— Autres —">
+            <option value="__archived">Archivés</option>
+            <option value="all">Tout afficher</option>
+          </optgroup>
         </select>
         <button onClick={() => { setFd({ statut: h.defaultStatut, role: h.defaultRole, date_inscription: today() }); setModal('add') }} style={{ ...S.btn('#0ea888', false), whiteSpace: 'nowrap', padding: '6px 12px', fontSize: 12 }}>+ Âme</button>
         <button onClick={() => setModal('import')} style={{ ...S.btn('#3060d0', true), display: 'flex', alignItems: 'center', gap: 3, whiteSpace: 'nowrap', padding: '6px 10px', fontSize: 11 }}><Upload size={12} /> CSV</button>
