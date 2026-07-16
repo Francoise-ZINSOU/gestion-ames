@@ -134,11 +134,14 @@ export default function VueEglisePage({ auth, refs, h }) {
   return (
     <div>
       {/* KPIs globaux */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 16 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 8 }}>
         {kpi(Users, 'Total actifs', totalMembres, familles.length + ' famille(s)', '#0ea888')}
-        {kpi(TrendingUp, 'Taux culte moyen', avgCulte !== null ? avgCulte + '%' : '—', '4 dernières sem.', '#3060d0')}
+        {kpi(TrendingUp, 'Taux culte moyen', avgCulte !== null ? avgCulte + '%' : '—', '4 derniers dimanches', '#3060d0')}
         {kpi(UserPlus, 'Nouveaux 30j', totalNouveaux, 'toutes familles', '#1a9c60')}
         {kpi(AlertTriangle, 'Familles à risque', critiques.length, '< 80% dimanche dernier', critiques.length > 0 ? '#e03050' : '#6b7280')}
+      </div>
+      <div style={{ fontSize: 10, color: '#6b7280', marginBottom: 14, fontStyle: 'italic' }}>
+        💡 <strong>Tendance</strong> : évolution du taux de présence sur les 4 derniers dimanches vs 4 précédents. +10 pts = croissance, -10 pts = alerte.
       </div>
 
       {/* Familles à risque - critique */}
@@ -176,7 +179,7 @@ export default function VueEglisePage({ auth, refs, h }) {
               </div>
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontSize: 15, fontWeight: 700, color: '#d48f00', fontFamily: "'Outfit', sans-serif" }}>{stats[f.id].trend > 0 ? '+' : ''}{stats[f.id].trend} pts</div>
-                <div style={{ fontSize: 10, color: '#6b7280' }}>vs 4 sem. précédentes</div>
+                <div style={{ fontSize: 10, color: '#6b7280' }}>vs 4 dimanches précédents</div>
               </div>
             </div>
           ))}
@@ -190,7 +193,16 @@ export default function VueEglisePage({ auth, refs, h }) {
         {/* Desktop table */}
         <div className="desk-only">
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead><tr>{['Famille', 'Berger', 'Membres', 'Culte 4sem', 'Tendance', 'Dim. dernier', 'Nouveaux', 'Entretiens'].map(h => <th key={h} style={S.th}>{h}</th>)}</tr></thead>
+            <thead><tr>
+              <th style={S.th}>Famille</th>
+              <th style={S.th}>Berger</th>
+              <th style={S.th}>Membres</th>
+              <th style={S.th}>Taux moy. 4 dim.</th>
+              <th style={S.th} title="Évolution du taux : moyenne des 4 derniers dimanches vs 4 précédents. Positif = famille en croissance, négatif = alerte.">Tendance <span style={{ color: '#7040d0', cursor: 'help', fontSize: 10 }}>ⓘ</span></th>
+              <th style={S.th}>Taux dim. dernier</th>
+              <th style={S.th}>Nouveaux 30j</th>
+              <th style={S.th}>Entretiens 30j</th>
+            </tr></thead>
             <tbody>
               {familles.map(f => {
                 const s = stats[f.id] || {}
@@ -230,9 +242,9 @@ export default function VueEglisePage({ auth, refs, h }) {
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 10, fontSize: 10, color: '#6b7280' }}>
-                  <span>Dim: <strong style={{ color: s.lastSundayRate < 80 ? '#e03050' : '#1a9c60' }}>{s.lastSundayRate !== null ? s.lastSundayRate + '%' : '—'}</strong></span>
-                  <span>Nouveaux: <strong>{s.nouveaux}</strong></span>
-                  <span>Entretiens: <strong>{s.entMonth}</strong></span>
+                  <span>Dim. dernier: <strong style={{ color: s.lastSundayRate < 80 ? '#e03050' : '#1a9c60' }}>{s.lastSundayRate !== null ? s.lastSundayRate + '%' : '—'}</strong></span>
+                  <span>Nouveaux 30j: <strong>{s.nouveaux}</strong></span>
+                  <span>Entretiens 30j: <strong>{s.entMonth}</strong></span>
                 </div>
               </div>
             )

@@ -208,7 +208,13 @@ export function useRefs() {
     })
     setLoading(false)
   }, [])
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    load()
+    const channel = supabase.channel('refs-activites-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'activites' }, () => load())
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [load])
   return { refs, loading, reload: load }
 }
 
@@ -308,7 +314,13 @@ export function useDatesAnnulees() {
     const { data } = await supabase.from('dates_annulees').select('*').order('date_annulee', { ascending: false })
     setDates(data || []); setLoading(false)
   }, [])
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    load()
+    const channel = supabase.channel('dates-annulees-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'dates_annulees' }, () => load())
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [load])
   const ajouter = async (activiteId, dateAnnulee, motif) => {
     const { data, error } = await supabase.from('dates_annulees').insert({ activite_id: activiteId, date_annulee: dateAnnulee, motif: motif || null }).select()
     if (error) throw error
