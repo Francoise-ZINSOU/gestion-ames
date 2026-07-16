@@ -34,12 +34,24 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
 
   return (
     <div>
+      {actifs.length === 0 && (
+        <div style={{ ...S.card, marginBottom: 16, border: '1px solid #0ea88833', background: '#0ea88808' }}>
+          <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 8, color: '#0ea888' }}>Bienvenue dans Gestion des Âmes</div>
+          <div style={{ fontSize: 12, color: '#5a6480', lineHeight: 1.7 }}>
+            Pour commencer :<br/>
+            <strong>1.</strong> Ajoutez vos membres dans <span onClick={() => setPage('ames')} style={{ color: '#0ea888', cursor: 'pointer', textDecoration: 'underline' }}>Âmes</span><br/>
+            <strong>2.</strong> Saisissez les présences dans <span onClick={() => setPage('pres')} style={{ color: '#0ea888', cursor: 'pointer', textDecoration: 'underline' }}>Saisie</span><br/>
+            <strong>3.</strong> Planifiez des entretiens dans les fiches membres
+          </div>
+        </div>
+      )}
+
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 16 }}>
-        <div style={S.kpi('#0ea888')}><div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#8892a8', marginBottom: 6 }}>Total actifs</div><div style={{ fontSize: 26, fontWeight: 700, fontFamily: 'Georgia, serif', color: '#0ea888' }}>{actifs.length}</div></div>
+        <div style={S.kpi('#0ea888')}><div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#8892a8', marginBottom: 6 }}>Total actifs</div><div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: '#0ea888' }}>{actifs.length}</div></div>
         {kpiStatuts.map(([nom, { count, couleur }]) => (
-          <div key={nom} style={S.kpi(couleur)}><div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#8892a8', marginBottom: 6 }}>{nom}</div><div style={{ fontSize: 26, fontWeight: 700, fontFamily: 'Georgia, serif', color: couleur }}>{count}</div></div>
+          <div key={nom} style={S.kpi(couleur)}><div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#8892a8', marginBottom: 6 }}>{nom}</div><div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: couleur }}>{count}</div></div>
         ))}
-        <div style={S.kpi(tG >= 80 ? '#1a9c60' : tG >= 50 ? '#d48f00' : '#e03050')}><div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#8892a8', marginBottom: 6 }}>Taux culte</div><div style={{ fontSize: 26, fontWeight: 700, fontFamily: 'Georgia, serif', color: tG >= 80 ? '#1a9c60' : tG >= 50 ? '#d48f00' : '#e03050' }}>{tG}%</div></div>
+        <div style={S.kpi(tG >= 80 ? '#1a9c60' : tG >= 50 ? '#d48f00' : '#e03050')}><div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#8892a8', marginBottom: 6 }}>Taux culte</div><div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: tG >= 80 ? '#1a9c60' : tG >= 50 ? '#d48f00' : '#e03050' }}>{tG}%</div></div>
       </div>
 
       {!lastSundaySaved && (
@@ -79,6 +91,11 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
           </div>
         )
       })()}
+
+      <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
+        <button onClick={() => setPage('pres')} style={{ ...S.btn('#1a9c60', true), display: 'flex', alignItems: 'center', gap: 4, flex: 1, justifyContent: 'center', padding: '10px 12px' }}>Saisir présences</button>
+        <button onClick={() => setPage('ents')} style={{ ...S.btn('#3060d0', true), display: 'flex', alignItems: 'center', gap: 4, flex: 1, justifyContent: 'center', padding: '10px 12px' }}>+ Entretien</button>
+      </div>
 
       <div style={S.card}>
         <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 10 }}>Inscriptions récentes</div>

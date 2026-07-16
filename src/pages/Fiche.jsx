@@ -3,7 +3,7 @@ import { S, fmt, fmtS, dago, today, getStatutColor, getRoleColor } from '../lib/
 import { useHistoriqueStatuts } from '../lib/data'
 import { ClipboardList, BarChart3, MessageCircle, Zap, BookOpen, Pencil, Archive, Phone, Mail, CalendarDays, RotateCcw, Check, X, History } from 'lucide-react'
 
-export default function FichePage({ membres, actifs, presences, entretiens, defis, plans, refs, h, selectedMembre: m, selectedId, openFiche, showToast, ajouterEnt, modifierEnt, supprimerEnt, ajouterDefi, modifierDefi, supprimerDefi, assignerModule, validerModule, retirerModule, modifierMembre, archiverMembre, reloadMembres, setPage }) {
+export default function FichePage({ membres, actifs, presences, entretiens, defis, plans, refs, h, selectedMembre: m, selectedId, openFiche, showToast, ajouterEnt, modifierEnt, supprimerEnt, ajouterDefi, modifierDefi, supprimerDefi, assignerModule, validerModule, retirerModule, modifierMembre, archiverMembre, reloadMembres, setPage, prevPage }) {
   const [ftab, setFtab] = useState('id')
   const [modal, setModal] = useState(null)
   const [fd, setFd] = useState({})
@@ -97,7 +97,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
   return (
     <div>
       <div style={{ display: 'flex', gap: 5, marginBottom: 10, alignItems: 'center', overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 4 }}>
-        <button onClick={() => setPage('ames')} style={S.btn('#5a6480', true)}>← Liste</button>
+        <button onClick={() => setPage(prevPage || 'ames')} style={S.btn('#5a6480', true)}>{({ alerts: '← Alertes', ames: '← Liste', ents: '← Entretiens', home: '← Accueil' })[prevPage] || '← Liste'}</button>
         {[['id', 'Identité', ClipboardList], ['pr', 'Présences', BarChart3], ['en', 'Entretiens', MessageCircle], ['df', 'Défis', Zap], ['pt', 'Plan', BookOpen]].map(([id, label, Icon]) => (
           <button key={id} onClick={() => setFtab(id)} style={{ padding: '4px 12px', borderRadius: 14, border: '1px solid ' + (ftab === id ? '#0ea888' : '#e0e4ec'), background: ftab === id ? '#0ea88814' : '#f0f2f6', color: ftab === id ? '#0ea888' : '#5a6480', fontSize: 11, fontWeight: ftab === id ? 600 : 500, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4 }}><Icon size={12} /> {label}</button>
         ))}
@@ -111,7 +111,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
       <div style={{ ...S.card, display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
         <div style={{ width: 44, height: 44, borderRadius: '50%', background: getStatutColor(refs, m.statut) + '18', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 700, color: getStatutColor(refs, m.statut), border: '2px solid ' + getStatutColor(refs, m.statut), flexShrink: 0 }}>{(m.prenom || m.nom || '?').charAt(0)}</div>
         <div style={{ flex: '1 1 200px', minWidth: 0 }}>
-          <div style={{ fontSize: 17, fontWeight: 700, fontFamily: 'Georgia, serif' }}>{m.prenom} {m.nom}</div>
+          <div style={{ fontSize: 17, fontWeight: 700, fontFamily: "'Outfit', sans-serif" }}>{m.prenom} {m.nom}</div>
           <div style={{ display: 'flex', gap: 5, marginTop: 3, flexWrap: 'wrap' }}>
             <span style={S.pill(getStatutColor(refs, m.statut))}>{m.statut}</span>
             {m.role !== h.defaultRole && <span style={S.pill(getRoleColor(refs, m.role))}>{m.role}</span>}
@@ -122,7 +122,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, width: '100%', maxWidth: 340 }}>
           {[{ v: days !== null ? days + 'j' : '—', l: 'Inscription', c: '#0ea888' }, { v: ca, l: 'Abs.', c: ca >= 3 ? '#e03050' : '#1a9c60' }, { v: mEn.length, l: 'Entretiens', c: '#3060d0' }, { v: pv + '/' + mPt.length, l: 'Plan', c: '#7040d0' }].map((x, i) => (
             <div key={i} style={{ textAlign: 'center', padding: 6, background: '#f0f2f6', borderRadius: 6 }}>
-              <div style={{ fontSize: 16, fontWeight: 700, color: x.c, fontFamily: 'Georgia, serif' }}>{x.v}</div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: x.c, fontFamily: "'Outfit', sans-serif" }}>{x.v}</div>
               <div style={{ fontSize: 8, color: '#8892a8', fontWeight: 600, textTransform: 'uppercase' }}>{x.l}</div>
             </div>
           ))}
@@ -505,7 +505,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
         <div className="modal-overlay">
           <div className="modal-box" style={{ maxWidth: 500 }}>
             <div style={{ padding: '16px 20px', borderBottom: '1px solid #e0e4ec' }}>
-              <div style={{ fontSize: 15, fontWeight: 700, fontFamily: 'Georgia, serif' }}>Modifier le membre</div>
+              <div style={{ fontSize: 15, fontWeight: 700, fontFamily: "'Outfit', sans-serif" }}>Modifier le membre</div>
             </div>
             <div style={{ padding: '16px 20px', maxHeight: '60vh', overflowY: 'auto' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px' }}>

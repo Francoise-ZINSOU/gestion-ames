@@ -40,7 +40,7 @@ export const S = {
 // ── Formatage dates ──
 export function fmt(d) {
   if (!d) return '—'
-  try { return new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }) }
+  try { return new Date(d).toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' }) }
   catch { return '—' }
 }
 

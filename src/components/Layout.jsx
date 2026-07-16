@@ -34,7 +34,7 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
   }
 
   return (
-    <div style={{ fontFamily: 'Trebuchet MS, Gill Sans, Calibri, sans-serif', background: '#f4f6f9', color: '#1a1e2e', fontSize: 13, lineHeight: 1.55, minHeight: '100vh' }}>
+    <div style={{ fontFamily: 'DM Sans, sans-serif', background: '#f4f6f9', color: '#1a1e2e', fontSize: 13, lineHeight: 1.55, minHeight: '100vh' }}>
       {/* Sidebar desktop */}
       <div className="sb" style={{ position: 'fixed', top: 0, left: 0, bottom: 0, width: 210, background: '#fff', borderRight: '1px solid #e0e4ec', display: 'flex', flexDirection: 'column', zIndex: 100, overflowY: 'auto' }}>
         <div style={{ padding: '18px 16px 14px', borderBottom: '1px solid #e0e4ec' }}>
@@ -87,7 +87,7 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
       </div>
 
       {/* Nav mobile */}
-      <nav className="nv" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderTop: '1px solid #e0e4ec', display: 'none', zIndex: 200, padding: '4px 0 2px' }}>
+      <nav className="nv" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderTop: '1px solid #e0e4ec', display: 'none', zIndex: 200, padding: '4px 0 calc(2px + env(safe-area-inset-bottom, 0px))' }}>
         {[['home', 'Accueil', Home], ['pres', 'Saisie', CheckSquare], ['ames', 'Âmes', Users], ['alerts', 'Alertes', Bell], ['menu', 'Plus', Menu]].map(([id, label, Icon]) => (
           <button key={id} onClick={() => id === 'menu' ? setPage('menu') : setPage(id)} style={{
             flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
@@ -112,7 +112,8 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
           .desk-only{display:none!important}
           table{display:block;overflow-x:auto;white-space:nowrap}
         }
-        .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:500;display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;box-sizing:border-box}
+        .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:500;display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;box-sizing:border-box;-webkit-overflow-scrolling:touch}
+        body:has(.modal-overlay){overflow:hidden!important}
         .modal-overlay.danger{background:rgba(0,0,0,.5);z-index:600}
         .modal-box{width:100%;background:#fff;border-radius:12px;overflow:hidden;box-sizing:border-box;margin-top:4vh;max-height:92vh;display:flex;flex-direction:column}
         .modal-box>div:nth-child(2){overflow-y:auto;flex:1}

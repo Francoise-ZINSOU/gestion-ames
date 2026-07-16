@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { S, fmtS, today, getStatutColor, getRoleColor, validEmail, validTel } from '../lib/ui'
 import { Upload, Search } from 'lucide-react'
 
-export default function AmesPage({ membres, actifs, refs, h, openFiche, showToast, reloadMembres, presences, entretiens, setPage, ajouterMembre, modifierMembre, importerCSV }) {
+export default function AmesPage({ membres, actifs, refs, h, openFiche, showToast, reloadMembres, presences, entretiens, setPage, ajouterMembre, modifierMembre, importerCSV, auth }) {
   const [q, setQ] = useState('')
   const [fRole, setFRole] = useState('all')
   const [fSt, setFSt] = useState('actifs')
@@ -122,6 +122,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
           <option value="all">Tous statuts</option>
           <option value="actifs">Actifs seulement</option>
           <option value="__archived">Archivés</option>
+          {myMembre && <option value="__mysuivis">Mes suivis</option>}
           {(refs.statuts || []).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}
         </select>
         <button onClick={() => { setFd({ statut: h.defaultStatut, role: h.defaultRole, date_inscription: today() }); setModal('add') }} style={{ ...S.btn('#0ea888', false), whiteSpace: 'nowrap' }}>+ Âme</button>
@@ -183,7 +184,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
         <div className="modal-overlay">
           <div className="modal-box" style={{ maxWidth: 500 }}>
             <div style={{ padding: '16px 20px', borderBottom: '1px solid #e0e4ec' }}>
-              <div style={{ fontSize: 15, fontWeight: 700, fontFamily: 'Georgia, serif' }}>{modal === 'edit' ? 'Modifier' : 'Nouveau membre'}</div>
+              <div style={{ fontSize: 15, fontWeight: 700, fontFamily: "'Outfit', sans-serif" }}>{modal === 'edit' ? 'Modifier' : 'Nouveau membre'}</div>
             </div>
             <div style={{ padding: '16px 20px', maxHeight: '60vh', overflowY: 'auto' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px' }}>
@@ -241,7 +242,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
               {!fd._csvRows ? (
                 <div>
                   <div style={{ fontSize: 12, color: '#5a6480', marginBottom: 10, lineHeight: 1.6 }}>Préparez un fichier CSV avec les colonnes : Prénom, Nom, Téléphone, Email, Date inscription</div>
-                  <div style={{ padding: '8px 12px', background: '#f0f2f6', borderRadius: 6, fontSize: 11, fontFamily: 'monospace', marginBottom: 12, lineHeight: 1.8 }}>
+                  <div style={{ padding: '8px 12px', background: '#f0f2f6', borderRadius: 6, fontSize: 11, fontFamily: "'Roboto Mono', monospace", marginBottom: 12, lineHeight: 1.8 }}>
                     Prénom,Nom,Téléphone,Email<br/>Marina,N'GUESSAN,+225 07 12 34 56,marina@email.com<br/>David,Mensah,+225 05 33 44 55,
                   </div>
                   <div style={{ fontSize: 11, color: '#8892a8', marginBottom: 10 }}>Seuls Prénom et Nom sont obligatoires. Statut = Nouveau, Rôle = Membre par défaut.</div>

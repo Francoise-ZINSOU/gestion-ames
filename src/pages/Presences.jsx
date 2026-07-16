@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { S, fmt, today } from '../lib/ui'
 import { Save, Trash2, CheckSquare, Square, Search } from 'lucide-react'
 
-export default function PresencesPage({ actifs, presences, refs, sauverPresences, supprimerDate, auth }) {
+export default function PresencesPage({ actifs, presences, refs, enregistrerPresences, supprimerDate, auth }) {
   const activites = refs.activites || []
   const [actId, setActId] = useState(activites[0]?.id || '')
   const [date, setDate] = useState(today())
@@ -40,7 +40,7 @@ export default function PresencesPage({ actifs, presences, refs, sauverPresences
   const handleSave = async () => {
     const presentIds = Object.keys(chk).filter(k => chk[k])
     try {
-      await sauverPresences(actId, date, presentIds)
+      await enregistrerPresences(actId, date, presentIds)
       setSaved(true)
     } catch (e) { /* w() gère le toast */ }
   }
@@ -77,27 +77,24 @@ export default function PresencesPage({ actifs, presences, refs, sauverPresences
             <div>
               <div style={{ fontSize: 13, fontWeight: 600 }}>{act?.icone} {act?.nom} — {fmt(date)}</div>
               <div style={{ fontSize: 11, color: '#8892a8', marginTop: 2 }}>
-                {nChecked}/{eligible.length} coché(s){existing.length > 0 ? ' · Déjà enregistré — vous complétez' : ''}
+                {nChecked}/{eligible.length} coché(s){existing.length > 0 ? ' · Déjà enregistré' : ''}
               </div>
             </div>
             <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
               <button onClick={() => { const o = {}; eligible.forEach(m => { o[m.id] = true }); setChk(o); setSaved(false) }} style={S.btn('#0ea888', true)}>Tous</button>
               <button onClick={() => { setChk({}); setSaved(false) }} style={S.btn('#8892a8', true)}>Aucun</button>
-              <button onClick={handleSave} style={{ ...S.btn('#1a9c60', false), display: 'flex', alignItems: 'center', gap: 4 }}>
-                {saved ? <><CheckSquare size={13} /> Enregistré</> : <><Save size={13} /> Sauver</>}
-              </button>
-              {existing.length > 0 && <button onClick={handleDelete} style={{ ...S.btn('#e03050', true), display: 'flex', alignItems: 'center', gap: 4 }}><Trash2 size={13} /> Suppr. date</button>}
+              {existing.length > 0 && <button onClick={handleDelete} style={{ ...S.btn('#e03050', true), display: 'flex', alignItems: 'center', gap: 4 }}><Trash2 size={13} /> Suppr.</button>}
             </div>
           </div>
 
           <div style={{ padding: '8px 10px', background: '#3060d008', borderRadius: 6, marginBottom: 10, fontSize: 11, color: '#3060d0', borderLeft: '3px solid #3060d0' }}>
             {existing.length > 0
-              ? `${existing.length} enregistrement(s) existent. Modifiez et sauvez pour mettre à jour. Si erreur, « Suppr. date ».`
-              : 'Cochez les présents et sauvez. Les non-cochés = absents. Vous pouvez compléter plus tard.'}
+              ? 'Modifiez et enregistrez. Si erreur, « Suppr. »'
+              : 'Cochez les présents. Non-cochés = absents.'}
           </div>
           {existing.length > 0 && existing[0]?.created_by && auth?.session?.user?.id && existing[0].created_by !== auth.session.user.id && (
             <div style={{ padding: '6px 10px', background: '#FAEEDA', borderRadius: 6, marginBottom: 10, fontSize: 11, color: '#633806', borderLeft: '3px solid #d48f00' }}>
-              Ces présences ont été saisies par un autre responsable. Sauver écrasera ses données.
+              Saisies par un autre responsable. Enregistrer écrasera ses données.
             </div>
           )}
 
@@ -110,7 +107,7 @@ export default function PresencesPage({ actifs, presences, refs, sauverPresences
           <div style={{ maxHeight: 400, overflowY: 'auto' }}>
             {filtered.map(m => (
               <div key={m.id} onClick={() => { setChk(prev => ({ ...prev, [m.id]: !prev[m.id] })); setSaved(false) }}
-                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 4px', borderBottom: '1px solid #e0e4ec', cursor: 'pointer', background: chk[m.id] ? '#1a9c6008' : 'transparent' }}>
+                style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 8px', borderBottom: '1px solid #e0e4ec', cursor: 'pointer', background: chk[m.id] ? '#1a9c6008' : 'transparent', minHeight: 44 }}>
                 <div style={{ width: 22, height: 22, borderRadius: 5, border: '2px solid ' + (chk[m.id] ? '#1a9c60' : '#e0e4ec'), background: chk[m.id] ? '#1a9c60' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, color: '#fff' }}>
                   {chk[m.id] ? '✓' : ''}
                 </div>
@@ -119,6 +116,16 @@ export default function PresencesPage({ actifs, presences, refs, sauverPresences
               </div>
             ))}
             {filtered.length === 0 && <div style={{ padding: 14, textAlign: 'center', color: '#8892a8', fontSize: 12 }}>Aucun membre éligible</div>}
+          </div>
+
+          {/* Barre sticky en bas — Enregistrer */}
+          <div style={{ position: 'sticky', bottom: 56, left: 0, right: 0, background: '#fff', borderTop: '1px solid #e0e4ec', padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', zIndex: 10, boxShadow: '0 -2px 8px rgba(0,0,0,.06)', borderRadius: '0 0 12px 12px' }}>
+            <div style={{ fontSize: 12, color: '#5a6480' }}>
+              <strong style={{ fontSize: 16, color: '#1a1e2e' }}>{nChecked}</strong> / {eligible.length}
+            </div>
+            <button onClick={handleSave} style={{ ...S.btn(saved ? '#8892a8' : '#1a9c60', false), display: 'flex', alignItems: 'center', gap: 5, padding: '10px 20px', fontSize: 13 }}>
+              {saved ? <><CheckSquare size={15} /> Enregistré</> : <><Save size={15} /> Enregistrer</>}
+            </button>
           </div>
         </div>
       )}

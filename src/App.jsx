@@ -25,7 +25,7 @@ export default function App() {
   const [selectedId, setSelectedId] = useState(null)
 
   if (auth.loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: 'Trebuchet MS, Gill Sans, Calibri, sans-serif' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: 'DM Sans, sans-serif' }}>
       <div style={{ color: '#5a6480', fontSize: 14 }}>Chargement...</div>
     </div>
   )
@@ -47,7 +47,8 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
 
   const dataLoading = mb.loading || pr.loading || rf.loading
 
-  const openFiche = (id) => { setSelectedId(id); setPage('fiche') }
+  const [prevPage, setPrevPage] = useState('ames')
+  const openFiche = (id) => { setSelectedId(id); setPrevPage(page); setPage('fiche') }
   const selectedMembre = mb.membres.find(m => m.id === selectedId) || null
 
   // Wrappers avec toast
@@ -57,7 +58,7 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
     membres: mb.membres, actifs: mb.actifs, presences: pr.presences,
     entretiens: en.entretiens, defis: df.defis, plans: pt.plans,
     alertes: al.alertes, refs: rf.refs, h,
-    openFiche, showToast, selectedMembre, selectedId, auth,
+    openFiche, showToast, selectedMembre, selectedId, auth, prevPage,
     // Membres
     ajouterMembre: w(mb.ajouter, '✓ Membre ajouté'),
     modifierMembre: w(mb.modifier, '✓ Membre modifié'),
@@ -65,7 +66,7 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
     importerCSV: w(mb.importerCSV, '✓ Import terminé'),
     reloadMembres: mb.reload,
     // Presences
-    sauverPresences: w(pr.sauver, '✓ Présences enregistrées'),
+    enregistrerPresences: w(pr.sauver, '✓ Présences enregistrées'),
     supprimerDate: w(pr.supprimerDate, '✓ Date supprimée'),
     // Entretiens
     ajouterEnt: w(en.ajouter, '✓ Entretien ajouté'),

@@ -14,6 +14,19 @@ const REF_TABLES = [
   { key: 'ref_motifs_depart', label: 'Motifs de départ', fields: ['nom'] },
 ]
 
+function AccordionRefTable({ table, label, fields, showToast }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div style={{ marginBottom: 4 }}>
+      <div onClick={() => setOpen(!open)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: open ? '#0ea88808' : '#f0f2f6', borderRadius: 7, cursor: 'pointer', border: '1px solid ' + (open ? '#0ea88833' : '#e0e4ec') }}>
+        <span style={{ fontSize: 12, fontWeight: 600, color: open ? '#0ea888' : '#5a6480' }}>{label}</span>
+        <span style={{ fontSize: 11, color: '#8892a8' }}>{open ? '▲' : '▼'}</span>
+      </div>
+      {open && <div style={{ padding: '10px 4px' }}><RefTable table={table} label={label} fields={fields} showToast={showToast} /></div>}
+    </div>
+  )
+}
+
 function RefTable({ table, label, fields, showToast }) {
   const { rows, ajouter, modifier, desactiver } = useRefAdmin(table)
   const [newNom, setNewNom] = useState('')
@@ -86,7 +99,7 @@ export default function ParamsPage({ showToast }) {
       </div>
       <div style={S.card}>
         {tab === 'users' ? <UsersTable showToast={showToast} />
-          : REF_TABLES.map(t => <RefTable key={t.key} table={t.key} label={t.label} fields={t.fields} showToast={showToast} />)}
+          : REF_TABLES.map(t => <AccordionRefTable key={t.key} table={t.key} label={t.label} fields={t.fields} showToast={showToast} />)}
       </div>
     </div>
   )
