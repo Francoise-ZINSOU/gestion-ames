@@ -92,7 +92,7 @@ function UsersTable({ showToast, actifs, refs }) {
   const { profils, setRole, reload: reloadProfils } = useProfils()
   const [familles, setFamilles] = useState([])
   const [showInvite, setShowInvite] = useState(false)
-  const [inviteData, setInviteData] = useState({ email: '', membre_id: '', famille_id: '', est_admin: false, est_responsable: true, est_berger_eglise: false, eglise_id: '' })
+  const [inviteData, setInviteData] = useState({ email: '', nom_affiche: '', membre_id: '', famille_id: '', est_admin: false, est_responsable: true, est_berger_eglise: false, eglise_id: '' })
   const [inviting, setInviting] = useState(false)
 
   useState(() => {
@@ -121,8 +121,8 @@ function UsersTable({ showToast, actifs, refs }) {
       if (data?.error) throw new Error(data.error)
       showToast('✓ Invitation envoyée à ' + inviteData.email)
       setShowInvite(false)
-      setInviteData({ email: '', membre_id: '', famille_id: '', est_admin: false, est_responsable: true, est_berger_eglise: false, eglise_id: '' })
-      setTimeout(reloadProfils, 1500)
+      setInviteData({ email: '', nom_affiche: '', membre_id: '', famille_id: '', est_admin: false, est_responsable: true, est_berger_eglise: false, eglise_id: '' })
+      setTimeout(reloadProfils, 2000)
     } catch (e) {
       const msg = e.message || ''
       if (msg.includes('404') || msg.includes('not found') || msg.includes('FunctionNotFound')) {
@@ -184,6 +184,10 @@ function UsersTable({ showToast, actifs, refs }) {
             <input type="email" value={inviteData.email} onChange={e => setInviteData(p => ({ ...p, email: e.target.value }))} style={S.inp} placeholder="marie@exemple.com" />
           </div>
           <div style={{ marginBottom: 8 }}>
+            <label style={S.label}>Nom affiché</label>
+            <input value={inviteData.nom_affiche} onChange={e => setInviteData(p => ({ ...p, nom_affiche: e.target.value }))} style={S.inp} placeholder="Marie DUPONT" />
+          </div>
+          <div style={{ marginBottom: 8 }}>
             <label style={S.label}>Famille</label>
             <select value={inviteData.famille_id} onChange={e => setInviteData(p => ({ ...p, famille_id: e.target.value }))} style={S.inp}>
               <option value="">— Aucune —</option>
@@ -192,7 +196,11 @@ function UsersTable({ showToast, actifs, refs }) {
           </div>
           <div style={{ marginBottom: 8 }}>
             <label style={S.label}>Lier à un membre existant (optionnel)</label>
-            <select value={inviteData.membre_id} onChange={e => setInviteData(p => ({ ...p, membre_id: e.target.value }))} style={S.inp}>
+            <select value={inviteData.membre_id} onChange={e => {
+              const mid = e.target.value
+              const m = (actifs || []).find(x => x.id === mid)
+              setInviteData(p => ({ ...p, membre_id: mid, nom_affiche: m ? m.prenom + ' ' + m.nom : p.nom_affiche }))
+            }} style={S.inp}>
               <option value="">— Aucun —</option>
               {(actifs || []).sort((a, b) => a.nom.localeCompare(b.nom)).map(m => <option key={m.id} value={m.id}>{m.prenom} {m.nom}</option>)}
             </select>

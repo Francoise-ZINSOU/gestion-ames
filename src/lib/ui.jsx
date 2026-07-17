@@ -17,7 +17,8 @@ export const S = {
   inp: {
     width: '100%', padding: '7px 10px', borderRadius: 6,
     border: '1px solid #c8cfe0', background: '#f0f2f6', color: '#1a1e2e',
-    fontFamily: 'inherit', fontSize: 13, outline: '2px solid transparent', outlineOffset: '2px'
+    fontFamily: 'inherit', fontSize: 13, outline: '2px solid transparent', outlineOffset: '2px',
+    boxSizing: 'border-box'
   },
   label: {
     display: 'block', fontSize: 11, fontWeight: 600, letterSpacing: 1,
