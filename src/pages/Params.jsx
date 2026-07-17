@@ -106,7 +106,18 @@ function UsersTable({ showToast, actifs, refs }) {
       const { data, error } = await supabase.functions.invoke('invite-user', {
         body: inviteData
       })
-      if (error) throw error
+      if (error) {
+        // Edge Function errors : extraire le message utile
+        let detail = error.message || 'Erreur Edge Function'
+        try {
+          const ctx = error.context
+          if (ctx && typeof ctx.json === 'function') {
+            const body = await ctx.json()
+            if (body?.error) detail = body.error
+          }
+        } catch (_) {}
+        throw new Error(detail)
+      }
       if (data?.error) throw new Error(data.error)
       showToast('✓ Invitation envoyée à ' + inviteData.email)
       setShowInvite(false)
