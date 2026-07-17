@@ -126,11 +126,11 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
       </div>
       {/* Filtres + actions — une seule ligne */}
       <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 12, flexWrap: 'wrap' }}>
-        <select value={fRole} onChange={e => setFRole(e.target.value)} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #c8cfe0', background: '#f0f2f6', fontFamily: 'inherit', fontSize: 11, color: '#1a1e2e', outline: 'none' }}>
+        <select value={fRole} onChange={e => setFRole(e.target.value)} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #c8cfe0', background: '#f0f2f6', fontFamily: 'inherit', fontSize: 12, color: '#1a1e2e', outline: 'none' }}>
           <option value="all">Tous rôles</option>
           {(refs.roles || []).map(r => <option key={r.nom} value={r.nom}>{r.nom}</option>)}
         </select>
-        <select value={fSt} onChange={e => setFSt(e.target.value)} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #c8cfe0', background: '#f0f2f6', fontFamily: 'inherit', fontSize: 11, color: '#1a1e2e', outline: 'none' }}>
+        <select value={fSt} onChange={e => setFSt(e.target.value)} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #c8cfe0', background: '#f0f2f6', fontFamily: 'inherit', fontSize: 12, color: '#1a1e2e', outline: 'none' }}>
           <option value="actifs">Actifs</option>
           {myMembre && <option value="__mysuivis">★ Mes suivis</option>}
           <optgroup label="— Par statut —">
@@ -141,15 +141,15 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
             <option value="all">Tout afficher</option>
           </optgroup>
         </select>
-        <button onClick={() => { setFd({ statut: h.defaultStatut, role: h.defaultRole, date_inscription: today() }); setModal('add') }} style={{ ...S.btn('#0ea888', false), whiteSpace: 'nowrap', padding: '6px 12px', fontSize: 12 }}>+ Âme</button>
-        <button onClick={() => setModal('import')} style={{ ...S.btn('#3060d0', true), display: 'flex', alignItems: 'center', gap: 3, whiteSpace: 'nowrap', padding: '6px 10px', fontSize: 11 }}><Upload size={12} /> CSV</button>
-        <button onClick={() => setBulkMode(!bulkMode)} style={{ ...S.btn(bulkMode ? '#7040d0' : '#6b7280', true), padding: '6px 10px', fontSize: 11 }}>{bulkMode ? '✓ Sélection' : '☐ Sélection'}</button>
+        <button onClick={() => { setFd({ statut: h.defaultStatut, role: h.defaultRole, date_inscription: today() }); setModal('add') }} style={{ ...S.btn('#0ea888', false), whiteSpace: 'nowrap', padding: '6px 12px', fontSize: 13 }}>+ Âme</button>
+        <button onClick={() => setModal('import')} style={{ ...S.btn('#3060d0', true), display: 'flex', alignItems: 'center', gap: 3, whiteSpace: 'nowrap', padding: '6px 10px', fontSize: 12 }}><Upload size={12} /> CSV</button>
+        <button onClick={() => setBulkMode(!bulkMode)} style={{ ...S.btn(bulkMode ? '#7040d0' : '#6b7280', true), padding: '6px 10px', fontSize: 12 }}>{bulkMode ? '✓ Sélection' : '☐ Sélection'}</button>
       </div>
 
       {/* Bulk actions */}
       {bulkMode && (
         <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 8, padding: '6px 10px', background: '#7040d008', borderRadius: 7, border: '1px solid #7040d033', flexWrap: 'wrap' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, cursor: 'pointer' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, cursor: 'pointer' }}>
             <input type="checkbox" checked={filt.length > 0 && filt.every(m => bulkSel[m.id])} onChange={e => {
               const newSel = {}; if (e.target.checked) { filt.forEach(m => { newSel[m.id] = true }) }; setBulkSel(newSel)
             }} />
@@ -157,7 +157,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
           </label>
           {Object.values(bulkSel).filter(Boolean).length > 0 && (
             <>
-              <select id="bulk-statut" style={{ fontSize: 11, padding: '4px 6px', borderRadius: 4, border: '1px solid #e0e4ec' }}>
+              <select id="bulk-statut" style={{ fontSize: 12, padding: '4px 6px', borderRadius: 4, border: '1px solid #e0e4ec' }}>
                 <option value="">Statut →</option>
                 {(refs.statuts || []).filter(s => !s.est_archive).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}
               </select>
@@ -172,8 +172,8 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                   setBulkSel({}); setBulkMode(false)
                   reloadMembres()
                 } catch (e) { showToast('⚠ ' + (e.message || 'Erreur')) }
-              }} style={{ ...S.btn('#7040d0', false), padding: '4px 8px', fontSize: 11 }}>OK</button>
-              <select id="bulk-suiveur" style={{ fontSize: 11, padding: '4px 6px', borderRadius: 4, border: '1px solid #e0e4ec' }}>
+              }} style={{ ...S.btn('#7040d0', false), padding: '4px 8px', fontSize: 12 }}>OK</button>
+              <select id="bulk-suiveur" style={{ fontSize: 12, padding: '4px 6px', borderRadius: 4, border: '1px solid #e0e4ec' }}>
                 <option value="">Suiveur →</option>
                 {leaders.map(l => <option key={l.id} value={l.id}>{l.prenom} {l.nom}</option>)}
               </select>
@@ -188,10 +188,10 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                   setBulkSel({}); setBulkMode(false)
                   reloadMembres()
                 } catch (e) { showToast('⚠ ' + (e.message || 'Erreur')) }
-              }} style={{ ...S.btn('#0ea888', false), padding: '4px 8px', fontSize: 11 }}>OK</button>
+              }} style={{ ...S.btn('#0ea888', false), padding: '4px 8px', fontSize: 12 }}>OK</button>
             </>
           )}
-          <button onClick={() => { setBulkMode(false); setBulkSel({}) }} style={{ ...S.btn('#6b7280', true), padding: '4px 8px', fontSize: 11, marginLeft: 'auto' }}>✕</button>
+          <button onClick={() => { setBulkMode(false); setBulkSel({}) }} style={{ ...S.btn('#6b7280', true), padding: '4px 8px', fontSize: 12, marginLeft: 'auto' }}>✕</button>
         </div>
       )}
 
@@ -233,11 +233,11 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                   <div key={m.id} onClick={() => bulkMode ? setBulkSel(prev => ({ ...prev, [m.id]: !prev[m.id] })) : openFiche(m.id)} style={{ padding: '10px 8px', borderBottom: '1px solid #e0e4ec', cursor: 'pointer', opacity: m.archive ? 0.5 : 1, background: bulkSel[m.id] ? '#7040d008' : 'transparent' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
                       {bulkMode && <input type="checkbox" checked={!!bulkSel[m.id]} readOnly />}
-                      <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: '#0ea888', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.prenom} {m.nom}</span>
+                      <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: '#0ea888', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.prenom} {m.nom}</span>
                       <span style={S.pill(getStatutColor(refs, m.statut))}>{m.statut}</span>
                     </div>
-                    <div style={{ display: 'flex', gap: 8, fontSize: 10, color: '#6b7280', alignItems: 'center', flexWrap: 'wrap' }}>
-                      <span style={{ ...S.pill(getRoleColor(refs, m.role)), fontSize: 9, padding: '1px 6px' }}>{m.role}</span>
+                    <div style={{ display: 'flex', gap: 8, fontSize: 11, color: '#6b7280', alignItems: 'center', flexWrap: 'wrap' }}>
+                      <span style={{ ...S.pill(getRoleColor(refs, m.role)), fontSize: 10, padding: '1px 6px' }}>{m.role}</span>
                       {t !== null && <span style={{ fontWeight: 600, color: t >= 80 ? '#1a9c60' : t >= 50 ? '#d48f00' : '#e03050' }}>{t}%</span>}
                       {mEn(m.id) > 0 && <span style={{ color: '#3060d0' }}>{mEn(m.id)} ent.</span>}
                       {m.suivi_par && <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>→ {getSuiveur(m.suivi_par)}</span>}
@@ -270,11 +270,14 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                 <div style={{ marginBottom: 8 }}>
                   <label style={S.label}>Date d'inscription</label>
                   <input value={fd.date_inscription || ''} onChange={e => uf('date_inscription', e.target.value)} max={today()} style={S.inp} type="date" />
-                  {editing && fd.date_inscription && fd.date_inscription !== editing.date_inscription && (
-                    <div style={{ fontSize: 10, color: '#d48f00', marginTop: 4, padding: '4px 8px', background: '#d48f0008', border: '1px solid #d48f0033', borderRadius: 4 }}>
-                      ⚠ Modifier la date recalcule l'éligibilité des présences passées.
-                    </div>
-                  )}
+                  {modal === 'edit' && fd.id && (() => {
+                    const original = membres.find(x => x.id === fd.id)
+                    return original && fd.date_inscription && fd.date_inscription !== original.date_inscription && (
+                      <div style={{ fontSize: 11, color: '#d48f00', marginTop: 4, padding: '4px 8px', background: '#d48f0008', border: '1px solid #d48f0033', borderRadius: 4 }}>
+                        ⚠ Modifier la date recalcule l'éligibilité des présences passées.
+                      </div>
+                    )
+                  })()}
                 </div>
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Date de naissance</label><input value={fd.date_naissance || ''} onChange={e => uf('date_naissance', e.target.value)} max={today()} style={S.inp} type="date" /></div>
               </div>
@@ -301,8 +304,8 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
               <div style={{ fontSize: 15, fontWeight: 700, color: '#d48f00' }}>Réassigner avant changement de rôle</div>
             </div>
             <div style={{ padding: '16px 20px' }}>
-              <div style={{ fontSize: 12, color: '#5a6480', marginBottom: 10 }}>Ce membre suit {fd._reassignSuivis.length} personne(s). Choisissez un nouveau responsable :</div>
-              <div style={{ marginBottom: 8, padding: '8px 10px', background: '#f0f2f6', borderRadius: 6, fontSize: 11, color: '#5a6480' }}>
+              <div style={{ fontSize: 13, color: '#5a6480', marginBottom: 10 }}>Ce membre suit {fd._reassignSuivis.length} personne(s). Choisissez un nouveau responsable :</div>
+              <div style={{ marginBottom: 8, padding: '8px 10px', background: '#f0f2f6', borderRadius: 6, fontSize: 12, color: '#5a6480' }}>
                 {fd._reassignSuivis.map(s => s.prenom + ' ' + s.nom).join(', ')}
               </div>
               <div style={{ marginBottom: 8 }}><label style={S.label}>Nouveau responsable</label><select value={fd._newSuivId || ''} onChange={e => uf('_newSuivId', e.target.value || null)} style={S.inp}><option value="">— Choisir —</option>{leaders.filter(l => l.id !== fd._reassignFrom).map(l => <option key={l.id} value={l.id}>{l.prenom} {l.nom} ({l.role})</option>)}</select></div>
@@ -323,17 +326,22 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
             <div style={{ padding: '16px 20px' }}>
               {!fd._csvRows ? (
                 <div>
-                  <div style={{ fontSize: 12, color: '#5a6480', marginBottom: 10, lineHeight: 1.6 }}>Préparez un fichier CSV avec les colonnes : Prénom, Nom, Téléphone, Email, Date inscription</div>
-                  <div style={{ padding: '8px 12px', background: '#f0f2f6', borderRadius: 6, fontSize: 11, fontFamily: "'Roboto Mono', monospace", marginBottom: 12, lineHeight: 1.8 }}>
+                  <div style={{ fontSize: 13, color: '#5a6480', marginBottom: 10, lineHeight: 1.6 }}>Préparez un fichier CSV avec les colonnes : Prénom, Nom, Téléphone, Email, Date inscription</div>
+                  <div style={{ padding: '8px 12px', background: '#f0f2f6', borderRadius: 6, fontSize: 12, fontFamily: "'Roboto Mono', monospace", marginBottom: 12, lineHeight: 1.8 }}>
                     Prénom,Nom,Téléphone,Email<br/>Marina,N'GUESSAN,+225 07 12 34 56,marina@email.com<br/>David,Mensah,+225 05 33 44 55,
                   </div>
-                  <div style={{ fontSize: 11, color: '#6b7280', marginBottom: 10 }}>Seuls Prénom et Nom sont obligatoires. Statut = Nouveau, Rôle = Membre par défaut.</div>
-                  <input type="file" accept=".csv,.txt" onChange={e => {
-                    const file = e.target.files?.[0]; if (!file) return
+                  <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 10 }}>Seuls Prénom et Nom sont obligatoires. Statut = Nouveau, Rôle = Membre par défaut.</div>
+                  <input type="file" accept=".csv,.txt,text/csv,text/plain,text/comma-separated-values,application/csv,application/vnd.ms-excel" onChange={e => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    // Vérification taille (max 5 MB)
+                    if (file.size > 5 * 1024 * 1024) { showToast('⚠ Fichier trop volumineux (max 5 MB)'); e.target.value = ''; return }
                     const parseCSV = (text) => {
+                      // Retirer le BOM UTF-8 si présent
+                      if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1)
                       const sep = text.includes(';') ? ';' : ','
                       const lines = text.split(/\r?\n/).filter(l => l.trim())
-                      if (lines.length < 2) { showToast('⚠ Fichier vide'); return }
+                      if (lines.length < 2) { showToast('⚠ Fichier vide ou format invalide'); return }
                       const headerRaw = lines[0].split(sep).map(h => h.trim().replace(/^["']|["']$/g, '').toLowerCase())
                       const colMap = {}
                       headerRaw.forEach((h, i) => {
@@ -343,7 +351,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                         else if (/mail/i.test(h)) colMap.email = i
                         else if (/date.*inscr/i.test(h) || /inscription/i.test(h)) colMap.date_inscription = i
                       })
-                      if (colMap.prenom === undefined && colMap.nom === undefined) { showToast('⚠ Colonnes Prénom/Nom introuvables'); return }
+                      if (colMap.prenom === undefined && colMap.nom === undefined) { showToast('⚠ Colonnes Prénom/Nom introuvables. Vérifiez la première ligne.'); return }
                       const rows = lines.slice(1).map(line => {
                         const cells = line.split(sep).map(c => c.trim().replace(/^["']|["']$/g, ''))
                         return {
@@ -355,24 +363,30 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                           _dup: membres.some(m => m.nom?.toLowerCase() === (cells[colMap.nom] || '').toLowerCase() && m.prenom?.toLowerCase() === (cells[colMap.prenom] || '').toLowerCase())
                         }
                       }).filter(r => r.prenom || r.nom)
+                      if (rows.length === 0) { showToast('⚠ Aucune ligne valide détectée'); return }
                       setFd(prev => ({ ...prev, _csvRows: rows }))
+                      showToast('✓ ' + rows.length + ' ligne(s) détectée(s)')
                     }
                     // Essayer UTF-8, fallback windows-1252 si accents cassés (�)
                     const r1 = new FileReader()
+                    r1.onerror = () => showToast('⚠ Erreur de lecture du fichier')
                     r1.onload = (ev) => {
                       const text = ev.target.result
                       if (/\ufffd/.test(text)) {
                         const r2 = new FileReader()
+                        r2.onerror = () => showToast('⚠ Erreur de lecture (encodage)')
                         r2.onload = (ev2) => parseCSV(ev2.target.result)
                         r2.readAsText(file, 'windows-1252')
                       } else { parseCSV(text) }
                     }
                     r1.readAsText(file, 'UTF-8')
-                  }} style={{ fontSize: 12 }} />
+                    // Reset input pour permettre de ré-importer le même fichier
+                    e.target.value = ''
+                  }} style={{ fontSize: 13, width: '100%', boxSizing: 'border-box' }} />
                 </div>
               ) : (
                 <div>
-                  <div style={{ fontSize: 12, color: '#5a6480', marginBottom: 8 }}>
+                  <div style={{ fontSize: 13, color: '#5a6480', marginBottom: 8 }}>
                     {fd._csvRows.length} ligne(s). {fd._csvRows.filter(r => r._dup).length > 0 && <span style={{ color: '#d48f00' }}>⚠ {fd._csvRows.filter(r => r._dup).length} doublon(s) en jaune.</span>}
                   </div>
                   <div style={{ maxHeight: '30dvh', overflowY: 'auto' }}>
@@ -380,8 +394,8 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                       <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 6px', borderBottom: '1px solid #e0e4ec', background: r._dup ? '#FAEEDA' : 'transparent', opacity: r._skip ? 0.4 : 1 }}>
                         <input type="checkbox" checked={!r._skip} onChange={() => { const rows = [...fd._csvRows]; rows[i] = { ...rows[i], _skip: !rows[i]._skip }; setFd(prev => ({ ...prev, _csvRows: rows })) }} />
                         <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: 12, fontWeight: 600 }}>{r.prenom} {r.nom}</div>
-                          <div style={{ fontSize: 10, color: '#6b7280' }}>{[r.telephone, r.email].filter(Boolean).join(' · ')}</div>
+                          <div style={{ fontSize: 13, fontWeight: 600 }}>{r.prenom} {r.nom}</div>
+                          <div style={{ fontSize: 11, color: '#6b7280' }}>{[r.telephone, r.email].filter(Boolean).join(' · ')}</div>
                         </div>
                       </div>
                     ))}
@@ -424,7 +438,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
       {confirmAction && (
         <div className="modal-overlay danger">
           <div className="modal-box" style={{ maxWidth: 380 }}>
-            <div style={{ padding: '20px 24px' }}><div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Confirmation</div><div style={{ fontSize: 13, color: '#5a6480', lineHeight: 1.6 }}>{confirmAction.msg}</div></div>
+            <div style={{ padding: '20px 24px' }}><div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Confirmation</div><div style={{ fontSize: 14, color: '#5a6480', lineHeight: 1.6 }}>{confirmAction.msg}</div></div>
             <div style={{ padding: '12px 24px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button onClick={() => setConfirmAction(null)} style={S.btn('#6b7280', true)}>Annuler</button>
               <button onClick={() => { confirmAction.fn(); setConfirmAction(null) }} style={S.btn('#e03050', false)}>Confirmer</button>

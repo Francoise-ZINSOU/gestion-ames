@@ -35,9 +35,9 @@ export default function EntretiensPage({ entretiens, membres, actifs, refs, h, o
     <div>
       {planifiesRetard.length > 0 && (
         <div style={{ ...S.card, borderLeft: '3px solid #d48f00', marginBottom: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600, color: '#d48f00', marginBottom: 6 }}><AlertTriangle size={14} /> {planifiesRetard.length} entretien(s) planifié(s) en retard</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: '#d48f00', marginBottom: 6 }}><AlertTriangle size={14} /> {planifiesRetard.length} entretien(s) planifié(s) en retard</div>
           {planifiesRetard.map(e => (
-            <div key={e.id} onClick={() => openFiche(e.membre_id)} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, padding: '3px 0', borderBottom: '1px solid #e0e4ec', cursor: 'pointer' }}>
+            <div key={e.id} onClick={() => openFiche(e.membre_id)} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, padding: '3px 0', borderBottom: '1px solid #e0e4ec', cursor: 'pointer' }}>
               <span style={{ color: '#e03050', width: 65, flexShrink: 0 }}>{fmtS(e.date_entretien)}</span>
               <span style={{ fontWeight: 600, color: '#0ea888' }}>{e.mn}</span>
               <span style={{ color: '#5a6480', flex: 1 }}>{e.sujet}</span>
@@ -48,10 +48,10 @@ export default function EntretiensPage({ entretiens, membres, actifs, refs, h, o
 
       <div style={S.card}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-          <div style={{ fontSize: 13, fontWeight: 600 }}>Tous les entretiens ({all.length})</div>
+          <div style={{ fontSize: 14, fontWeight: 600 }}>Tous les entretiens ({all.length})</div>
           <button onClick={() => { setFd({ statut: h.defaultStatutEnt, date_entretien: today() }); setModal('new') }} style={{ ...S.btn('#3060d0', false), display: 'flex', alignItems: 'center', gap: 4 }}><Plus size={13} /> Entretien</button>
         </div>
-        {all.length === 0 ? <div style={{ padding: 12, textAlign: 'center', color: '#6b7280', fontSize: 12 }}>Aucun entretien enregistré. <span onClick={() => { setFd({ statut: h.defaultStatutEnt, date_entretien: today() }); setModal('new') }} style={{ color: '#3060d0', cursor: 'pointer', textDecoration: 'underline' }}>Créer le premier</span></div>
+        {all.length === 0 ? <div style={{ padding: 12, textAlign: 'center', color: '#6b7280', fontSize: 13 }}>Aucun entretien enregistré. <span onClick={() => { setFd({ statut: h.defaultStatutEnt, date_entretien: today() }); setModal('new') }} style={{ color: '#3060d0', cursor: 'pointer', textDecoration: 'underline' }}>Créer le premier</span></div>
           : <div>
             {/* Desktop */}
             <div className="desk-only">
@@ -73,15 +73,15 @@ export default function EntretiensPage({ entretiens, membres, actifs, refs, h, o
               {all.slice(0, showCount).map(e => (
                 <div key={e.id} onClick={() => openFiche(e.membre_id)} style={{ padding: '10px 6px', borderBottom: '1px solid #e0e4ec', cursor: 'pointer' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: '#0ea888' }}>{e.mn}</span>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: '#0ea888' }}>{e.mn}</span>
                     <span style={S.pill(stColor(e.statut))}>{e.statut}</span>
                   </div>
-                  <div style={{ fontSize: 11, color: '#6b7280' }}>{fmtS(e.date_entretien)} · {e.avecNom}{e.sujet ? ' · ' + e.sujet : ''}</div>
+                  <div style={{ fontSize: 12, color: '#6b7280' }}>{fmtS(e.date_entretien)} · {e.avecNom}{e.sujet ? ' · ' + e.sujet : ''}</div>
                 </div>
               ))}
             </div>
             {all.length > showCount && (
-              <div onClick={() => setShowCount(prev => prev + 30)} style={{ padding: '10px 0', textAlign: 'center', fontSize: 12, color: '#0ea888', fontWeight: 600, cursor: 'pointer' }}>
+              <div onClick={() => setShowCount(prev => prev + 30)} style={{ padding: '10px 0', textAlign: 'center', fontSize: 13, color: '#0ea888', fontWeight: 600, cursor: 'pointer' }}>
                 Voir plus ({all.length - showCount} restants)
               </div>
             )}

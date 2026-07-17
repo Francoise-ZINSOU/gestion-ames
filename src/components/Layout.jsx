@@ -19,11 +19,11 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
         display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '7px 10px',
         border: 'none', borderRadius: 6, background: page === id ? '#0ea88816' : 'transparent',
         color: page === id ? '#0ea888' : '#5a6480', fontWeight: page === id ? 600 : 500,
-        cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', fontSize: 12, marginBottom: 1
+        cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', fontSize: 13, marginBottom: 1
       }}>
         <Icon size={15} strokeWidth={page === id ? 2.2 : 1.8} />
         <span style={{ flex: 1 }}>{label}</span>
-        {badge > 0 ? <span style={{ background: '#e03050', color: '#fff', fontSize: 9, fontWeight: 700, padding: '0 5px', borderRadius: 8 }}>{badge}</span> : null}
+        {badge > 0 ? <span style={{ background: '#e03050', color: '#fff', fontSize: 10, fontWeight: 700, padding: '0 5px', borderRadius: 8 }}>{badge}</span> : null}
       </button>
     )
   }
@@ -36,18 +36,18 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
   }
 
   return (
-    <div style={{ fontFamily: 'DM Sans, sans-serif', background: '#f4f6f9', color: '#1a1e2e', fontSize: 13, lineHeight: 1.55, minHeight: '100vh', minHeight: '100dvh' }}>
+    <div style={{ fontFamily: 'DM Sans, sans-serif', background: '#f4f6f9', color: '#1a1e2e', fontSize: 14, lineHeight: 1.55, minHeight: '100vh', minHeight: '100dvh' }}>
       {/* Sidebar desktop */}
       <div className="sb" style={{ position: 'fixed', top: 0, left: 0, bottom: 0, width: 210, background: '#fff', borderRight: '1px solid #e0e4ec', display: 'flex', flexDirection: 'column', zIndex: 100, overflowY: 'auto' }}>
         <div style={{ padding: '18px 16px 14px', borderBottom: '1px solid #e0e4ec' }}>
-          <div style={{ fontSize: 9, letterSpacing: 3, textTransform: 'uppercase', color: '#0ea888', fontWeight: 700, marginBottom: 4 }}>{egliseName || 'Gestion Pastorale'}</div>
+          <div style={{ fontSize: 10, letterSpacing: 3, textTransform: 'uppercase', color: '#0ea888', fontWeight: 700, marginBottom: 4 }}>{egliseName || 'Gestion Pastorale'}</div>
           <div style={{ fontSize: 14, fontWeight: 700, fontFamily: "'Outfit', sans-serif" }}>Suivi des Âmes</div>
-          {familleName && <div style={{ fontSize: 10, color: '#5a6480', marginTop: 2 }}>{familleName}</div>}
-          <div style={{ fontSize: 10, color: '#6b7280', marginTop: 2 }}>{membreCount} actif(s)</div>
+          {familleName && <div style={{ fontSize: 11, color: '#5a6480', marginTop: 2 }}>{familleName}</div>}
+          <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2 }}>{membreCount} actif(s)</div>
         </div>
 
         <div style={{ padding: '8px 6px 2px' }}>
-          <div style={{ fontSize: 9, letterSpacing: 2, textTransform: 'uppercase', color: '#6b7280', fontWeight: 600, padding: '0 6px', marginBottom: 2 }}>PRÉSENCES</div>
+          <div style={{ fontSize: 10, letterSpacing: 2, textTransform: 'uppercase', color: '#6b7280', fontWeight: 600, padding: '0 6px', marginBottom: 2 }}>PRÉSENCES</div>
           {navBtn('home', 'Accueil', 0)}
           {navBtn('ames', 'Âmes', 0)}
           {navBtn('pres', 'Saisie', 0)}
@@ -56,7 +56,7 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
         </div>
 
         <div style={{ padding: '8px 6px 2px' }}>
-          <div style={{ fontSize: 9, letterSpacing: 2, textTransform: 'uppercase', color: '#6b7280', fontWeight: 600, padding: '0 6px', marginBottom: 2 }}>PASTORAL</div>
+          <div style={{ fontSize: 10, letterSpacing: 2, textTransform: 'uppercase', color: '#6b7280', fontWeight: 600, padding: '0 6px', marginBottom: 2 }}>PASTORAL</div>
           {navBtn('alerts', 'Alertes', alertCount)}
           {navBtn('ents', 'Entretiens', 0)}
           {navBtn('protos', 'Plan de croissance', 0)}
@@ -65,14 +65,14 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
 
         {(isBergerEglise || isAdmin) && (
           <div style={{ padding: '8px 6px 2px' }}>
-            <div style={{ fontSize: 9, letterSpacing: 2, textTransform: 'uppercase', color: '#6b7280', fontWeight: 600, padding: '0 6px', marginBottom: 2 }}>ÉGLISE</div>
+            <div style={{ fontSize: 10, letterSpacing: 2, textTransform: 'uppercase', color: '#6b7280', fontWeight: 600, padding: '0 6px', marginBottom: 2 }}>ÉGLISE</div>
             {navBtn('vueEglise', 'Vue église', 0)}
           </div>
         )}
 
         {isAdmin && (
           <div style={{ padding: '8px 6px 2px' }}>
-            <div style={{ fontSize: 9, letterSpacing: 2, textTransform: 'uppercase', color: '#6b7280', fontWeight: 600, padding: '0 6px', marginBottom: 2 }}>ADMIN</div>
+            <div style={{ fontSize: 10, letterSpacing: 2, textTransform: 'uppercase', color: '#6b7280', fontWeight: 600, padding: '0 6px', marginBottom: 2 }}>ADMIN</div>
             {navBtn('params', 'Paramètres', 0)}
           </div>
         )}
@@ -80,8 +80,8 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
         {selectedMembre && <div style={{ padding: '2px 6px' }}>{navBtn('fiche', 'Fiche', 0)}</div>}
 
         <div style={{ marginTop: 'auto', padding: '10px 12px', borderTop: '1px solid #e0e4ec' }}>
-          <div style={{ fontSize: 10, color: '#5a6480', marginBottom: 6 }}>{profil?.nom_affiche || profil?.email}</div>
-          <button onClick={logout} style={{ background: 'none', border: 'none', color: '#6b7280', fontSize: 11, cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
+          <div style={{ fontSize: 11, color: '#5a6480', marginBottom: 6 }}>{profil?.nom_affiche || profil?.email}</div>
+          <button onClick={logout} style={{ background: 'none', border: 'none', color: '#6b7280', fontSize: 12, cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
             <LogOut size={12} /> Se déconnecter
           </button>
         </div>
@@ -92,9 +92,9 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
         <div style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(255,255,255,.92)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #e0e4ec', padding: '0 20px', height: 48, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <div style={{ fontSize: 15, fontWeight: 700, fontFamily: "'Outfit', sans-serif" }}>{titles[page] || '—'}</div>
-            {(egliseName || familleName) && <div className="mob-only" style={{ fontSize: 9, color: '#0ea888', fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', marginTop: -1 }}>{egliseName}{egliseName && familleName ? ' · ' : ''}{familleName}</div>}
+            {(egliseName || familleName) && <div className="mob-only" style={{ fontSize: 10, color: '#0ea888', fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', marginTop: -1 }}>{egliseName}{egliseName && familleName ? ' · ' : ''}{familleName}</div>}
           </div>
-          <span style={{ fontSize: 10, color: '#6b7280' }}>{membreCount} âmes</span>
+          <span style={{ fontSize: 11, color: '#6b7280' }}>{membreCount} âmes</span>
         </div>
         <div style={{ padding: '16px 20px 50px' }}>{children}</div>
       </div>
@@ -105,7 +105,7 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
           <button key={id} onClick={() => id === 'menu' ? setPage('menu') : setPage(id)} style={{
             flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
             padding: '4px 2px', border: 'none', background: 'transparent', cursor: 'pointer',
-            fontFamily: 'inherit', fontSize: 9, color: page === id ? '#0ea888' : '#6b7280', fontWeight: page === id ? 700 : 500
+            fontFamily: 'inherit', fontSize: 10, color: page === id ? '#0ea888' : '#6b7280', fontWeight: page === id ? 700 : 500
           }}>
             <Icon size={18} strokeWidth={page === id ? 2.2 : 1.5} />
             <span>{label}</span>

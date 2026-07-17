@@ -66,27 +66,27 @@ export default function HistoriquePage({ presences, refs, datesAnnulees }) {
     <div>
       <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', marginBottom: 12 }}>
         {activites.map(a => (
-          <button key={a.id} onClick={() => setActId(a.id)} style={{ padding: '6px 12px', borderRadius: 7, border: '1px solid ' + (actId === a.id ? a.couleur : '#e0e4ec'), background: actId === a.id ? a.couleur + '12' : 'transparent', color: actId === a.id ? a.couleur : '#5a6480', fontSize: 12, fontWeight: actId === a.id ? 600 : 500, cursor: 'pointer', fontFamily: 'inherit' }}>{a.icone} {a.nom}</button>
+          <button key={a.id} onClick={() => setActId(a.id)} style={{ padding: '6px 12px', borderRadius: 7, border: '1px solid ' + (actId === a.id ? a.couleur : '#e0e4ec'), background: actId === a.id ? a.couleur + '12' : 'transparent', color: actId === a.id ? a.couleur : '#5a6480', fontSize: 13, fontWeight: actId === a.id ? 600 : 500, cursor: 'pointer', fontFamily: 'inherit' }}>{a.icone} {a.nom}</button>
         ))}
       </div>
       <div style={S.card}>
-        <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Taux par date — {act?.icone} {act?.nom}</div>
+        <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Taux par date — {act?.icone} {act?.nom}</div>
         {tl.length > 0 && (
-          <div style={{ fontSize: 11, color: '#6b7280', marginBottom: 8 }}>
+          <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>
             {savedTl.length} saisie(s){missingTl.length > 0 && <span style={{ color: '#e03050', fontWeight: 600 }}> · {missingTl.length} manquante(s)</span>} · du {fmtS(firstDate)} au {fmtS(lastDate)}
           </div>
         )}
         {missingTl.length > 0 && (
-          <div style={{ padding: '6px 10px', background: '#e0305008', border: '1px solid #e0305033', borderRadius: 6, marginBottom: 10, fontSize: 11, color: '#e03050' }}>
+          <div style={{ padding: '6px 10px', background: '#e0305008', border: '1px solid #e0305033', borderRadius: 6, marginBottom: 10, fontSize: 12, color: '#e03050' }}>
             ⚠ {missingTl.length} {act?.nom?.toLowerCase()} non saisie(s) : {missingTl.slice(-3).map(t => fmtS(t.date)).join(', ')}{missingTl.length > 3 ? '...' : ''}
           </div>
         )}
-        <div style={{ display: 'flex', gap: 12, fontSize: 10, color: '#6b7280', marginBottom: 8, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 12, fontSize: 11, color: '#6b7280', marginBottom: 8, flexWrap: 'wrap' }}>
           <span><span style={{ display: 'inline-block', width: 10, height: 10, background: '#1a9c60', borderRadius: 2, marginRight: 3, verticalAlign: 'middle' }} /> Saisie</span>
           <span><span style={{ display: 'inline-block', width: 10, height: 10, background: 'repeating-linear-gradient(45deg, #d48f00, #d48f00 3px, transparent 3px, transparent 6px)', border: '1px solid #d48f00', borderRadius: 2, marginRight: 3, verticalAlign: 'middle' }} /> Annulée</span>
           <span><span style={{ display: 'inline-block', width: 10, height: 10, background: 'transparent', border: '2px dashed #e03050', borderRadius: 2, marginRight: 3, verticalAlign: 'middle' }} /> Non saisie</span>
         </div>
-        {tl.length === 0 ? <div style={{ padding: 20, textAlign: 'center', color: '#6b7280', fontSize: 12 }}>Aucune donnée</div>
+        {tl.length === 0 ? <div style={{ padding: 20, textAlign: 'center', color: '#6b7280', fontSize: 13 }}>Aucune donnée</div>
           : <div>
             <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', marginBottom: 8 }}>
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 150, minWidth: Math.max(300, tl.length * 32) }}>
@@ -96,7 +96,7 @@ export default function HistoriquePage({ presences, refs, datesAnnulees }) {
                   if (t.status === 'missing') {
                     return (
                       <div key={t.date} title={"Non saisie — " + t.date} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: '1 0 28px', maxWidth: 36 }}>
-                        <div style={{ fontSize: 9, color: '#e03050', marginBottom: 2, fontWeight: 700 }}>?</div>
+                        <div style={{ fontSize: 10, color: '#e03050', marginBottom: 2, fontWeight: 700 }}>?</div>
                         <div style={{ width: '70%', background: 'transparent', border: '2px dashed #e03050', borderRadius: '3px 3px 0 0', height: '100px', boxSizing: 'border-box' }} />
                         <div style={{ fontSize: 7, color: '#e03050', marginTop: 2, transform: 'rotate(-45deg)', transformOrigin: 'center', whiteSpace: 'nowrap', fontWeight: 600 }}>{label}</div>
                       </div>
@@ -105,7 +105,7 @@ export default function HistoriquePage({ presences, refs, datesAnnulees }) {
                   if (t.status === 'cancelled') {
                     return (
                       <div key={t.date} title={"Annulée — " + (t.motif || '')} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: '1 0 28px', maxWidth: 36 }}>
-                        <div style={{ fontSize: 9, color: '#d48f00', marginBottom: 2, fontWeight: 700 }}>—</div>
+                        <div style={{ fontSize: 10, color: '#d48f00', marginBottom: 2, fontWeight: 700 }}>—</div>
                         <div style={{ width: '70%', background: 'repeating-linear-gradient(45deg, #d48f0033, #d48f0033 3px, transparent 3px, transparent 6px)', border: '1px solid #d48f00', borderRadius: '3px 3px 0 0', height: '80px', boxSizing: 'border-box' }} />
                         <div style={{ fontSize: 7, color: '#d48f00', marginTop: 2, transform: 'rotate(-45deg)', transformOrigin: 'center', whiteSpace: 'nowrap' }}>{label}</div>
                       </div>
@@ -114,7 +114,7 @@ export default function HistoriquePage({ presences, refs, datesAnnulees }) {
                   const pct = t.el > 0 ? Math.round(t.pr / t.el * 100) : 0
                   return (
                     <div key={t.date} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: '1 0 28px', maxWidth: 36 }}>
-                      <div style={{ fontSize: 9, color: '#5a6480', marginBottom: 2, fontWeight: 600 }}>{pct}%</div>
+                      <div style={{ fontSize: 10, color: '#5a6480', marginBottom: 2, fontWeight: 600 }}>{pct}%</div>
                       <div style={{ width: '70%', background: pct >= 80 ? '#1a9c60' : pct >= 50 ? '#d48f00' : '#e03050', borderRadius: '3px 3px 0 0', height: Math.max(6, pct * 1.2) + 'px' }} />
                       <div style={{ fontSize: 7, color: '#6b7280', marginTop: 2, transform: 'rotate(-45deg)', transformOrigin: 'center', whiteSpace: 'nowrap' }}>{label}</div>
                     </div>

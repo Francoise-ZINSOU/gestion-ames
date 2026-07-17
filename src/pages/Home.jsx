@@ -70,8 +70,8 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
     <div>
       {mySuivis.length > 0 && (
         <div style={{ ...S.card, borderLeft: '3px solid #7040d0', background: '#7040d008', marginBottom: 12 }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: '#7040d0', marginBottom: 6 }}>★ Mes suivis ({mySuivis.length})</div>
-          <div style={{ display: 'flex', gap: 12, fontSize: 11, color: '#5a6480', flexWrap: 'wrap' }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: '#7040d0', marginBottom: 6 }}>★ Mes suivis ({mySuivis.length})</div>
+          <div style={{ display: 'flex', gap: 12, fontSize: 12, color: '#5a6480', flexWrap: 'wrap' }}>
             {mySuivisEnDifficulte > 0 && <span><strong style={{ color: '#e03050' }}>{mySuivisEnDifficulte}</strong> en {statutCritique?.toLowerCase() || 'difficulté'}</span>}
             <span onClick={() => setPage('ames')} style={{ color: '#7040d0', cursor: 'pointer', textDecoration: 'underline', marginLeft: 'auto' }}>Voir la liste →</span>
           </div>
@@ -79,14 +79,14 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
       )}
       {familleInactive && (
         <div style={{ ...S.card, borderLeft: '3px solid #6b7280', background: '#f4f6f9', marginBottom: 12 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Famille désactivée</div>
-          <div style={{ fontSize: 11, color: '#5a6480' }}>Les données restent consultables mais aucune alerte ou détection n'est calculée.</div>
+          <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Famille désactivée</div>
+          <div style={{ fontSize: 12, color: '#5a6480' }}>Les données restent consultables mais aucune alerte ou détection n'est calculée.</div>
         </div>
       )}
       {actifs.length === 0 && (
         <div style={{ ...S.card, marginBottom: 16, border: '1px solid #0ea88833', background: '#0ea88808' }}>
           <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 8, color: '#0ea888' }}>Bienvenue dans Gestion des Âmes</div>
-          <div style={{ fontSize: 12, color: '#5a6480', lineHeight: 1.7 }}>
+          <div style={{ fontSize: 13, color: '#5a6480', lineHeight: 1.7 }}>
             Pour commencer :<br/>
             <strong>1.</strong> Ajoutez vos membres dans <span onClick={() => setPage('ames')} style={{ color: '#0ea888', cursor: 'pointer', textDecoration: 'underline' }}>Âmes</span><br/>
             <strong>2.</strong> Saisissez les présences dans <span onClick={() => setPage('pres')} style={{ color: '#0ea888', cursor: 'pointer', textDecoration: 'underline' }}>Saisie</span><br/>
@@ -97,19 +97,19 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10, marginBottom: 16 }}>
         <div onClick={() => setPage('ames')} style={{ ...S.kpi(statutColor(statutCritique)), cursor: 'pointer' }}>
-          <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }}>{statutCritique}</div>
+          <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }}>{statutCritique}</div>
           <div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: statutColor(statutCritique) }}>{statutCount(statutCritique)}</div>
         </div>
         <div onClick={() => setPage('ames')} style={{ ...S.kpi(statutColor(h.defaultStatut) || '#3060d0'), cursor: 'pointer' }}>
-          <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }}>{h.defaultStatut || 'Nouveaux'}</div>
+          <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }}>{h.defaultStatut || 'Nouveaux'}</div>
           <div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: statutColor(h.defaultStatut) || '#3060d0' }}>{statutCount(h.defaultStatut)}</div>
         </div>
         <div onClick={() => setPage('ames')} style={{ ...S.kpi('#0ea888'), cursor: 'pointer' }}>
-          <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }}>Total actifs</div>
+          <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }}>Total actifs</div>
           <div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: '#0ea888' }}>{actifs.length}</div>
         </div>
         <div style={S.kpi(tG >= 80 ? '#1a9c60' : tG >= 50 ? '#d48f00' : '#e03050')}>
-          <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }}>Taux culte</div>
+          <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }}>Taux culte</div>
           <div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: tG >= 80 ? '#1a9c60' : tG >= 50 ? '#d48f00' : '#e03050' }}>{culte ? tG + '%' : '—'}</div>
         </div>
       </div>
@@ -117,8 +117,8 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
       {!lastSundaySaved && (
         <div onClick={() => setPage('pres')} style={{ padding: '8px 12px', borderRadius: 7, border: '1px solid #3060d033', background: '#3060d008', marginBottom: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
           <CheckSquare size={14} color="#3060d0" />
-          <span style={{ fontSize: 12, color: '#3060d0' }}>Les présences du <strong>dimanche {fmtS(lastSunday)}</strong> n'ont pas été saisies</span>
-          <span style={{ fontSize: 11, color: '#0ea888', marginLeft: 'auto', textDecoration: 'underline' }}>Saisir</span>
+          <span style={{ fontSize: 13, color: '#3060d0' }}>Les présences du <strong>dimanche {fmtS(lastSunday)}</strong> n'ont pas été saisies</span>
+          <span style={{ fontSize: 12, color: '#0ea888', marginLeft: 'auto', textDecoration: 'underline' }}>Saisir</span>
         </div>
       )}
 
@@ -150,52 +150,52 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
           <div style={{ marginBottom: 14, border: '1px solid #e0e4ec', borderRadius: 8, background: '#fff', overflow: 'hidden' }}>
             <div onClick={() => setShowNotifs(!showNotifs)} style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', background: '#f4f6f9', flexWrap: 'wrap' }}>
               <span style={{ fontSize: 16 }}>🔔</span>
-              <strong style={{ fontSize: 13 }}>{totalNotif} notification(s)</strong>
+              <strong style={{ fontSize: 14 }}>{totalNotif} notification(s)</strong>
               <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                {(alertes.length + missingCulteDates.length + declining.length) > 0 && <span style={{ padding: '1px 6px', borderRadius: 8, background: '#e03050', color: '#fff', fontSize: 10, fontWeight: 600 }}>{alertes.length + missingCulteDates.length + declining.length} urgent</span>}
-                {(staleNouveau.length + defisSansModule.length) > 0 && <span style={{ padding: '1px 6px', borderRadius: 8, background: '#d48f00', color: '#fff', fontSize: 10, fontWeight: 600 }}>{staleNouveau.length + defisSansModule.length} attention</span>}
-                {thisWeekBdays.length > 0 && <span style={{ padding: '1px 6px', borderRadius: 8, background: '#C49A20', color: '#fff', fontSize: 10, fontWeight: 600 }}>{thisWeekBdays.length} 🎂</span>}
+                {(alertes.length + missingCulteDates.length + declining.length) > 0 && <span style={{ padding: '1px 6px', borderRadius: 8, background: '#e03050', color: '#fff', fontSize: 11, fontWeight: 600 }}>{alertes.length + missingCulteDates.length + declining.length} urgent</span>}
+                {(staleNouveau.length + defisSansModule.length) > 0 && <span style={{ padding: '1px 6px', borderRadius: 8, background: '#d48f00', color: '#fff', fontSize: 11, fontWeight: 600 }}>{staleNouveau.length + defisSansModule.length} attention</span>}
+                {thisWeekBdays.length > 0 && <span style={{ padding: '1px 6px', borderRadius: 8, background: '#C49A20', color: '#fff', fontSize: 11, fontWeight: 600 }}>{thisWeekBdays.length} 🎂</span>}
               </div>
-              <span style={{ marginLeft: 'auto', fontSize: 11, color: '#6b7280' }}>{showNotifs ? '▲' : '▼'}</span>
+              <span style={{ marginLeft: 'auto', fontSize: 12, color: '#6b7280' }}>{showNotifs ? '▲' : '▼'}</span>
             </div>
             {showNotifs && (
               <div style={{ padding: '4px 14px 10px' }}>
                 {missingCulteDates.length > 0 && (
                   <div onClick={() => setPage('pres')} style={{ padding: '8px 10px', borderRadius: 6, background: '#e0305008', borderLeft: '3px solid #e03050', marginTop: 6, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                     <AlertTriangle size={13} color="#e03050" />
-                    <span style={{ fontSize: 12, color: '#e03050' }}><strong>{missingCulteDates.length}</strong> culte(s) non saisi(s) sur les 30 derniers jours</span>
-                    <span style={{ marginLeft: 'auto', fontSize: 10, color: '#0ea888' }}>Saisir →</span>
+                    <span style={{ fontSize: 13, color: '#e03050' }}><strong>{missingCulteDates.length}</strong> culte(s) non saisi(s) sur les 30 derniers jours</span>
+                    <span style={{ marginLeft: 'auto', fontSize: 11, color: '#0ea888' }}>Saisir →</span>
                   </div>
                 )}
                 {alertes.length > 0 && (
                   <div onClick={() => setPage('alerts')} style={{ padding: '8px 10px', borderRadius: 6, background: '#e0305008', borderLeft: '3px solid #e03050', marginTop: 6, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                     <AlertTriangle size={13} color="#e03050" />
-                    <span style={{ fontSize: 12, color: '#e03050' }}><strong>{alertes.length}</strong> alerte(s) de suivi</span>
-                    <span style={{ marginLeft: 'auto', fontSize: 10, color: '#0ea888' }}>Voir →</span>
+                    <span style={{ fontSize: 13, color: '#e03050' }}><strong>{alertes.length}</strong> alerte(s) de suivi</span>
+                    <span style={{ marginLeft: 'auto', fontSize: 11, color: '#0ea888' }}>Voir →</span>
                   </div>
                 )}
                 {thisWeekBdays.length > 0 && (
                   <div style={{ padding: '8px 10px', borderRadius: 6, background: '#C49A2008', borderLeft: '3px solid #C49A20', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ fontSize: 13 }}>🎂</span>
-                    <span style={{ fontSize: 12, color: '#8B6914' }}><strong>{thisWeekBdays.length}</strong> anniversaire(s) : {thisWeekBdays.map(m => m.prenom).join(', ')}</span>
+                    <span style={{ fontSize: 14 }}>🎂</span>
+                    <span style={{ fontSize: 13, color: '#8B6914' }}><strong>{thisWeekBdays.length}</strong> anniversaire(s) : {thisWeekBdays.map(m => m.prenom).join(', ')}</span>
                   </div>
                 )}
                 {declining.length > 0 && (
                   <div style={{ padding: '8px 10px', borderRadius: 6, background: '#e0305008', borderLeft: '3px solid #e03050', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
                     <TrendingDown size={13} color="#e03050" />
-                    <span style={{ fontSize: 12, color: '#e03050' }}><strong>{declining.length}</strong> membre(s) avec présence en baisse</span>
+                    <span style={{ fontSize: 13, color: '#e03050' }}><strong>{declining.length}</strong> membre(s) avec présence en baisse</span>
                   </div>
                 )}
                 {staleNouveau.length > 0 && (
                   <div style={{ padding: '8px 10px', borderRadius: 6, background: '#d48f0008', borderLeft: '3px solid #d48f00', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
                     <Clock size={13} color="#d48f00" />
-                    <span style={{ fontSize: 12, color: '#d48f00' }}><strong>{staleNouveau.length}</strong> "Nouveau" depuis + de 3 mois</span>
+                    <span style={{ fontSize: 13, color: '#d48f00' }}><strong>{staleNouveau.length}</strong> "Nouveau" depuis + de 3 mois</span>
                   </div>
                 )}
                 {defisSansModule.length > 0 && (
                   <div style={{ padding: '8px 10px', borderRadius: 6, background: '#7040d008', borderLeft: '3px solid #7040d0', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
                     <BookOpen size={13} color="#7040d0" />
-                    <span style={{ fontSize: 12, color: '#7040d0' }}><strong>{defisSansModule.length}</strong> défi(s) sans module assigné</span>
+                    <span style={{ fontSize: 13, color: '#7040d0' }}><strong>{defisSansModule.length}</strong> défi(s) sans module assigné</span>
                   </div>
                 )}
               </div>
@@ -205,18 +205,18 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
       })()}
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
-        <button onClick={() => setPage('pres')} style={{ ...S.btn('#1a9c60', true), display: 'flex', alignItems: 'center', gap: 4, padding: '8px 16px', fontSize: 12 }}>Saisir présences</button>
-        <button onClick={() => setPage('ents')} style={{ ...S.btn('#3060d0', true), display: 'flex', alignItems: 'center', gap: 4, padding: '8px 16px', fontSize: 12 }}>+ Entretien</button>
+        <button onClick={() => setPage('pres')} style={{ ...S.btn('#1a9c60', true), display: 'flex', alignItems: 'center', gap: 4, padding: '8px 16px', fontSize: 13 }}>Saisir présences</button>
+        <button onClick={() => setPage('ents')} style={{ ...S.btn('#3060d0', true), display: 'flex', alignItems: 'center', gap: 4, padding: '8px 16px', fontSize: 13 }}>+ Entretien</button>
       </div>
 
       <div style={S.card}>
-        <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 10 }}>Inscriptions récentes</div>
+        <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10 }}>Inscriptions récentes</div>
         {recent.length === 0
-          ? <div style={{ color: '#6b7280', fontSize: 12 }}>Aucune inscription récente.</div>
+          ? <div style={{ color: '#6b7280', fontSize: 13 }}>Aucune inscription récente.</div>
           : recent.map(m => (
             <div key={m.id} onClick={() => openFiche(m.id)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 0', borderBottom: '1px solid #e0e4ec', cursor: 'pointer' }}>
-              <div style={{ flex: 1 }}><span style={{ fontSize: 11, fontWeight: 600 }}>{m.prenom} {m.nom}</span></div>
-              <span style={{ fontSize: 10, color: '#6b7280' }}>{fmtS(m.date_inscription)}</span>
+              <div style={{ flex: 1 }}><span style={{ fontSize: 12, fontWeight: 600 }}>{m.prenom} {m.nom}</span></div>
+              <span style={{ fontSize: 11, color: '#6b7280' }}>{fmtS(m.date_inscription)}</span>
               <span style={S.pill(getStatutColor(refs, m.statut))}>{m.statut}</span>
             </div>
           ))

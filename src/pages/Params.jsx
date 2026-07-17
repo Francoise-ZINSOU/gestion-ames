@@ -20,8 +20,8 @@ function AccordionRefTable({ table, label, fields, showToast }) {
   return (
     <div style={{ marginBottom: 4 }}>
       <div onClick={() => setOpen(!open)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: open ? '#0ea88808' : '#f0f2f6', borderRadius: 7, cursor: 'pointer', border: '1px solid ' + (open ? '#0ea88833' : '#e0e4ec') }}>
-        <span style={{ fontSize: 12, fontWeight: 600, color: open ? '#0ea888' : '#5a6480' }}>{label}</span>
-        <span style={{ fontSize: 11, color: '#6b7280' }}>{open ? '▲' : '▼'}</span>
+        <span style={{ fontSize: 13, fontWeight: 600, color: open ? '#0ea888' : '#5a6480' }}>{label}</span>
+        <span style={{ fontSize: 12, color: '#6b7280' }}>{open ? '▲' : '▼'}</span>
       </div>
       {open && <div style={{ padding: '10px 4px' }}><RefTable table={table} label={label} fields={fields} showToast={showToast} /></div>}
     </div>
@@ -51,11 +51,11 @@ function RefTable({ table, label, fields, showToast }) {
 
   return (
     <div style={{ marginBottom: 16 }}>
-      <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 6 }}>{label}</div>
+      <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>{label}</div>
       {rows.map(r => (
         <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0', borderBottom: '1px solid #e0e4ec', opacity: r.actif ? 1 : 0.4 }}>
           {r.couleur && <div style={{ width: 12, height: 12, borderRadius: 3, background: r.couleur, flexShrink: 0 }} />}
-          <span style={{ flex: 1, fontSize: 12 }}>{r.nom}</span>
+          <span style={{ flex: 1, fontSize: 13 }}>{r.nom}</span>
           {fields.includes('jour_semaine') && (
             <select value={r.jour_semaine ?? ''} onChange={async e => {
               const v = e.target.value === '' ? null : parseInt(e.target.value)
@@ -64,7 +64,7 @@ function RefTable({ table, label, fields, showToast }) {
                 if (error) throw error
                 showToast('✓ Mis à jour'); load()
               } catch (err) { showToast('⚠ ' + err.message) }
-            }} style={{ fontSize: 10, padding: '3px 6px', border: '1px solid #e0e4ec', borderRadius: 4, background: '#f0f2f6', fontFamily: 'inherit' }}>
+            }} style={{ fontSize: 11, padding: '3px 6px', border: '1px solid #e0e4ec', borderRadius: 4, background: '#f0f2f6', fontFamily: 'inherit' }}>
               <option value="">Ponctuelle</option>
               <option value="0">Dimanche</option>
               <option value="1">Lundi</option>
@@ -75,7 +75,7 @@ function RefTable({ table, label, fields, showToast }) {
               <option value="6">Samedi</option>
             </select>
           )}
-          <button onClick={() => desactiver(r.id, !r.actif)} style={{ background: 'none', border: 'none', fontSize: 10, color: r.actif ? '#6b7280' : '#0ea888', cursor: 'pointer' }}>
+          <button onClick={() => desactiver(r.id, !r.actif)} style={{ background: 'none', border: 'none', fontSize: 11, color: r.actif ? '#6b7280' : '#0ea888', cursor: 'pointer' }}>
             {r.actif ? 'Désactiver' : 'Réactiver'}
           </button>
         </div>
@@ -91,10 +91,38 @@ function RefTable({ table, label, fields, showToast }) {
 function UsersTable({ showToast, actifs, refs }) {
   const { profils, setRole, reload: reloadProfils } = useProfils()
   const [familles, setFamilles] = useState([])
+  const [showInvite, setShowInvite] = useState(false)
+  const [inviteData, setInviteData] = useState({ email: '', membre_id: '', famille_id: '', est_admin: false, est_responsable: true, est_berger_eglise: false, eglise_id: '' })
+  const [inviting, setInviting] = useState(false)
 
   useState(() => {
     supabase.from('familles_disciples').select('*, eglises(nom, actif)').order('nom').then(({ data }) => setFamilles(data || []))
   })
+
+  const handleInvite = async () => {
+    if (!inviteData.email?.trim()) { showToast('⚠ Email requis'); return }
+    setInviting(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('Session expirée')
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/invite-user`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(inviteData)
+      })
+      const result = await res.json()
+      if (!res.ok) throw new Error(result.error || 'Erreur inconnue')
+      showToast('✓ Invitation envoyée à ' + inviteData.email)
+      setShowInvite(false)
+      setInviteData({ email: '', membre_id: '', famille_id: '', est_admin: false, est_responsable: true, est_berger_eglise: false, eglise_id: '' })
+      setTimeout(reloadProfils, 1500)
+    } catch (e) {
+      showToast('⚠ ' + (e.message || 'Erreur invitation'))
+    } finally { setInviting(false) }
+  }
 
   const handleRole = async (id, resp, admin) => {
     try { await setRole(id, resp, admin); showToast('✓ Droits mis à jour') }
@@ -130,25 +158,65 @@ function UsersTable({ showToast, actifs, refs }) {
 
   return (
     <div style={{ marginBottom: 16 }}>
-      <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 6 }}>Utilisateurs</div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+        <div style={{ fontSize: 13, fontWeight: 600 }}>Utilisateurs</div>
+        <button onClick={() => setShowInvite(!showInvite)} style={{ ...S.btn('#0ea888', false), fontSize: 12, padding: '4px 10px' }}>{showInvite ? '✕ Fermer' : '+ Inviter'}</button>
+      </div>
+
+      {showInvite && (
+        <div style={{ padding: 12, background: '#0ea88808', border: '1px solid #0ea88833', borderRadius: 8, marginBottom: 12 }}>
+          <div style={{ fontSize: 12, color: '#5a6480', marginBottom: 8, lineHeight: 1.5 }}>
+            L'utilisateur recevra un email l'invitant à définir son mot de passe.
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <label style={S.label}>Email</label>
+            <input type="email" value={inviteData.email} onChange={e => setInviteData(p => ({ ...p, email: e.target.value }))} style={S.inp} placeholder="marie@exemple.com" />
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <label style={S.label}>Famille</label>
+            <select value={inviteData.famille_id} onChange={e => setInviteData(p => ({ ...p, famille_id: e.target.value }))} style={S.inp}>
+              <option value="">— Aucune —</option>
+              {familles.map(f => <option key={f.id} value={f.id}>{f.nom}{f.eglises?.nom ? ' (' + f.eglises.nom + ')' : ''}</option>)}
+            </select>
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <label style={S.label}>Lier à un membre existant (optionnel)</label>
+            <select value={inviteData.membre_id} onChange={e => setInviteData(p => ({ ...p, membre_id: e.target.value }))} style={S.inp}>
+              <option value="">— Aucun —</option>
+              {(actifs || []).sort((a, b) => a.nom.localeCompare(b.nom)).map(m => <option key={m.id} value={m.id}>{m.prenom} {m.nom}</option>)}
+            </select>
+          </div>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 10, fontSize: 12 }}>
+            <label style={{ display: 'flex', gap: 4, alignItems: 'center', cursor: 'pointer' }}>
+              <input type="checkbox" checked={inviteData.est_responsable} onChange={e => setInviteData(p => ({ ...p, est_responsable: e.target.checked }))} /> Responsable (accès à l'app)
+            </label>
+            <label style={{ display: 'flex', gap: 4, alignItems: 'center', cursor: 'pointer' }}>
+              <input type="checkbox" checked={inviteData.est_admin} onChange={e => setInviteData(p => ({ ...p, est_admin: e.target.checked }))} /> Admin
+            </label>
+          </div>
+          <button onClick={handleInvite} disabled={inviting || !inviteData.email} style={{ ...S.btn('#0ea888', false), width: '100%', opacity: inviting || !inviteData.email ? 0.6 : 1 }}>
+            {inviting ? 'Envoi...' : 'Envoyer l\'invitation'}
+          </button>
+        </div>
+      )}
       {profils.map(p => {
         const linkedMembre = (actifs || []).find(m => m.id === p.membre_id)
         return (
           <div key={p.id} style={{ padding: '8px 0', borderBottom: '1px solid #e0e4ec' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
               <div style={{ flex: 1, minWidth: 120 }}>
-                <div style={{ fontSize: 12, fontWeight: 600 }}>{p.nom_affiche || p.email}</div>
-                <div style={{ fontSize: 10, color: '#6b7280' }}>{p.email}</div>
+                <div style={{ fontSize: 13, fontWeight: 600 }}>{p.nom_affiche || p.email}</div>
+                <div style={{ fontSize: 11, color: '#6b7280' }}>{p.email}</div>
               </div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, cursor: 'pointer' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, cursor: 'pointer' }}>
                 <input type="checkbox" checked={p.est_responsable || false} onChange={e => handleRole(p.id, e.target.checked, p.est_admin)} />
                 Resp.
               </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, cursor: 'pointer' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, cursor: 'pointer' }}>
                 <input type="checkbox" checked={p.est_admin || false} onChange={e => handleRole(p.id, p.est_responsable, e.target.checked)} />
                 Admin
               </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, cursor: 'pointer', color: '#7040d0' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, cursor: 'pointer', color: '#7040d0' }}>
                 <input type="checkbox" checked={p.est_berger_eglise || false} onChange={e => {
                   const famille = familles.find(f => f.id === p.famille_id)
                   linkBergerEglise(p.id, e.target.checked, famille?.eglise_id)
@@ -157,7 +225,7 @@ function UsersTable({ showToast, actifs, refs }) {
               </label>
             </div>
             <div style={{ marginTop: 4 }}>
-              <select value={p.membre_id || ''} onChange={e => linkMembre(p.id, e.target.value || null)} style={{ fontSize: 10, padding: '3px 6px', border: '1px solid #e0e4ec', borderRadius: 4, background: '#f0f2f6', color: '#5a6480', fontFamily: 'inherit', width: '100%', maxWidth: 250 }}>
+              <select value={p.membre_id || ''} onChange={e => linkMembre(p.id, e.target.value || null)} style={{ fontSize: 11, padding: '3px 6px', border: '1px solid #e0e4ec', borderRadius: 4, background: '#f0f2f6', color: '#5a6480', fontFamily: 'inherit', width: '100%', maxWidth: 250 }}>
                 <option value="">— Lier à un membre —</option>
                 {(actifs || []).filter(m => {
                     const role = (refs?.roles || []).find(r => r.nom === m.role)
@@ -166,11 +234,11 @@ function UsersTable({ showToast, actifs, refs }) {
                     return true
                   }).sort((a, b) => a.nom.localeCompare(b.nom)).map(m => <option key={m.id} value={m.id}>{m.prenom} {m.nom} ({m.role})</option>)}
               </select>
-              {linkedMembre && <span style={{ fontSize: 10, color: '#0ea888', marginLeft: 6 }}>→ {linkedMembre.prenom} {linkedMembre.nom}</span>}
+              {linkedMembre && <span style={{ fontSize: 11, color: '#0ea888', marginLeft: 6 }}>→ {linkedMembre.prenom} {linkedMembre.nom}</span>}
             </div>
             {familles.length > 0 && (
               <div style={{ marginTop: 4 }}>
-                <select value={p.famille_id || ''} onChange={e => linkFamille(p.id, e.target.value || null)} style={{ fontSize: 10, padding: '3px 6px', border: '1px solid #e0e4ec', borderRadius: 4, background: p.famille_id ? '#0ea88808' : '#e0305008', color: '#5a6480', fontFamily: 'inherit', width: '100%', maxWidth: 250 }}>
+                <select value={p.famille_id || ''} onChange={e => linkFamille(p.id, e.target.value || null)} style={{ fontSize: 11, padding: '3px 6px', border: '1px solid #e0e4ec', borderRadius: 4, background: p.famille_id ? '#0ea88808' : '#e0305008', color: '#5a6480', fontFamily: 'inherit', width: '100%', maxWidth: 250 }}>
                   <option value="">— Assigner à une famille —</option>
                   {familles.filter(f => f.actif !== false && (!f.eglises || f.eglises.actif !== false)).map(f => <option key={f.id} value={f.id}>{f.eglises?.nom} → {f.nom}</option>)}
                 </select>
@@ -218,14 +286,14 @@ function EglisePanel({ showToast }) {
   return (
     <div>
       <div style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 6 }}>Églises</div>
+        <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>Églises</div>
         {eglises.map(e => {
           const nbFam = familles.filter(f => f.eglise_id === e.id).length
           const nbFamActives = familles.filter(f => f.eglise_id === e.id && f.actif !== false).length
           return (
-            <div key={e.id} style={{ padding: '6px 0', borderBottom: '1px solid #e0e4ec', fontSize: 12, display: 'flex', alignItems: 'center', gap: 6, opacity: e.actif === false ? 0.4 : 1 }}>
-              <span style={{ fontWeight: 600, flex: 1 }}>{e.nom}{e.actif === false && <span style={{ fontSize: 9, marginLeft: 6, color: '#6b7280' }}>(désactivée)</span>}</span>
-              <span style={{ fontSize: 10, color: '#6b7280' }}>{nbFamActives}/{nbFam} famille(s)</span>
+            <div key={e.id} style={{ padding: '6px 0', borderBottom: '1px solid #e0e4ec', fontSize: 13, display: 'flex', alignItems: 'center', gap: 6, opacity: e.actif === false ? 0.4 : 1 }}>
+              <span style={{ fontWeight: 600, flex: 1 }}>{e.nom}{e.actif === false && <span style={{ fontSize: 10, marginLeft: 6, color: '#6b7280' }}>(désactivée)</span>}</span>
+              <span style={{ fontSize: 11, color: '#6b7280' }}>{nbFamActives}/{nbFam} famille(s)</span>
               <button onClick={async () => {
                 try {
                   const willDisable = e.actif !== false
@@ -240,27 +308,27 @@ function EglisePanel({ showToast }) {
                   }
                   loadAll()
                 } catch (err) { showToast('⚠ ' + err.message) }
-              }} style={{ background: 'none', border: 'none', fontSize: 10, color: e.actif !== false ? '#6b7280' : '#0ea888', cursor: 'pointer' }}>
+              }} style={{ background: 'none', border: 'none', fontSize: 11, color: e.actif !== false ? '#6b7280' : '#0ea888', cursor: 'pointer' }}>
                 {e.actif !== false ? 'Désactiver' : 'Réactiver'}
               </button>
             </div>
           )
         })}
         <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
-          <input value={newEglise} onChange={e => setNewEglise(e.target.value)} placeholder="Nom de l'église..." style={{ ...S.inp, flex: 1, fontSize: 11 }} />
+          <input value={newEglise} onChange={e => setNewEglise(e.target.value)} placeholder="Nom de l'église..." style={{ ...S.inp, flex: 1, fontSize: 12 }} />
           <button onClick={addEglise} style={S.btn('#0ea888', false)}>+</button>
         </div>
       </div>
 
       <div>
-        <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 6 }}>Familles de disciples</div>
+        <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>Familles de disciples</div>
         {familles.map(f => {
           const eg = eglises.find(e => e.id === f.eglise_id)
           return (
-            <div key={f.id} style={{ padding: '6px 0', borderBottom: '1px solid #e0e4ec', fontSize: 12, display: 'flex', alignItems: 'center', gap: 6, opacity: f.actif === false ? 0.4 : 1 }}>
+            <div key={f.id} style={{ padding: '6px 0', borderBottom: '1px solid #e0e4ec', fontSize: 13, display: 'flex', alignItems: 'center', gap: 6, opacity: f.actif === false ? 0.4 : 1 }}>
               <div style={{ flex: 1 }}>
                 <span style={{ fontWeight: 600 }}>{f.nom}</span>
-                <span style={{ fontSize: 10, color: '#6b7280', marginLeft: 6 }}>({eg?.nom}){f.actif === false && ' (désactivée)'}</span>
+                <span style={{ fontSize: 11, color: '#6b7280', marginLeft: 6 }}>({eg?.nom}){f.actif === false && ' (désactivée)'}</span>
               </div>
               <button onClick={async () => {
                 try {
@@ -269,7 +337,7 @@ function EglisePanel({ showToast }) {
                   showToast(f.actif !== false ? '✓ Famille désactivée' : '✓ Famille réactivée')
                   loadAll()
                 } catch (err) { showToast('⚠ ' + err.message) }
-              }} style={{ background: 'none', border: 'none', fontSize: 10, color: f.actif !== false ? '#6b7280' : '#0ea888', cursor: 'pointer' }}>
+              }} style={{ background: 'none', border: 'none', fontSize: 11, color: f.actif !== false ? '#6b7280' : '#0ea888', cursor: 'pointer' }}>
                 {f.actif !== false ? 'Désactiver' : 'Réactiver'}
               </button>
             </div>
@@ -277,18 +345,18 @@ function EglisePanel({ showToast }) {
         })}
         {eglises.length > 0 && (
           <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
-            <select value={newFamille.eglise_id} onChange={e => setNewFamille(prev => ({ ...prev, eglise_id: e.target.value }))} style={{ ...S.inp, flex: '1 1 120px', fontSize: 11 }}>
+            <select value={newFamille.eglise_id} onChange={e => setNewFamille(prev => ({ ...prev, eglise_id: e.target.value }))} style={{ ...S.inp, flex: '1 1 120px', fontSize: 12 }}>
               <option value="">— Église —</option>
               {eglises.map(e => <option key={e.id} value={e.id}>{e.nom}</option>)}
             </select>
-            <input value={newFamille.nom} onChange={e => setNewFamille(prev => ({ ...prev, nom: e.target.value }))} placeholder="Nom de la famille..." style={{ ...S.inp, flex: '2 1 150px', fontSize: 11 }} />
+            <input value={newFamille.nom} onChange={e => setNewFamille(prev => ({ ...prev, nom: e.target.value }))} placeholder="Nom de la famille..." style={{ ...S.inp, flex: '2 1 150px', fontSize: 12 }} />
             <button onClick={addFamille} style={S.btn('#0ea888', false)}>+</button>
           </div>
         )}
       </div>
 
       {eglises.length === 0 && (
-        <div style={{ padding: 12, textAlign: 'center', color: '#6b7280', fontSize: 11 }}>
+        <div style={{ padding: 12, textAlign: 'center', color: '#6b7280', fontSize: 12 }}>
           Créez une église pour commencer. Les familles de disciples permettront ensuite de séparer les données par groupe.
         </div>
       )}

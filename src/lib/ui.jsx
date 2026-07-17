@@ -2,25 +2,25 @@
 export const S = {
   pill: (color) => ({
     display: 'inline-block', padding: '2px 8px', borderRadius: 10,
-    fontSize: 10, fontWeight: 600, background: color + '18', color, whiteSpace: 'nowrap', marginRight: 2
+    fontSize: 11, fontWeight: 600, background: color + '18', color, whiteSpace: 'nowrap', marginRight: 2
   }),
   card: {
     background: '#fff', border: '1px solid #e0e4ec', borderRadius: 10,
     padding: '16px 18px', marginBottom: 12
   },
   th: {
-    textAlign: 'left', padding: '6px 8px', fontSize: 9, fontWeight: 600,
+    textAlign: 'left', padding: '6px 8px', fontSize: 10, fontWeight: 600,
     letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280',
     borderBottom: '2px solid #e0e4ec', background: '#f0f2f6'
   },
-  td: { padding: '7px 8px', borderBottom: '1px solid #e0e4ec', fontSize: 12 },
+  td: { padding: '7px 8px', borderBottom: '1px solid #e0e4ec', fontSize: 13 },
   inp: {
     width: '100%', padding: '7px 10px', borderRadius: 6,
     border: '1px solid #c8cfe0', background: '#f0f2f6', color: '#1a1e2e',
-    fontFamily: 'inherit', fontSize: 12, outline: '2px solid transparent', outlineOffset: '2px'
+    fontFamily: 'inherit', fontSize: 13, outline: '2px solid transparent', outlineOffset: '2px'
   },
   label: {
-    display: 'block', fontSize: 10, fontWeight: 600, letterSpacing: 1,
+    display: 'block', fontSize: 11, fontWeight: 600, letterSpacing: 1,
     textTransform: 'uppercase', color: '#5a6480', marginBottom: 3
   },
   btn: (c, outline) => ({
@@ -28,7 +28,7 @@ export const S = {
     border: outline ? '1px solid ' + c : 'none',
     background: outline ? 'transparent' : c,
     color: outline ? c : '#fff',
-    fontFamily: 'inherit', fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'opacity 0.15s'
+    fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'opacity 0.15s'
   }),
   kpi: (c) => ({
     background: '#fff', border: '1px solid #e0e4ec', borderRadius: 10,
@@ -106,7 +106,7 @@ export function Toast({ message }) {
   return (
     <div style={{
       position: 'fixed', top: 12, right: 12, padding: '10px 18px', borderRadius: 8,
-      background: isError ? '#e03050' : '#1a9c60', color: '#fff', fontSize: 13,
+      background: isError ? '#e03050' : '#1a9c60', color: '#fff', fontSize: 14,
       fontWeight: 600, zIndex: 999, boxShadow: '0 4px 12px rgba(0,0,0,.15)'
     }}>{message}</div>
   )
