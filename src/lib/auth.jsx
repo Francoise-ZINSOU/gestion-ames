@@ -7,9 +7,16 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
   const [profil, setProfil] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [needsPassword, setNeedsPassword] = useState(false)
   const profilLoading = useRef(false)
 
   useEffect(() => {
+    // Détecter si l'URL contient un token d'invitation (avant que Supabase le consomme)
+    const hash = window.location.hash
+    if (hash.includes('type=invite') || hash.includes('type=recovery') || hash.includes('type=magiclink')) {
+      setNeedsPassword(true)
+    }
+
     // Session initiale
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
@@ -21,10 +28,15 @@ export function AuthProvider({ children }) {
     })
 
     // Écouter les changements d'auth
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
       setSession(newSession)
+      // Détecter l'arrivée via invitation ou reset password
+      if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
+        if (hash.includes('type=invite') || hash.includes('type=recovery')) {
+          setNeedsPassword(true)
+        }
+      }
       if (newSession) {
-        // Ne pas passer loading à false tant que le profil n'est pas chargé
         if (!profilLoading.current) {
           setLoading(true)
           loadProfil(newSession.user.id)
@@ -92,6 +104,8 @@ export function AuthProvider({ children }) {
     login,
     signup,
     logout,
+    needsPassword,
+    clearNeedsPassword: () => { setNeedsPassword(false); window.location.hash = '' },
     isAdmin: profil?.est_admin === true,
     isResponsable: profil?.est_responsable === true || profil?.est_admin === true,
     isSuperAdmin: profil?.est_super_admin === true,

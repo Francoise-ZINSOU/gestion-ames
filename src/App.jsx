@@ -18,6 +18,7 @@ import FiliationPage from './pages/Filiation'
 import ExportPage from './pages/Export'
 import ParamsPage from './pages/Params'
 import VueEglisePage from './pages/VueEglise'
+import SetPasswordPage from './pages/SetPassword'
 import MenuMobile from './pages/MenuMobile'
 
 export default function App() {
@@ -32,6 +33,7 @@ export default function App() {
     </div>
   )
   if (!auth.session) return <LoginPage />
+  if (auth.needsPassword) return <SetPasswordPage profil={auth.profil} onDone={auth.clearNeedsPassword} />
   if (!auth.isResponsable) return <AccessDenied />
 
   // Si famille_id est requis (multi-église activé) et pas super-admin
