@@ -171,7 +171,12 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
                   <button onClick={async () => {
                     try {
                       const { supabase } = await import('../lib/supabase')
-                      await supabase.rpc('sauver_presences', { p_activite_id: culte.id, p_date: todayStr, p_presences: [{ membre_id: m.id, present: true }] })
+                      // Récupérer les présences existantes de cette date pour ne pas les écraser
+                      const existingIds = presences
+                        .filter(p => p.activite_id === culte.id && p.date_presence === todayStr && p.present)
+                        .map(p => p.membre_id)
+                      const allPresents = [...new Set([...existingIds, m.id])]
+                      await supabase.rpc('sauver_presences', { p_activite_id: culte.id, p_date: todayStr, p_presents: allPresents })
                       showToast('✓ Présent marqué pour aujourd\'hui')
                       reloadMembres()
                     } catch (e) { showToast('⚠ ' + (e.message || 'Erreur')) }

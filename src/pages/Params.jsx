@@ -103,24 +103,24 @@ function UsersTable({ showToast, actifs, refs }) {
     if (!inviteData.email?.trim()) { showToast('⚠ Email requis'); return }
     setInviting(true)
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) throw new Error('Session expirée')
-      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/invite-user`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(inviteData)
+      const { data, error } = await supabase.functions.invoke('invite-user', {
+        body: inviteData
       })
-      const result = await res.json()
-      if (!res.ok) throw new Error(result.error || 'Erreur inconnue')
+      if (error) throw error
+      if (data?.error) throw new Error(data.error)
       showToast('✓ Invitation envoyée à ' + inviteData.email)
       setShowInvite(false)
       setInviteData({ email: '', membre_id: '', famille_id: '', est_admin: false, est_responsable: true, est_berger_eglise: false, eglise_id: '' })
       setTimeout(reloadProfils, 1500)
     } catch (e) {
-      showToast('⚠ ' + (e.message || 'Erreur invitation'))
+      const msg = e.message || ''
+      if (msg.includes('404') || msg.includes('not found') || msg.includes('FunctionNotFound')) {
+        showToast('⚠ Fonction "invite-user" non trouvée. Déployez-la dans Supabase → Edge Functions.')
+      } else if (msg.includes('401') || msg.includes('JWT')) {
+        showToast('⚠ Session expirée. Reconnectez-vous.')
+      } else {
+        showToast('⚠ ' + msg)
+      }
     } finally { setInviting(false) }
   }
 
