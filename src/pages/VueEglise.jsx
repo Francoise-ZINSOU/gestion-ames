@@ -146,17 +146,17 @@ export default function VueEglisePage({ auth, refs, h }) {
 
   return (
     <div>
-      {/* Filtre de période */}
+      {/* Filtre de période — les inputs sont pré-remplis avec la période effective */}
       <div style={{ marginBottom: 12 }}>
         <div style={{ fontSize: 11, color: '#6b7280', fontWeight: 600, marginBottom: 6, display: 'flex', gap: 6, alignItems: 'center' }}>
           <span>Période</span>
           {!fDateDe && !fDateA && <span style={{ fontSize: 10, color: '#6b7280', fontStyle: 'italic', fontWeight: 400 }}>(par défaut : 4 dernières semaines)</span>}
-          {(fDateDe || fDateA) && <button onClick={() => { setFDateDe(''); setFDateA('') }} style={{ background: 'none', border: 'none', fontSize: 10, color: '#e03050', cursor: 'pointer', marginLeft: 'auto' }}>✕ Effacer</button>}
+          {(fDateDe || fDateA) && <button onClick={() => { setFDateDe(''); setFDateA('') }} style={{ background: 'none', border: 'none', fontSize: 10, color: '#e03050', cursor: 'pointer', marginLeft: 'auto' }}>✕ Réinitialiser</button>}
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <input type="date" value={fDateDe} onChange={e => setFDateDe(e.target.value)} style={{ flex: 1, padding: '6px 8px', borderRadius: 6, border: '1px solid #c8cfe0', background: '#f0f2f6', fontSize: 11, fontFamily: 'inherit', minWidth: 0 }} />
+          <input type="date" value={fDateDe || defaultDeStr} onChange={e => setFDateDe(e.target.value)} max={toLocalDate(now)} style={{ flex: 1, padding: '6px 8px', borderRadius: 6, border: '1px solid #c8cfe0', background: fDateDe ? '#f0f2f6' : '#f4f6f9', fontSize: 11, fontFamily: 'inherit', minWidth: 0, color: fDateDe ? '#1a1e2e' : '#5a6480' }} />
           <span style={{ fontSize: 11, color: '#6b7280', flexShrink: 0 }}>→</span>
-          <input type="date" value={fDateA} onChange={e => setFDateA(e.target.value)} style={{ flex: 1, padding: '6px 8px', borderRadius: 6, border: '1px solid #c8cfe0', background: '#f0f2f6', fontSize: 11, fontFamily: 'inherit', minWidth: 0 }} />
+          <input type="date" value={fDateA || toLocalDate(now)} onChange={e => setFDateA(e.target.value)} max={toLocalDate(now)} style={{ flex: 1, padding: '6px 8px', borderRadius: 6, border: '1px solid #c8cfe0', background: fDateA ? '#f0f2f6' : '#f4f6f9', fontSize: 11, fontFamily: 'inherit', minWidth: 0, color: fDateA ? '#1a1e2e' : '#5a6480' }} />
         </div>
       </div>
       {/* KPIs globaux */}

@@ -148,46 +148,50 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
 
       {/* Bulk actions */}
       {bulkMode && (
-        <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 8, padding: '8px 12px', background: '#7040d008', borderRadius: 7, border: '1px solid #7040d033', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 8, padding: '6px 10px', background: '#7040d008', borderRadius: 7, border: '1px solid #7040d033', flexWrap: 'wrap' }}>
           <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, cursor: 'pointer' }}>
             <input type="checkbox" checked={filt.length > 0 && filt.every(m => bulkSel[m.id])} onChange={e => {
               const newSel = {}; if (e.target.checked) { filt.forEach(m => { newSel[m.id] = true }) }; setBulkSel(newSel)
             }} />
             <span style={{ color: '#7040d0', fontWeight: 600 }}>{Object.values(bulkSel).filter(Boolean).length}/{filt.length}</span>
           </label>
-          <select id="bulk-statut" style={{ fontSize: 11, padding: '4px 6px', borderRadius: 4, border: '1px solid #e0e4ec' }}>
-            <option value="">Changer statut →</option>
-            {(refs.statuts || []).filter(s => !s.est_archive).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}
-          </select>
-          <button onClick={async () => {
-            const st = document.getElementById('bulk-statut')?.value
-            if (!st) { showToast('⚠ Choisissez un statut'); return }
-            const ids = Object.keys(bulkSel).filter(k => bulkSel[k])
-            if (!ids.length) return
-            try {
-              for (const id of ids) { await modifierMembre(id, { statut: st }) }
-              showToast('✓ ' + ids.length + ' membre(s) mis à jour')
-              setBulkSel({}); setBulkMode(false)
-              reloadMembres()
-            } catch (e) { showToast('⚠ ' + (e.message || 'Erreur')) }
-          }} style={S.btn('#7040d0', false)}>Appliquer</button>
-          <select id="bulk-suiveur" style={{ fontSize: 11, padding: '4px 6px', borderRadius: 4, border: '1px solid #e0e4ec' }}>
-            <option value="">Assigner à →</option>
-            {leaders.map(l => <option key={l.id} value={l.id}>{l.prenom} {l.nom}</option>)}
-          </select>
-          <button onClick={async () => {
-            const suivId = document.getElementById('bulk-suiveur')?.value
-            if (!suivId) { showToast('⚠ Choisissez un responsable'); return }
-            const ids = Object.keys(bulkSel).filter(k => bulkSel[k])
-            if (!ids.length) return
-            try {
-              for (const id of ids) { await modifierMembre(id, { suivi_par: suivId }) }
-              showToast('✓ ' + ids.length + ' membre(s) assigné(s)')
-              setBulkSel({}); setBulkMode(false)
-              reloadMembres()
-            } catch (e) { showToast('⚠ ' + (e.message || 'Erreur')) }
-          }} style={S.btn('#0ea888', false)}>Assigner</button>
-          <button onClick={() => { setBulkMode(false); setBulkSel({}) }} style={S.btn('#6b7280', true)}>Annuler</button>
+          {Object.values(bulkSel).filter(Boolean).length > 0 && (
+            <>
+              <select id="bulk-statut" style={{ fontSize: 11, padding: '4px 6px', borderRadius: 4, border: '1px solid #e0e4ec' }}>
+                <option value="">Statut →</option>
+                {(refs.statuts || []).filter(s => !s.est_archive).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}
+              </select>
+              <button onClick={async () => {
+                const st = document.getElementById('bulk-statut')?.value
+                if (!st) { showToast('⚠ Choisissez un statut'); return }
+                const ids = Object.keys(bulkSel).filter(k => bulkSel[k])
+                if (!ids.length) return
+                try {
+                  for (const id of ids) { await modifierMembre(id, { statut: st }) }
+                  showToast('✓ ' + ids.length + ' membre(s) mis à jour')
+                  setBulkSel({}); setBulkMode(false)
+                  reloadMembres()
+                } catch (e) { showToast('⚠ ' + (e.message || 'Erreur')) }
+              }} style={{ ...S.btn('#7040d0', false), padding: '4px 8px', fontSize: 11 }}>OK</button>
+              <select id="bulk-suiveur" style={{ fontSize: 11, padding: '4px 6px', borderRadius: 4, border: '1px solid #e0e4ec' }}>
+                <option value="">Suiveur →</option>
+                {leaders.map(l => <option key={l.id} value={l.id}>{l.prenom} {l.nom}</option>)}
+              </select>
+              <button onClick={async () => {
+                const suivId = document.getElementById('bulk-suiveur')?.value
+                if (!suivId) { showToast('⚠ Choisissez un responsable'); return }
+                const ids = Object.keys(bulkSel).filter(k => bulkSel[k])
+                if (!ids.length) return
+                try {
+                  for (const id of ids) { await modifierMembre(id, { suivi_par: suivId }) }
+                  showToast('✓ ' + ids.length + ' membre(s) assigné(s)')
+                  setBulkSel({}); setBulkMode(false)
+                  reloadMembres()
+                } catch (e) { showToast('⚠ ' + (e.message || 'Erreur')) }
+              }} style={{ ...S.btn('#0ea888', false), padding: '4px 8px', fontSize: 11 }}>OK</button>
+            </>
+          )}
+          <button onClick={() => { setBulkMode(false); setBulkSel({}) }} style={{ ...S.btn('#6b7280', true), padding: '4px 8px', fontSize: 11, marginLeft: 'auto' }}>✕</button>
         </div>
       )}
 
@@ -221,22 +225,22 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                 })}</tbody>
               </table>
             </div>
-            {/* Mobile: cartes */}
+            {/* Mobile: cartes compactes */}
             <div className="mob-only">
               {filt.map(m => {
                 const t = taux(m.id)
                 return (
-                  <div key={m.id} onClick={() => bulkMode ? setBulkSel(prev => ({ ...prev, [m.id]: !prev[m.id] })) : openFiche(m.id)} style={{ padding: '12px 10px', borderBottom: '1px solid #e0e4ec', cursor: 'pointer', opacity: m.archive ? 0.5 : 1, background: bulkSel[m.id] ? '#7040d008' : 'transparent' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                      {bulkMode && <input type="checkbox" checked={!!bulkSel[m.id]} readOnly style={{ marginRight: 4 }} />}
-                      <span style={{ fontSize: 13, fontWeight: 600, color: '#0ea888', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.prenom} {m.nom}</span>
+                  <div key={m.id} onClick={() => bulkMode ? setBulkSel(prev => ({ ...prev, [m.id]: !prev[m.id] })) : openFiche(m.id)} style={{ padding: '10px 8px', borderBottom: '1px solid #e0e4ec', cursor: 'pointer', opacity: m.archive ? 0.5 : 1, background: bulkSel[m.id] ? '#7040d008' : 'transparent' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                      {bulkMode && <input type="checkbox" checked={!!bulkSel[m.id]} readOnly />}
+                      <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: '#0ea888', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.prenom} {m.nom}</span>
                       <span style={S.pill(getStatutColor(refs, m.statut))}>{m.statut}</span>
                     </div>
-                    <div style={{ display: 'flex', gap: 8, fontSize: 11, color: '#6b7280', flexWrap: 'wrap' }}>
-                      <span style={S.pill(getRoleColor(refs, m.role))}>{m.role}</span>
+                    <div style={{ display: 'flex', gap: 8, fontSize: 10, color: '#6b7280', alignItems: 'center', flexWrap: 'wrap' }}>
+                      <span style={{ ...S.pill(getRoleColor(refs, m.role)), fontSize: 9, padding: '1px 6px' }}>{m.role}</span>
                       {t !== null && <span style={{ fontWeight: 600, color: t >= 80 ? '#1a9c60' : t >= 50 ? '#d48f00' : '#e03050' }}>{t}%</span>}
                       {mEn(m.id) > 0 && <span style={{ color: '#3060d0' }}>{mEn(m.id)} ent.</span>}
-                      {m.suivi_par && <span>→ {getSuiveur(m.suivi_par)}</span>}
+                      {m.suivi_par && <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>→ {getSuiveur(m.suivi_par)}</span>}
                     </div>
                   </div>
                 )
