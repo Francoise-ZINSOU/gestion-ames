@@ -133,6 +133,8 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
         .hide-scrollbar{scrollbar-width:none;-ms-overflow-style:none}
         .hide-scrollbar::-webkit-scrollbar{display:none;width:0;height:0}
         input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid #0ea888;outline-offset:2px}
+        input,select,textarea,button{font-family:inherit}
+        input[type="checkbox"],input[type="radio"]{accent-color:#0ea888}
         .scroll-fade{position:relative}
         .scroll-fade::after{content:'';position:absolute;top:0;right:0;bottom:0;width:20px;background:linear-gradient(to right, transparent, #f4f6f9);pointer-events:none}
         .modal-overlay.danger{background:rgba(0,0,0,.5);z-index:600}
