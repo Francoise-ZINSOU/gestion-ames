@@ -5,12 +5,11 @@ import { AlertTriangle, Clock, BookOpen, CheckSquare, TrendingDown } from 'lucid
 export default function HomePage({ actifs, alertes, presences, defis, plans, refs, h, openFiche, setPage, datesAnnulees, auth }) {
   const [showNotifs, setShowNotifs] = useState(true)
 
-  // KPIs par statut — dynamiques basés sur les refs actifs
-  const statutCounts = {}
-  ;(refs.statuts || []).filter(s => !s.est_archive).forEach(s => {
-    statutCounts[s.nom] = { count: actifs.filter(m => m.statut === s.nom).length, couleur: s.couleur, ordre: s.ordre }
-  })
-  const kpiStatuts = Object.entries(statutCounts).filter(([, v]) => v.count > 0 || v.ordre <= 3).sort((a, b) => a[1].ordre - b[1].ordre)
+  // KPIs figés : Total actifs / Nouveaux / Statut critique / Taux culte
+  const statutCount = (nom) => actifs.filter(m => m.statut === nom).length
+  const statutColor = (nom) => (refs.statuts || []).find(s => s.nom === nom)?.couleur || '#6b7280'
+  // Statut "critique" = celui avec l'ordre le plus élevé parmi les non-archivés (par convention: le pire)
+  const statutCritique = (refs.statuts || []).filter(s => !s.est_archive).sort((a, b) => b.ordre - a.ordre)[0]?.nom || 'En difficulté'
 
   // Culte (utilisé pour taux et rappel)
   const culte = h.culteId ? { id: h.culteId } : null
@@ -56,10 +55,28 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
   const recent = actifs.filter(m => { const d = dago(m.date_inscription); return d !== null && d <= 30 })
     .sort((a, b) => new Date(b.date_inscription || 0) - new Date(a.date_inscription || 0)).slice(0, 8)
 
+  // Dashboard personnalisé Pilier : ses suivis
+  const myMembre = auth?.profil?.membre_id ? (actifs || []).find(m => m.id === auth.profil.membre_id) : null
+  const mySuivis = myMembre ? actifs.filter(m => m.suivi_par === myMembre.id) : []
+  const mySuivisEnDifficulte = mySuivis.filter(m => m.statut === statutCritique).length
+  const myEntretiensCeMois = (() => {
+    const monthAgo = new Date(); monthAgo.setDate(monthAgo.getDate() - 30)
+    return (window.__allEntretiens || []).filter(e => mySuivis.some(m => m.id === e.membre_id) && new Date(e.date_entretien) >= monthAgo).length
+  })()
+
   const familleInactive = auth?.profil?.familles_disciples && (auth.profil.familles_disciples.actif === false || auth.profil.familles_disciples.eglises?.actif === false)
 
   return (
     <div>
+      {mySuivis.length > 0 && (
+        <div style={{ ...S.card, borderLeft: '3px solid #7040d0', background: '#7040d008', marginBottom: 12 }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: '#7040d0', marginBottom: 6 }}>★ Mes suivis ({mySuivis.length})</div>
+          <div style={{ display: 'flex', gap: 12, fontSize: 11, color: '#5a6480', flexWrap: 'wrap' }}>
+            {mySuivisEnDifficulte > 0 && <span><strong style={{ color: '#e03050' }}>{mySuivisEnDifficulte}</strong> en {statutCritique?.toLowerCase() || 'difficulté'}</span>}
+            <span onClick={() => setPage('ames')} style={{ color: '#7040d0', cursor: 'pointer', textDecoration: 'underline', marginLeft: 'auto' }}>Voir la liste →</span>
+          </div>
+        </div>
+      )}
       {familleInactive && (
         <div style={{ ...S.card, borderLeft: '3px solid #6b7280', background: '#f4f6f9', marginBottom: 12 }}>
           <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Famille désactivée</div>
@@ -78,12 +95,23 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
         </div>
       )}
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 16 }}>
-        <div style={S.kpi('#0ea888')}><div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }}>Total actifs</div><div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: '#0ea888' }}>{actifs.length}</div></div>
-        {kpiStatuts.map(([nom, { count, couleur }]) => (
-          <div key={nom} onClick={() => setPage('ames')} style={{ ...S.kpi(couleur), cursor: 'pointer' }}><div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }}>{nom}</div><div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: couleur }}>{count}</div></div>
-        ))}
-        <div style={S.kpi(tG >= 80 ? '#1a9c60' : tG >= 50 ? '#d48f00' : '#e03050')}><div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }}>Taux culte</div><div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: tG >= 80 ? '#1a9c60' : tG >= 50 ? '#d48f00' : '#e03050' }}>{tG}%</div></div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10, marginBottom: 16 }}>
+        <div onClick={() => setPage('ames')} style={{ ...S.kpi(statutColor(statutCritique)), cursor: 'pointer' }}>
+          <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }}>{statutCritique}</div>
+          <div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: statutColor(statutCritique) }}>{statutCount(statutCritique)}</div>
+        </div>
+        <div onClick={() => setPage('ames')} style={{ ...S.kpi(statutColor(h.defaultStatut) || '#3060d0'), cursor: 'pointer' }}>
+          <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }}>{h.defaultStatut || 'Nouveaux'}</div>
+          <div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: statutColor(h.defaultStatut) || '#3060d0' }}>{statutCount(h.defaultStatut)}</div>
+        </div>
+        <div onClick={() => setPage('ames')} style={{ ...S.kpi('#0ea888'), cursor: 'pointer' }}>
+          <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }}>Total actifs</div>
+          <div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: '#0ea888' }}>{actifs.length}</div>
+        </div>
+        <div style={S.kpi(tG >= 80 ? '#1a9c60' : tG >= 50 ? '#d48f00' : '#e03050')}>
+          <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }}>Taux culte</div>
+          <div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: tG >= 80 ? '#1a9c60' : tG >= 50 ? '#d48f00' : '#e03050' }}>{culte ? tG + '%' : '—'}</div>
+        </div>
       </div>
 
       {!lastSundaySaved && (
@@ -120,9 +148,14 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
 
         return (
           <div style={{ marginBottom: 14, border: '1px solid #e0e4ec', borderRadius: 8, background: '#fff', overflow: 'hidden' }}>
-            <div onClick={() => setShowNotifs(!showNotifs)} style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', background: '#f4f6f9' }}>
+            <div onClick={() => setShowNotifs(!showNotifs)} style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', background: '#f4f6f9', flexWrap: 'wrap' }}>
               <span style={{ fontSize: 16 }}>🔔</span>
               <strong style={{ fontSize: 13 }}>{totalNotif} notification(s)</strong>
+              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                {(alertes.length + missingCulteDates.length + declining.length) > 0 && <span style={{ padding: '1px 6px', borderRadius: 8, background: '#e03050', color: '#fff', fontSize: 10, fontWeight: 600 }}>{alertes.length + missingCulteDates.length + declining.length} urgent</span>}
+                {(staleNouveau.length + defisSansModule.length) > 0 && <span style={{ padding: '1px 6px', borderRadius: 8, background: '#d48f00', color: '#fff', fontSize: 10, fontWeight: 600 }}>{staleNouveau.length + defisSansModule.length} attention</span>}
+                {thisWeekBdays.length > 0 && <span style={{ padding: '1px 6px', borderRadius: 8, background: '#C49A20', color: '#fff', fontSize: 10, fontWeight: 600 }}>{thisWeekBdays.length} 🎂</span>}
+              </div>
               <span style={{ marginLeft: 'auto', fontSize: 11, color: '#6b7280' }}>{showNotifs ? '▲' : '▼'}</span>
             </div>
             {showNotifs && (

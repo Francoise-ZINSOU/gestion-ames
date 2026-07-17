@@ -54,6 +54,8 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
   const handleSave = async () => {
     if (!fd.nom?.trim() || !fd.prenom?.trim()) { showToast('⚠ Nom et prénom obligatoires'); return }
     if (fd.email && !validEmail(fd.email)) { showToast('⚠ Email invalide'); return }
+    if (fd.date_inscription && fd.date_inscription > today()) { showToast('⚠ La date d\'inscription ne peut pas être dans le futur'); return }
+    if (fd.date_naissance && fd.date_naissance > today()) { showToast('⚠ La date de naissance ne peut pas être dans le futur'); return }
     if (fd.telephone && !validTel(fd.telephone)) { showToast('⚠ Téléphone invalide'); return }
 
     const isEdit = modal === 'edit' && fd.id
@@ -261,8 +263,16 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Email</label><input value={fd.email || ''} onChange={e => uf('email', e.target.value)} style={{ ...S.inp, borderColor: fd.email && !validEmail(fd.email) ? '#e03050' : '#c8cfe0' }} type="email" /></div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px' }}>
-                <div style={{ marginBottom: 8 }}><label style={S.label}>Date d'inscription</label><input value={fd.date_inscription || ''} onChange={e => uf('date_inscription', e.target.value)} style={S.inp} type="date" /></div>
-                <div style={{ marginBottom: 8 }}><label style={S.label}>Date de naissance</label><input value={fd.date_naissance || ''} onChange={e => uf('date_naissance', e.target.value)} style={S.inp} type="date" /></div>
+                <div style={{ marginBottom: 8 }}>
+                  <label style={S.label}>Date d'inscription</label>
+                  <input value={fd.date_inscription || ''} onChange={e => uf('date_inscription', e.target.value)} max={today()} style={S.inp} type="date" />
+                  {editing && fd.date_inscription && fd.date_inscription !== editing.date_inscription && (
+                    <div style={{ fontSize: 10, color: '#d48f00', marginTop: 4, padding: '4px 8px', background: '#d48f0008', border: '1px solid #d48f0033', borderRadius: 4 }}>
+                      ⚠ Modifier la date recalcule l'éligibilité des présences passées.
+                    </div>
+                  )}
+                </div>
+                <div style={{ marginBottom: 8 }}><label style={S.label}>Date de naissance</label><input value={fd.date_naissance || ''} onChange={e => uf('date_naissance', e.target.value)} max={today()} style={S.inp} type="date" /></div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px' }}>
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Statut</label><select value={fd.statut || h.defaultStatut} onChange={e => uf('statut', e.target.value)} style={S.inp}>{(refs.statuts || []).filter(s => !s.est_archive).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}</select></div>
@@ -384,7 +394,15 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                     setSaving(true)
                     try {
                       const rows = toImport.map(({ _skip, _dup, ...r }) => r)
-                      await importerCSV(rows)
+                      // Batching : 50 lignes à la fois avec feedback
+                      const batchSize = 50
+                      let done = 0
+                      for (let i = 0; i < rows.length; i += batchSize) {
+                        const batch = rows.slice(i, i + batchSize)
+                        await importerCSV(batch)
+                        done += batch.length
+                        showToast('Import : ' + done + '/' + rows.length + '...')
+                      }
                       showToast(`✓ ${rows.length} membre(s) importé(s)`)
                     } catch (e) { showToast('⚠ ' + e.message) }
                     setSaving(false)

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { S, fmt, fmtS, dago, dagoLabel, today, getStatutColor, getRoleColor } from '../lib/ui'
 import { useHistoriqueStatuts, useJournal } from '../lib/data'
 import { ClipboardList, BarChart3, MessageCircle, Zap, BookOpen, Pencil, Archive, ArchiveRestore, ArrowRightLeft, NotebookPen, Phone, Mail, CalendarDays, RotateCcw, Check, X, History } from 'lucide-react'
@@ -11,6 +11,14 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
   const [editEntId, setEditEntId] = useState(null)
   const { hist: historiqueStatuts } = useHistoriqueStatuts(m?.id)
   const { notes: journalNotes, ajouter: ajouterNote, supprimer: supprimerNote } = useJournal(m?.id)
+  const [histSuivi, setHistSuivi] = useState([])
+  useEffect(() => {
+    if (m?.id) {
+      import('../lib/supabase').then(({ supabase }) => {
+        supabase.from('historique_suivi').select('*').eq('membre_id', m.id).order('date_changement', { ascending: false }).limit(5).then(({ data }) => setHistSuivi(data || []))
+      })
+    }
+  }, [m?.id])
   const [confirmAction, setConfirmAction] = useState(null)
   const uf = (k, v) => setFd(prev => ({ ...prev, [k]: v }))
 
@@ -29,8 +37,9 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
     return Math.round(ps.filter(p => p.present).length / ps.length * 100)
   }
 
+  const culte = h.culteId ? { id: h.culteId } : null
+
   const cAbs = () => {
-    const culte = h.culteId ? { id: h.culteId } : null
     if (!culte) return 0
     const ps = mPr(culte.id).filter(p => p.eligible).sort((a, b) => new Date(b.date_presence) - new Date(a.date_presence))
     let c = 0
@@ -100,8 +109,8 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
     <div>
       <div style={{ display: 'flex', gap: 5, marginBottom: 10, alignItems: 'center', position: 'sticky', top: 48, zIndex: 40, background: '#f4f6f9', paddingBottom: 4 }}>
         <button onClick={() => setPage(prevPage || 'ames')} style={{ ...S.btn('#5a6480', true), flexShrink: 0 }}>{({ alerts: '← Alertes', ames: '← Liste', ents: '← Entretiens', home: '← Accueil' })[prevPage] || '← Liste'}</button>
-        <div className="hide-scrollbar" style={{ display: 'flex', gap: 5, alignItems: 'center', overflowX: 'auto', WebkitOverflowScrolling: 'touch', flex: 1, minWidth: 0 }}>
-          {[['id', 'Identité', ClipboardList], ['pr', 'Présences', BarChart3], ['en', 'Entretiens', MessageCircle], ['df', 'Défis', Zap], ['pt', 'Plan', BookOpen], ['jn', 'Journal', NotebookPen]].map(([id, label, Icon]) => (
+        <div className="hide-scrollbar scroll-fade" style={{ display: 'flex', gap: 5, alignItems: 'center', overflowX: 'auto', WebkitOverflowScrolling: 'touch', flex: 1, minWidth: 0 }}>
+          {[['id', 'Identité', ClipboardList], ['jn', 'Journal', NotebookPen], ['en', 'Entretiens', MessageCircle], ['pr', 'Présences', BarChart3], ['df', 'Défis', Zap], ['pt', 'Plan', BookOpen]].map(([id, label, Icon]) => (
             <button key={id} onClick={() => setFtab(id)} style={{ padding: '4px 12px', borderRadius: 14, border: '1px solid ' + (ftab === id ? '#0ea888' : '#e0e4ec'), background: ftab === id ? '#0ea88814' : '#f0f2f6', color: ftab === id ? '#0ea888' : '#5a6480', fontSize: 11, fontWeight: ftab === id ? 600 : 500, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap', flexShrink: 0 }}><Icon size={12} /> {label}</button>
           ))}
         </div>
@@ -110,7 +119,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
           {showActionMenu && (
             <>
               <div onClick={() => setShowActionMenu(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 99 }} />
-              <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e4ec', borderRadius: 7, boxShadow: '0 4px 12px rgba(0,0,0,.08)', zIndex: 100, minWidth: 160, overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e4ec', borderRadius: 7, boxShadow: '0 4px 12px rgba(0,0,0,.08)', zIndex: 100, minWidth: 160, maxWidth: 'calc(100vw - 40px)', overflow: 'hidden' }}>
               <div onClick={() => { setFd({ ...m }); setModal('edMb'); setShowActionMenu(false) }} style={{ padding: '10px 14px', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #f0f2f6' }}><Pencil size={13} color="#5a6480" /> Modifier</div>
               {!m.archive && <div onClick={() => { setConfirmAction({ msg: 'Archiver ce membre ?', fn: handleArchive }); setShowActionMenu(false) }} style={{ padding: '10px 14px', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #f0f2f6' }}><Archive size={13} color="#6b7280" /> Archiver</div>}
               {m.archive && <div onClick={() => { setConfirmAction({ msg: 'Restaurer ce membre ? Il redeviendra actif avec le statut "' + h.defaultStatut + '".', fn: async () => {
@@ -152,6 +161,25 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
       {/* Tab: Identité */}
       {ftab === 'id' && (
         <div style={S.card}>
+          {culte && (() => {
+            const todayStr = today()
+            const alreadyPresent = presences.some(p => p.membre_id === m.id && p.activite_id === culte.id && p.date_presence === todayStr && p.present)
+            return (
+              <div style={{ marginBottom: 12, padding: '10px 12px', background: alreadyPresent ? '#1a9c6008' : '#0ea88808', border: '1px solid ' + (alreadyPresent ? '#1a9c6033' : '#0ea88833'), borderRadius: 8, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 12, color: alreadyPresent ? '#1a9c60' : '#0ea888', fontWeight: 600 }}>{alreadyPresent ? '✓ Présent aujourd\'hui' : 'Marquer présent aujourd\'hui ?'}</span>
+                {!alreadyPresent && (
+                  <button onClick={async () => {
+                    try {
+                      const { supabase } = await import('../lib/supabase')
+                      await supabase.rpc('sauver_presences', { p_activite_id: culte.id, p_date: todayStr, p_presences: [{ membre_id: m.id, present: true }] })
+                      showToast('✓ Présent marqué pour aujourd\'hui')
+                      reloadMembres()
+                    } catch (e) { showToast('⚠ ' + (e.message || 'Erreur')) }
+                  }} style={{ ...S.btn('#0ea888', false), fontSize: 11, padding: '4px 10px' }}>Marquer présent</button>
+                )}
+              </div>
+            )
+          })()}
           <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Informations</div>
           {m.telephone && <div style={{ fontSize: 12, marginBottom: 4 }}><a href={'tel:' + m.telephone.replace(/\s/g, '')} style={{ color: '#0ea888', textDecoration: 'none' }}><Phone size={12} style={{display:'inline',verticalAlign:'middle',marginRight:4}} />{m.telephone}</a></div>}
           {m.email && <div style={{ fontSize: 12, marginBottom: 4 }}><a href={'mailto:' + m.email} style={{ color: '#3060d0', textDecoration: 'none' }}><Mail size={12} style={{display:'inline',verticalAlign:'middle',marginRight:4}} />{m.email}</a></div>}
@@ -707,7 +735,15 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Téléphone</label><input value={fd.telephone || ''} onChange={e => uf('telephone', e.target.value)} style={S.inp} /></div>
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Email</label><input value={fd.email || ''} onChange={e => uf('email', e.target.value)} style={S.inp} type="email" /></div>
               </div>
-              <div style={{ marginBottom: 8 }}><label style={S.label}>Date d'inscription</label><input value={fd.date_inscription || ''} onChange={e => uf('date_inscription', e.target.value)} style={S.inp} type="date" /></div>
+              <div style={{ marginBottom: 8 }}>
+                <label style={S.label}>Date d'inscription</label>
+                <input value={fd.date_inscription || ''} onChange={e => uf('date_inscription', e.target.value)} max={today()} style={S.inp} type="date" />
+                {fd.date_inscription && m.date_inscription && fd.date_inscription !== m.date_inscription && (
+                  <div style={{ fontSize: 10, color: '#d48f00', marginTop: 4, padding: '4px 8px', background: '#d48f0008', border: '1px solid #d48f0033', borderRadius: 4 }}>
+                    ⚠ Modifier la date d'inscription recalcule l'éligibilité des présences passées. Le taux du membre peut changer.
+                  </div>
+                )}
+              </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px' }}>
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Statut</label><select value={fd.statut || h.defaultStatut} onChange={e => uf('statut', e.target.value)} style={S.inp}>{(refs.statuts || []).filter(s => !s.est_archive).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}</select></div>
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Rôle</label><select value={fd.role || h.defaultRole} onChange={e => { uf('role', e.target.value); if (h.isBergerRole(e.target.value)) uf('suivi_par', null) }} style={S.inp}>{(refs.roles || []).map(r => <option key={r.nom} value={r.nom}>{r.nom}</option>)}</select></div>

@@ -32,9 +32,20 @@ function RefTable({ table, label, fields, showToast }) {
   const { rows, ajouter, modifier, desactiver } = useRefAdmin(table)
   const [newNom, setNewNom] = useState('')
 
+  const slugify = (s) => s.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')  // remove accents
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 30)
+
   const handleAdd = async () => {
     if (!newNom.trim()) return
-    try { await ajouter({ nom: newNom.trim() }); setNewNom(''); showToast('✓ Ajouté') }
+    const payload = { nom: newNom.trim() }
+    // Auto-générer le code pour la table activités (contrainte NOT NULL sur ancien schéma)
+    if (fields.includes('code') || table === 'activites') {
+      payload.code = slugify(newNom.trim())
+    }
+    try { await ajouter(payload); setNewNom(''); showToast('✓ Ajouté') }
     catch (e) { showToast(e.message?.includes('duplicate') ? '⚠ Ce nom existe déjà' : '⚠ ' + e.message) }
   }
 

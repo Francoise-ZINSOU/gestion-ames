@@ -1,5 +1,4 @@
 import { S, toLocalDate } from '../lib/ui'
-import { AlertTriangle } from 'lucide-react'
 
 export default function AlertesPage({ alertes, membres, openFiche, entretiens, refs }) {
   const getSuiveur = (id) => { if (!id) return 'Non assigné'; const m = membres.find(x => x.id === id); return m ? m.prenom + ' ' + m.nom : 'Non assigné' }

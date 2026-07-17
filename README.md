@@ -37,7 +37,7 @@ src/
     ├── Home.jsx               Dashboard (KPIs, notifications, quick actions)
     ├── Presences.jsx          Saisie des présences par activité/date
     ├── Ames.jsx               Liste + création + import CSV + actions en masse
-    ├── Fiche.jsx              Fiche 360° (6 onglets : Identité, Présences, Entretiens, Défis, Plan, Journal)
+    ├── Fiche.jsx              Fiche 360° (6 onglets : Identité, Journal, Entretiens, Présences, Défis, Plan)
     ├── Alertes.jsx            Alertes de suivi avec détail du score
     ├── EntretiensGlobal.jsx   Vue globale des entretiens
     ├── Croissance.jsx         Plan de croissance
@@ -69,7 +69,7 @@ src/
 - Conflit multi-utilisateur détecté
 
 ### Fiche 360°
-- 6 onglets : Identité, Présences, Entretiens, Défis, Plan de croissance, Journal pastoral
+- 6 onglets (ordre pastoral) : Identité, Journal, Entretiens, Présences, Défis, Plan de croissance
 - Menu "⋯ Actions" : Modifier / Archiver / Transférer (admin)
 - Bouton retour contextuel (← Alertes / ← Liste / ← Entretiens / ← Accueil)
 - KPIs : jours depuis inscription, absences consécutives, entretiens, plan validé
@@ -198,6 +198,8 @@ Les évolutions sont fournies en fichiers séparés à exécuter dans Supabase S
 - `evolution-v1.5-berger-eglise.sql` : Berger d'église (RLS lecture cross-famille)
 - `evolution-v1.6-frequence-activites.sql` : Fréquence des activités (jour_semaine), détection dates manquantes
 - `evolution-v1.7-desactivation.sql` : Flag actif sur eglises et familles_disciples (soft-delete)
+- `evolution-v1.8-eligibilite-coherence.sql` : Trigger recalcul éligibilité présences + code activités nullable + fix ponctuel
+- `evolution-v1.9-audit-experts.sql` : Historique du suivi pastoral (qui suivait qui à quelle date), contrainte anti-auto-suivi
 
 ---
 

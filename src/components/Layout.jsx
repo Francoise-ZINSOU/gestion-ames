@@ -49,9 +49,9 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
         <div style={{ padding: '8px 6px 2px' }}>
           <div style={{ fontSize: 9, letterSpacing: 2, textTransform: 'uppercase', color: '#6b7280', fontWeight: 600, padding: '0 6px', marginBottom: 2 }}>PRÉSENCES</div>
           {navBtn('home', 'Accueil', 0)}
+          {navBtn('ames', 'Âmes', 0)}
           {navBtn('pres', 'Saisie', 0)}
           {navBtn('timeline', 'Historique', 0)}
-          {navBtn('ames', 'Âmes', 0)}
           {navBtn('filia', 'Arbre de suivi', 0)}
         </div>
 
@@ -118,7 +118,7 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
         @supports (height: 100dvh) { :root { --vh: 1dvh; } }
         .mob-only{display:none}
         .desk-only{display:block}
-        @media(max-width:768px){
+        @media(max-width:768px){.toast-msg{bottom:80px!important}
           .sb{display:none!important}
           .mn{margin-left:0!important}
           .nv{display:flex!important}
@@ -132,8 +132,12 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
         body:has(.modal-overlay){overflow:hidden!important}
         .hide-scrollbar{scrollbar-width:none;-ms-overflow-style:none}
         .hide-scrollbar::-webkit-scrollbar{display:none;width:0;height:0}
+        input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid #0ea888;outline-offset:2px}
+        .scroll-fade{position:relative}
+        .scroll-fade::after{content:'';position:absolute;top:0;right:0;bottom:0;width:20px;background:linear-gradient(to right, transparent, #f4f6f9);pointer-events:none}
         .modal-overlay.danger{background:rgba(0,0,0,.5);z-index:600}
         .modal-box{width:100%;background:#fff;border-radius:12px;overflow:hidden;overflow-x:hidden!important;box-sizing:border-box;margin-top:4vh;max-height:92vh;max-height:92dvh;display:flex;flex-direction:column}
+        @media(max-width:768px){.toast-msg{bottom:80px!important}.modal-box{max-height:88dvh;margin-top:2vh}}
         .modal-box>div:nth-child(2){overflow-y:auto;overflow-x:hidden;flex:1}
         .modal-box textarea,.modal-box input,.modal-box select{max-width:100%;box-sizing:border-box}
         @media(max-width:500px){

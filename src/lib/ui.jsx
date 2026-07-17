@@ -17,7 +17,7 @@ export const S = {
   inp: {
     width: '100%', padding: '7px 10px', borderRadius: 6,
     border: '1px solid #c8cfe0', background: '#f0f2f6', color: '#1a1e2e',
-    fontFamily: 'inherit', fontSize: 12, outline: 'none'
+    fontFamily: 'inherit', fontSize: 12, outline: '2px solid transparent', outlineOffset: '2px'
   },
   label: {
     display: 'block', fontSize: 10, fontWeight: 600, letterSpacing: 1,
@@ -68,6 +68,13 @@ export function dagoLabel(d) {
 }
 
 // Retourne YYYY-MM-DD en local (évite le bug UTC de toISOString)
+// Retourne un Set des dates annulées pour une activité donnée
+// Pluralisation intelligente : plural(3, 'défi', 'défis') → "3 défis"
+export const plural = (n, singular, pluralWord) => n + ' ' + (n <= 1 ? singular : (pluralWord || singular + 's'))
+
+export const cancelledDatesFor = (datesAnnulees, activiteId) =>
+  new Set((datesAnnulees || []).filter(d => d.activite_id === activiteId).map(d => d.date_annulee))
+
 export const toLocalDate = (d) => {
   const y = d.getFullYear()
   const m = ('0' + (d.getMonth() + 1)).slice(-2)

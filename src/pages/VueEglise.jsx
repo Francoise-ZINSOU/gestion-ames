@@ -147,19 +147,23 @@ export default function VueEglisePage({ auth, refs, h }) {
   return (
     <div>
       {/* Filtre de période */}
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12, flexWrap: 'wrap' }}>
-        <span style={{ fontSize: 11, color: '#6b7280', fontWeight: 600 }}>Période :</span>
-        <input type="date" value={fDateDe} onChange={e => setFDateDe(e.target.value)} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #c8cfe0', background: '#f0f2f6', fontSize: 11, fontFamily: 'inherit' }} />
-        <span style={{ fontSize: 11, color: '#6b7280' }}>→</span>
-        <input type="date" value={fDateA} onChange={e => setFDateA(e.target.value)} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #c8cfe0', background: '#f0f2f6', fontSize: 11, fontFamily: 'inherit' }} />
-        {(fDateDe || fDateA) && <button onClick={() => { setFDateDe(''); setFDateA('') }} style={{ background: 'none', border: 'none', fontSize: 10, color: '#e03050', cursor: 'pointer' }}>✕ Effacer</button>}
-        {!fDateDe && !fDateA && <span style={{ fontSize: 10, color: '#6b7280', fontStyle: 'italic' }}>Par défaut : 4 dernières semaines</span>}
+      <div style={{ marginBottom: 12 }}>
+        <div style={{ fontSize: 11, color: '#6b7280', fontWeight: 600, marginBottom: 6, display: 'flex', gap: 6, alignItems: 'center' }}>
+          <span>Période</span>
+          {!fDateDe && !fDateA && <span style={{ fontSize: 10, color: '#6b7280', fontStyle: 'italic', fontWeight: 400 }}>(par défaut : 4 dernières semaines)</span>}
+          {(fDateDe || fDateA) && <button onClick={() => { setFDateDe(''); setFDateA('') }} style={{ background: 'none', border: 'none', fontSize: 10, color: '#e03050', cursor: 'pointer', marginLeft: 'auto' }}>✕ Effacer</button>}
+        </div>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <input type="date" value={fDateDe} onChange={e => setFDateDe(e.target.value)} style={{ flex: 1, padding: '6px 8px', borderRadius: 6, border: '1px solid #c8cfe0', background: '#f0f2f6', fontSize: 11, fontFamily: 'inherit', minWidth: 0 }} />
+          <span style={{ fontSize: 11, color: '#6b7280', flexShrink: 0 }}>→</span>
+          <input type="date" value={fDateA} onChange={e => setFDateA(e.target.value)} style={{ flex: 1, padding: '6px 8px', borderRadius: 6, border: '1px solid #c8cfe0', background: '#f0f2f6', fontSize: 11, fontFamily: 'inherit', minWidth: 0 }} />
+        </div>
       </div>
       {/* KPIs globaux */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 16 }}>
         {kpi(Users, 'Total actifs', totalMembres, familles.length + ' famille(s)', '#0ea888')}
         {kpi(TrendingUp, 'Taux culte moyen', avgCulte !== null ? avgCulte + '%' : '—', fDateDe || fDateA ? 'période sélectionnée' : '4 dernières semaines', '#3060d0')}
-        {kpi(UserPlus, 'Nouveaux 30j', totalNouveaux, familles.length + ' famille(s)', '#1a9c60')}
+        {kpi(UserPlus, 'Nouveaux', totalNouveaux, fDateDe || fDateA ? 'période sélectionnée' : '4 dernières semaines', '#1a9c60')}
         {kpi(AlertTriangle, 'Familles à risque', critiques.length, '< 80% dimanche dernier', critiques.length > 0 ? '#e03050' : '#6b7280')}
       </div>
 
@@ -207,7 +211,8 @@ export default function VueEglisePage({ auth, refs, h }) {
 
       {/* Comparatif toutes familles */}
       <div style={S.card}>
-        <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 10 }}>Comparatif par famille</div>
+        <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Comparatif par famille</div>
+        <div style={{ fontSize: 10, color: '#6b7280', marginBottom: 10 }}>Chiffres calculés sur la {fDateDe || fDateA ? 'période sélectionnée' : 'période des 4 dernières semaines'}. "Taux dim. dernier" reste toujours le dimanche le plus récent.</div>
 
         {/* Desktop table */}
         <div className="desk-only">
@@ -219,8 +224,8 @@ export default function VueEglisePage({ auth, refs, h }) {
               <th style={S.th}>Taux moy. période</th>
               <th style={S.th} title="Évolution du taux sur la période sélectionnée vs même durée précédente. Positif = croissance, négatif = alerte.">Tendance <span style={{ color: '#7040d0', cursor: 'help', fontSize: 10 }}>ⓘ</span></th>
               <th style={S.th}>Taux dim. dernier</th>
-              <th style={S.th}>Nouveaux période</th>
-              <th style={S.th}>Entretiens période</th>
+              <th style={S.th}>Nouveaux</th>
+              <th style={S.th}>Entretiens</th>
             </tr></thead>
             <tbody>
               {familles.map(f => {
