@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { S, fmt, fmtS, dago, dagoLabel, today, getStatutColor, getRoleColor } from '../lib/ui'
 import { useHistoriqueStatuts, useJournal } from '../lib/data'
-import { ClipboardList, BarChart3, MessageCircle, Zap, BookOpen, Pencil, Archive, ArrowRightLeft, NotebookPen, Phone, Mail, CalendarDays, RotateCcw, Check, X, History } from 'lucide-react'
+import { ClipboardList, BarChart3, MessageCircle, Zap, BookOpen, Pencil, Archive, ArchiveRestore, ArrowRightLeft, NotebookPen, Phone, Mail, CalendarDays, RotateCcw, Check, X, History } from 'lucide-react'
 
 export default function FichePage({ membres, actifs, presences, entretiens, defis, plans, refs, h, selectedMembre: m, selectedId, openFiche, showToast, ajouterEnt, modifierEnt, supprimerEnt, ajouterDefi, modifierDefi, supprimerDefi, assignerModule, validerModule, retirerModule, modifierMembre, archiverMembre, reloadMembres, setPage, prevPage, auth, datesAnnulees }) {
   const [ftab, setFtab] = useState('id')
@@ -113,6 +113,9 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
               <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e4ec', borderRadius: 7, boxShadow: '0 4px 12px rgba(0,0,0,.08)', zIndex: 100, minWidth: 160, overflow: 'hidden' }}>
               <div onClick={() => { setFd({ ...m }); setModal('edMb'); setShowActionMenu(false) }} style={{ padding: '10px 14px', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #f0f2f6' }}><Pencil size={13} color="#5a6480" /> Modifier</div>
               {!m.archive && <div onClick={() => { setConfirmAction({ msg: 'Archiver ce membre ?', fn: handleArchive }); setShowActionMenu(false) }} style={{ padding: '10px 14px', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #f0f2f6' }}><Archive size={13} color="#6b7280" /> Archiver</div>}
+              {m.archive && <div onClick={() => { setConfirmAction({ msg: 'Restaurer ce membre ? Il redeviendra actif avec le statut "' + h.defaultStatut + '".', fn: async () => {
+                try { await modifierMembre(m.id, { archive: false, statut: h.defaultStatut }); showToast('✓ Membre restauré'); reloadMembres() } catch(e) { showToast('⚠ Erreur') }
+              } }); setShowActionMenu(false) }} style={{ padding: '10px 14px', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, color: '#0ea888', borderBottom: '1px solid #f0f2f6' }}><ArchiveRestore size={13} /> Restaurer</div>}
               {auth?.isAdmin && <div onClick={async () => {
                 const { supabase } = await import('../lib/supabase')
                 const { data } = await supabase.from('familles_disciples').select('*, eglises(nom, actif)').eq('actif', true).order('nom')

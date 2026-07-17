@@ -3,6 +3,8 @@ import { toLocalDate, S, fmt, fmtS } from '../lib/ui'
 
 export default function HistoriquePage({ presences, refs, datesAnnulees }) {
   const activites = refs.activites || []
+  const [fDateDe, setFDateDe] = useState('')
+  const [fDateA, setFDateA] = useState('')
   const [actId, setActId] = useState(activites[0]?.id || '')
   useEffect(() => { if (!actId && activites.length) setActId(activites[0].id) }, [activites])
   const act = activites.find(a => a.id === actId)
@@ -38,8 +40,8 @@ export default function HistoriquePage({ presences, refs, datesAnnulees }) {
   // Timeline complète avec statuts : saved / cancelled / missing
   const buildTimeline = () => {
     const map = {}
-    // Toutes les dates attendues d'abord
-    expectedDates.forEach(d => {
+    // Toutes les dates attendues d'abord (filtrées par période)
+    expectedDates.filter(d => (!fDateDe || d >= fDateDe) && (!fDateA || d <= fDateA)).forEach(d => {
       if (cancelled.has(d)) {
         map[d] = { date: d, status: 'cancelled', motif: cancelledMotifs[d] }
       } else if (savedDates[d]) {
@@ -49,7 +51,7 @@ export default function HistoriquePage({ presences, refs, datesAnnulees }) {
       }
     })
     // Puis les dates saisies hors des attendues (activité ponctuelle ou mauvais jour)
-    Object.keys(savedDates).forEach(d => {
+    Object.keys(savedDates).filter(d => (!fDateDe || d >= fDateDe) && (!fDateA || d <= fDateA)).forEach(d => {
       if (!map[d]) map[d] = { ...savedDates[d], status: cancelled.has(d) ? 'cancelled' : 'saved' }
     })
     return Object.values(map).sort((a, b) => new Date(a.date) - new Date(b.date))

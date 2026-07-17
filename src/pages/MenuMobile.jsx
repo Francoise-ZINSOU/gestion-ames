@@ -1,8 +1,8 @@
 import { S } from '../lib/ui'
 import { useAuth } from '../lib/auth'
-import { Home, CheckSquare, TrendingUp, Users, GitBranch, Bell, MessageCircle, BookOpen, Download, Settings, LogOut, Search } from 'lucide-react'
+import { Home, CheckSquare, TrendingUp, Users, GitBranch, Bell, MessageCircle, BookOpen, Download, Settings, LogOut, Search, Building2 } from 'lucide-react'
 
-export default function MenuMobile({ setPage, isAdmin, selectedMembre }) {
+export default function MenuMobile({ setPage, isAdmin, selectedMembre, auth }) {
   const { logout, profil } = useAuth()
 
   const items = [
@@ -16,6 +16,7 @@ export default function MenuMobile({ setPage, isAdmin, selectedMembre }) {
     { id: 'protos', Icon: BookOpen, label: 'Plan de croissance' },
     { id: 'export', Icon: Download, label: 'Export' },
   ]
+  if (auth?.isBergerEglise || isAdmin) items.push({ id: 'vueEglise', Icon: Building2, label: 'Vue église' })
   if (isAdmin) items.push({ id: 'params', Icon: Settings, label: 'Paramètres' })
 
   return (

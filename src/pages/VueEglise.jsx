@@ -5,9 +5,11 @@ import { Users, TrendingUp, AlertTriangle, UserPlus, TrendingDown } from 'lucide
 
 export default function VueEglisePage({ auth, refs, h }) {
   const [familles, setFamilles] = useState([])
-  const [stats, setStats] = useState({})
+  const [rawData, setRawData] = useState({ membres: [], presences: [], entretiens: [], activites: [], datesAnn: [] })
   const [loading, setLoading] = useState(true)
   const [egliseActive, setEgliseActive] = useState(true)
+  const [fDateDe, setFDateDe] = useState('')
+  const [fDateA, setFDateA] = useState('')
 
   useEffect(() => {
     (async () => {
@@ -24,90 +26,14 @@ export default function VueEglisePage({ auth, refs, h }) {
 
       // Charger toutes les données en parallèle
       const famIds = (fam || []).map(f => f.id)
-      const [{ data: membres }, { data: presences }, { data: entretiens }, { data: activites }] = await Promise.all([
+      const [{ data: membres }, { data: presences }, { data: entretiens }, { data: activites }, { data: datesAnn }] = await Promise.all([
         supabase.from('membres').select('*').in('famille_id', famIds).eq('archive', false),
         supabase.from('presences').select('*').in('famille_id', famIds),
         supabase.from('entretiens').select('*').in('famille_id', famIds),
-        supabase.from('activites').select('*').eq('code', 'culte').or('famille_id.is.null,famille_id.in.(' + famIds.join(',') + ')')
+        supabase.from('activites').select('*').eq('code', 'culte').or('famille_id.is.null,famille_id.in.(' + famIds.join(',') + ')'),
+        supabase.from('dates_annulees').select('*')
       ])
-
-      // Calculer les stats par famille
-      const perFam = {}
-      const now = new Date()
-      const fourWeeksAgo = new Date(now); fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28)
-      const eightWeeksAgo = new Date(now); eightWeeksAgo.setDate(eightWeeksAgo.getDate() - 56)
-      const thirtyDaysAgo = new Date(now); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-
-      // Dernier dimanche
-      const lastSunday = new Date(now)
-      lastSunday.setDate(lastSunday.getDate() - lastSunday.getDay())
-      const lastSundayStr = toLocalDate(lastSunday)
-
-      ;(fam || []).forEach(f => {
-        const famMembres = (membres || []).filter(m => m.famille_id === f.id)
-        // Priorité : activité de la famille, sinon activité partagée (famille_id NULL, legacy)
-        const culteAct = (activites || []).find(a => a.famille_id === f.id) || (activites || []).find(a => !a.famille_id)
-        // Présences : celles de la famille (ou legacy sans famille_id)
-        const famPresences = culteAct ? (presences || []).filter(p => (p.famille_id === f.id || !p.famille_id) && p.activite_id === culteAct.id && p.eligible) : []
-
-        // Moyenne culte 4 dernières semaines
-        const recentPres = famPresences.filter(p => new Date(p.date_presence) >= fourWeeksAgo)
-        const recentDates = [...new Set(recentPres.map(p => p.date_presence))]
-        let recentAvg = null
-        if (recentDates.length > 0) {
-          const rates = recentDates.map(d => {
-            const ps = recentPres.filter(p => p.date_presence === d)
-            const nel = ps.length
-            const npr = ps.filter(p => p.present).length
-            return nel > 0 ? npr / nel * 100 : 0
-          })
-          recentAvg = Math.round(rates.reduce((s, r) => s + r, 0) / rates.length)
-        }
-
-        // 4 semaines précédentes (pour tendance)
-        const prevPres = famPresences.filter(p => new Date(p.date_presence) >= eightWeeksAgo && new Date(p.date_presence) < fourWeeksAgo)
-        const prevDates = [...new Set(prevPres.map(p => p.date_presence))]
-        let prevAvg = null
-        if (prevDates.length > 0) {
-          const rates = prevDates.map(d => {
-            const ps = prevPres.filter(p => p.date_presence === d)
-            const nel = ps.length
-            const npr = ps.filter(p => p.present).length
-            return nel > 0 ? npr / nel * 100 : 0
-          })
-          prevAvg = Math.round(rates.reduce((s, r) => s + r, 0) / rates.length)
-        }
-
-        const trend = (recentAvg !== null && prevAvg !== null) ? recentAvg - prevAvg : null
-
-        // Taux dernier dimanche
-        const lastSundayPres = famPresences.filter(p => p.date_presence === lastSundayStr)
-        let lastSundayRate = null
-        if (lastSundayPres.length > 0) {
-          const nel = lastSundayPres.length
-          const npr = lastSundayPres.filter(p => p.present).length
-          lastSundayRate = nel > 0 ? Math.round(npr / nel * 100) : 0
-        }
-
-        // Nouveaux ce mois
-        const nouveaux = famMembres.filter(m => m.date_inscription && new Date(m.date_inscription) >= thirtyDaysAgo).length
-
-        // Entretiens ce mois
-        const entMonth = (entretiens || []).filter(e => e.famille_id === f.id && e.date_entretien && new Date(e.date_entretien) >= thirtyDaysAgo).length
-
-        perFam[f.id] = {
-          nom: f.nom,
-          nbMembres: famMembres.length,
-          recentAvg, prevAvg, trend, lastSundayRate,
-          nouveaux, entMonth,
-          bergerName: (() => {
-            const berger = famMembres.find(m => h.isBergerRole(m.role))
-            return berger ? berger.prenom + ' ' + berger.nom : '—'
-          })()
-        }
-      })
-
-      setStats(perFam)
+      setRawData({ membres: membres || [], presences: presences || [], entretiens: entretiens || [], activites: activites || [], datesAnn: datesAnn || [] })
       setLoading(false)
     })()
   }, [auth, h])
@@ -122,6 +48,78 @@ export default function VueEglisePage({ auth, refs, h }) {
     </div>
   )
   if (!familles.length) return <div style={{ ...S.card, textAlign: 'center', color: '#6b7280' }}>Aucune famille dans cette église.</div>
+
+  // ── Calcul dynamique basé sur le filtre de dates ──
+  const now = new Date()
+  const defaultDe = new Date(now); defaultDe.setDate(defaultDe.getDate() - 28)
+  const defaultDeStr = toLocalDate(defaultDe)
+  const filterDe = fDateDe || defaultDeStr
+  const filterA = fDateA || toLocalDate(now)
+
+  // Période précédente (pour tendance) = même durée avant filterDe
+  const dureeJours = Math.round((new Date(filterA) - new Date(filterDe)) / 864e5)
+  const prevDe = new Date(new Date(filterDe)); prevDe.setDate(prevDe.getDate() - dureeJours)
+  const prevDeStr = toLocalDate(prevDe)
+
+  const thirtyDaysAgo = new Date(now); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+  const lastSunday = new Date(now); lastSunday.setDate(lastSunday.getDate() - lastSunday.getDay())
+  const lastSundayStr = toLocalDate(lastSunday)
+
+  const stats = {}
+  familles.forEach(f => {
+    const famMembres = rawData.membres.filter(m => m.famille_id === f.id)
+    const culteAct = rawData.activites.find(a => a.famille_id === f.id) || rawData.activites.find(a => !a.famille_id)
+    const cancelledDates = new Set((rawData.datesAnn || []).filter(d => culteAct && d.activite_id === culteAct.id).map(d => d.date_annulee))
+    const famPresences = culteAct ? rawData.presences.filter(p => (p.famille_id === f.id || !p.famille_id) && p.activite_id === culteAct.id && p.eligible && !cancelledDates.has(p.date_presence)) : []
+
+    // Moyenne culte dans la période sélectionnée
+    const recentPres = famPresences.filter(p => p.date_presence >= filterDe && p.date_presence <= filterA)
+    const recentDates = [...new Set(recentPres.map(p => p.date_presence))]
+    let recentAvg = null
+    if (recentDates.length > 0) {
+      const rates = recentDates.map(d => {
+        const ps = recentPres.filter(p => p.date_presence === d)
+        return ps.length > 0 ? Math.round(ps.filter(p => p.present).length / ps.length * 100) : 0
+      })
+      recentAvg = Math.round(rates.reduce((s, r) => s + r, 0) / rates.length)
+    }
+
+    // Période précédente (pour tendance)
+    const prevPres = famPresences.filter(p => p.date_presence >= prevDeStr && p.date_presence < filterDe)
+    const prevDates = [...new Set(prevPres.map(p => p.date_presence))]
+    let prevAvg = null
+    if (prevDates.length > 0) {
+      const rates = prevDates.map(d => {
+        const ps = prevPres.filter(p => p.date_presence === d)
+        return ps.length > 0 ? Math.round(ps.filter(p => p.present).length / ps.length * 100) : 0
+      })
+      prevAvg = Math.round(rates.reduce((s, r) => s + r, 0) / rates.length)
+    }
+
+    const trend = (recentAvg !== null && prevAvg !== null && recentDates.length >= 2 && prevDates.length >= 2) ? recentAvg - prevAvg : null
+
+    // Taux dernier dimanche
+    const lastSundayPres = famPresences.filter(p => p.date_presence === lastSundayStr)
+    let lastSundayRate = null
+    if (lastSundayPres.length > 0) {
+      lastSundayRate = Math.round(lastSundayPres.filter(p => p.present).length / lastSundayPres.length * 100)
+    }
+
+    // Nouveaux et entretiens dans la période
+    const nouveaux = famMembres.filter(m => m.date_inscription && m.date_inscription >= filterDe && m.date_inscription <= filterA).length
+    const entMonth = rawData.entretiens.filter(e => e.famille_id === f.id && e.date_entretien >= filterDe && e.date_entretien <= filterA).length
+
+    stats[f.id] = {
+      nom: f.nom, nbMembres: famMembres.length,
+      recentAvg, prevAvg, trend, lastSundayRate,
+      recentCount: recentDates.length, prevCount: prevDates.length,
+      nouveaux, entMonth,
+      bergerName: (() => {
+        const berger = famMembres.find(m => h.isBergerRole(m.role))
+        return berger ? berger.prenom + ' ' + berger.nom : '—'
+      })()
+    }
+  })
 
   // Agrégats globaux
   const totalMembres = familles.reduce((s, f) => s + (stats[f.id]?.nbMembres || 0), 0)
@@ -148,11 +146,20 @@ export default function VueEglisePage({ auth, refs, h }) {
 
   return (
     <div>
+      {/* Filtre de période */}
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12, flexWrap: 'wrap' }}>
+        <span style={{ fontSize: 11, color: '#6b7280', fontWeight: 600 }}>Période :</span>
+        <input type="date" value={fDateDe} onChange={e => setFDateDe(e.target.value)} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #c8cfe0', background: '#f0f2f6', fontSize: 11, fontFamily: 'inherit' }} />
+        <span style={{ fontSize: 11, color: '#6b7280' }}>→</span>
+        <input type="date" value={fDateA} onChange={e => setFDateA(e.target.value)} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #c8cfe0', background: '#f0f2f6', fontSize: 11, fontFamily: 'inherit' }} />
+        {(fDateDe || fDateA) && <button onClick={() => { setFDateDe(''); setFDateA('') }} style={{ background: 'none', border: 'none', fontSize: 10, color: '#e03050', cursor: 'pointer' }}>✕ Effacer</button>}
+        {!fDateDe && !fDateA && <span style={{ fontSize: 10, color: '#6b7280', fontStyle: 'italic' }}>Par défaut : 4 dernières semaines</span>}
+      </div>
       {/* KPIs globaux */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 16 }}>
         {kpi(Users, 'Total actifs', totalMembres, familles.length + ' famille(s)', '#0ea888')}
-        {kpi(TrendingUp, 'Taux culte moyen', avgCulte !== null ? avgCulte + '%' : '—', '4 derniers dimanches', '#3060d0')}
-        {kpi(UserPlus, 'Nouveaux 30j', totalNouveaux, 'toutes familles', '#1a9c60')}
+        {kpi(TrendingUp, 'Taux culte moyen', avgCulte !== null ? avgCulte + '%' : '—', fDateDe || fDateA ? 'période sélectionnée' : '4 dernières semaines', '#3060d0')}
+        {kpi(UserPlus, 'Nouveaux 30j', totalNouveaux, familles.length + ' famille(s)', '#1a9c60')}
         {kpi(AlertTriangle, 'Familles à risque', critiques.length, '< 80% dimanche dernier', critiques.length > 0 ? '#e03050' : '#6b7280')}
       </div>
 
@@ -191,7 +198,7 @@ export default function VueEglisePage({ auth, refs, h }) {
               </div>
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontSize: 15, fontWeight: 700, color: '#d48f00', fontFamily: "'Outfit', sans-serif" }}>{stats[f.id].trend > 0 ? '+' : ''}{stats[f.id].trend} pts</div>
-                <div style={{ fontSize: 10, color: '#6b7280' }}>vs 4 dimanches précédents</div>
+                <div style={{ fontSize: 10, color: '#6b7280' }}>vs période précédente</div>
               </div>
             </div>
           ))}
@@ -209,24 +216,27 @@ export default function VueEglisePage({ auth, refs, h }) {
               <th style={S.th}>Famille</th>
               <th style={S.th}>Berger</th>
               <th style={S.th}>Membres</th>
-              <th style={S.th}>Taux moy. 4 dim.</th>
-              <th style={S.th} title="Évolution du taux : moyenne des 4 derniers dimanches vs 4 précédents. Positif = famille en croissance, négatif = alerte.">Tendance <span style={{ color: '#7040d0', cursor: 'help', fontSize: 10 }}>ⓘ</span></th>
+              <th style={S.th}>Taux moy. période</th>
+              <th style={S.th} title="Évolution du taux sur la période sélectionnée vs même durée précédente. Positif = croissance, négatif = alerte.">Tendance <span style={{ color: '#7040d0', cursor: 'help', fontSize: 10 }}>ⓘ</span></th>
               <th style={S.th}>Taux dim. dernier</th>
-              <th style={S.th}>Nouveaux 30j</th>
-              <th style={S.th}>Entretiens 30j</th>
+              <th style={S.th}>Nouveaux période</th>
+              <th style={S.th}>Entretiens période</th>
             </tr></thead>
             <tbody>
               {familles.map(f => {
                 const s = stats[f.id] || {}
                 const trendColor = s.trend > 0 ? '#1a9c60' : s.trend < 0 ? '#e03050' : '#6b7280'
+                const trendLabel = s.trend !== null
+                  ? (s.trend > 0 ? '↗ +' : s.trend < 0 ? '↘ ' : '→ ') + s.trend + ' pts'
+                  : (s.recentCount || 0) < 2 ? 'Pas assez de données' : (s.prevCount || 0) < 2 ? 'Pas d\'historique' : '—'
                 return (
                   <tr key={f.id}>
                     <td style={{ ...S.td, fontWeight: 600, color: '#0ea888' }}>{f.nom}</td>
                     <td style={{ ...S.td, color: '#5a6480', fontSize: 11 }}>{s.bergerName}</td>
                     <td style={S.td}>{s.nbMembres}</td>
-                    <td style={{ ...S.td, fontWeight: 600 }}>{s.recentAvg !== null ? s.recentAvg + '%' : '—'}</td>
-                    <td style={{ ...S.td, color: trendColor, fontWeight: 600 }}>{s.trend !== null ? (s.trend > 0 ? '↗ +' : s.trend < 0 ? '↘ ' : '→ ') + s.trend + ' pts' : '—'}</td>
-                    <td style={{ ...S.td, fontWeight: 600, color: s.lastSundayRate < 80 ? '#e03050' : '#1a9c60' }}>{s.lastSundayRate !== null ? s.lastSundayRate + '%' : '—'}</td>
+                    <td style={{ ...S.td, fontWeight: 600 }}>{s.recentAvg !== null ? s.recentAvg + '%' : '—'}<span style={{ fontSize: 9, color: '#6b7280', fontWeight: 400 }}>{s.recentCount ? ' (' + s.recentCount + ' dim.)' : ''}</span></td>
+                    <td style={{ ...S.td, color: s.trend !== null ? trendColor : '#6b7280', fontWeight: s.trend !== null ? 600 : 400, fontSize: s.trend !== null ? 12 : 10 }}>{trendLabel}</td>
+                    <td style={{ ...S.td, fontWeight: 600, color: s.lastSundayRate !== null ? (s.lastSundayRate < 80 ? '#e03050' : '#1a9c60') : '#6b7280' }}>{s.lastSundayRate !== null ? s.lastSundayRate + '%' : '—'}</td>
                     <td style={S.td}>{s.nouveaux}</td>
                     <td style={S.td}>{s.entMonth}</td>
                   </tr>
@@ -250,13 +260,13 @@ export default function VueEglisePage({ auth, refs, h }) {
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ fontSize: 15, fontWeight: 700, fontFamily: "'Outfit', sans-serif" }}>{s.recentAvg !== null ? s.recentAvg + '%' : '—'}</div>
-                    <div style={{ fontSize: 9, color: trendColor, fontWeight: 600 }}>{s.trend !== null ? (s.trend > 0 ? '+' : '') + s.trend + ' pts' : '—'}</div>
+                    <div style={{ fontSize: 9, color: s.trend !== null ? trendColor : '#6b7280', fontWeight: s.trend !== null ? 600 : 400 }}>{s.trend !== null ? (s.trend > 0 ? '+' : '') + s.trend + ' pts' : s.recentCount < 2 ? 'Pas assez de données' : '—'}</div>
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 10, fontSize: 10, color: '#6b7280' }}>
                   <span>Dim. dernier: <strong style={{ color: s.lastSundayRate < 80 ? '#e03050' : '#1a9c60' }}>{s.lastSundayRate !== null ? s.lastSundayRate + '%' : '—'}</strong></span>
-                  <span>Nouveaux 30j: <strong>{s.nouveaux}</strong></span>
-                  <span>Entretiens 30j: <strong>{s.entMonth}</strong></span>
+                  <span>Nouveaux: <strong>{s.nouveaux}</strong></span>
+                  <span>Entretiens: <strong>{s.entMonth}</strong></span>
                 </div>
               </div>
             )

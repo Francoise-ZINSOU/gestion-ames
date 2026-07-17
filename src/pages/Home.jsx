@@ -142,7 +142,7 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
                   </div>
                 )}
                 {thisWeekBdays.length > 0 && (
-                  <div style={{ padding: '8px 10px', borderRadius: 6, background: '#FFD70008', borderLeft: '3px solid #FFD700', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{ padding: '8px 10px', borderRadius: 6, background: '#C49A2008', borderLeft: '3px solid #C49A20', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{ fontSize: 13 }}>🎂</span>
                     <span style={{ fontSize: 12, color: '#8B6914' }}><strong>{thisWeekBdays.length}</strong> anniversaire(s) : {thisWeekBdays.map(m => m.prenom).join(', ')}</span>
                   </div>

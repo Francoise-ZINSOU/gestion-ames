@@ -128,6 +128,11 @@ src/
 ### Détection de tendances
 - Présence en baisse : 3+/4 dimanches passés vs 0-1/4 récents → alerte préventive
 
+### Filtres de dates
+- Page Entretiens : filtre par période (date début → date fin)
+- Page Historique : filtre par période avec bouton effacer
+- Vue église : filtre automatique des dates annulées
+
 ### Détection des dates manquantes
 - Activités récurrentes : chaque activité peut avoir un jour de la semaine (`jour_semaine`)
 - Historique : 3 états visuels distincts (saisie / annulée / non saisie)
