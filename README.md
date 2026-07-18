@@ -30,11 +30,12 @@ src/
 ├── components/
 │   └── Layout.jsx             Sidebar desktop + nav mobile + header
 └── pages/
-    ├── Login.jsx              Connexion
-    ├── AccessDenied.jsx       Accès refusé
+    ├── Login.jsx              Connexion (3 modes : login / forgot / sent)
+    ├── SetPassword.jsx        Définition mot de passe (nouveaux utilisateurs invités)
+    ├── AccessDenied.jsx       Accès en attente (instructions claires pour obtenir l'accès)
     ├── NoFamille.jsx          Utilisateur sans famille assignée
     ├── MenuMobile.jsx         Menu "Plus" mobile
-    ├── Home.jsx               Dashboard (KPIs, notifications, quick actions)
+    ├── Home.jsx               Dashboard (4 KPIs figés, bandeau Pilier, notifications badges)
     ├── Presences.jsx          Saisie des présences par activité/date
     ├── Ames.jsx               Liste + création + import CSV + actions en masse
     ├── Fiche.jsx              Fiche 360° (6 onglets : Identité, Journal, Entretiens, Présences, Défis, Plan)
@@ -70,7 +71,10 @@ src/
 
 ### Fiche 360°
 - 6 onglets (ordre pastoral) : Identité, Journal, Entretiens, Présences, Défis, Plan de croissance
-- Menu "⋯ Actions" : Modifier / Archiver / Transférer (admin)
+- Menu "⋯ Actions" : Modifier / Archiver / Restaurer / Transférer (admin)
+- Raccourci "Marquer présent aujourd'hui" (en haut de l'onglet Identité)
+- Historique du suivi pastoral (5 derniers changements de suiveur)
+- Détection présences orphelines (membre dont la date d'inscription a changé)
 - Bouton retour contextuel (← Alertes / ← Liste / ← Entretiens / ← Accueil)
 - KPIs : jours depuis inscription, absences consécutives, entretiens, plan validé
 - Suggestion "Passer en Résolu" quand tous les modules d'un défi sont validés
@@ -103,12 +107,23 @@ src/
 - Piliers non rattachés = signal d'anomalie
 - Membres sans suiveur affichés séparément
 
-### Multi-église
+### Multi-église / Multi-tenant
 - Table `eglises` + `familles_disciples`
 - `famille_id` sur toutes les données
-- RLS filtrant automatiquement par famille
-- Super-admin bypass
-- Trigger auto-set du `famille_id` à l'insertion
+- RLS filtrant par famille (policies uniques, sans fallback NULL)
+- Trigger `BEFORE INSERT` auto-injecte `famille_id` sur 9 tables — zéro orphelin possible
+- Protection : un utilisateur ne peut pas changer sa propre `famille_id`
+- Création de famille → 3 activités de base auto-créées (Culte, Enseignement, Prière)
+- Sélecteur de famille dans Paramètres → Activités (admin multi-familles)
+- Super-admin bypass total
+
+### Gestion des utilisateurs
+- Invitation par email via Edge Function Supabase (`invite-user`)
+- Formulaire : email, nom affiché, famille, rôle (Responsable/Admin)
+- L'invité reçoit un email → clique → définit son mot de passe → accès
+- Page "Définir mon mot de passe" pour les nouveaux arrivants
+- Mot de passe oublié (3 modes : connexion / réinitialisation / confirmation)
+- Protection : impossible de retirer le dernier admin
 
 ### Berger d'église (vue macro)
 - Nouvelle page "Vue église"
@@ -199,7 +214,10 @@ Les évolutions sont fournies en fichiers séparés à exécuter dans Supabase S
 - `evolution-v1.6-frequence-activites.sql` : Fréquence des activités (jour_semaine), détection dates manquantes
 - `evolution-v1.7-desactivation.sql` : Flag actif sur eglises et familles_disciples (soft-delete)
 - `evolution-v1.8-eligibilite-coherence.sql` : Trigger recalcul éligibilité présences + code activités nullable + fix ponctuel
-- `evolution-v1.9-audit-experts.sql` : Historique du suivi pastoral (qui suivait qui à quelle date), contrainte anti-auto-suivi
+- `evolution-v1.9-audit-experts.sql` : Historique du suivi pastoral, contrainte anti-auto-suivi
+- `evolution-v2.0-multi-tenant-fix.sql` : Triggers auto `famille_id` sur 9 tables, protection auto-transfert
+- `fix-rls-isolation.sql` : Suppression policies RLS doublons, retrait fallback `IS NULL`, isolation complète
+- `migration-isolation-familles.sql` : Rattachement données orphelines, création activités par famille
 
 ---
 
@@ -217,18 +235,30 @@ npm run build       → dossier dist/
 - Grays : `#1a1e2e` texte, `#5a6480` sub-texte, `#6b7280` meta (WCAG AA), `#e0e4ec` bordures
 - Polices : DM Sans / Outfit / Roboto Mono via Google Fonts CDN
 
-### Responsive
+### Responsive / UX mobile
 - Mobile-first : `mob-only` / `desk-only` classes
 - Breakpoint : 768px
 - Viewport : `100dvh` + `viewport-fit=cover` (safe-area iOS)
 - Nav bottom mobile avec 5 boutons + safe-area
 - Sidebar fixe 210px desktop
+- `box-sizing: border-box` global (aucun overflow)
+- `font-family: inherit` sur tous les form controls
+- `accent-color: #0ea888` sur checkboxes/radios
+- Focus visible clavier : `outline: 2px solid #0ea888`
+- Tailles minimales : body 14px, texte courant 13px, meta 12px, micro 10-11px
+- Cartes membres compactes (~60px), bulk bar conditionnelle
+- Dropdown activités sur mobile (boutons sur desktop)
+- Recherche cachée si < 15 membres
+- Modales max-height 88dvh sur mobile, toast à bottom 80px
 
 ### Principes
 - **Zéro string hardcodée** : tout passe par `refHelpers(refs)`
 - **Realtime** : 5 channels Supabase (membres, presences, entretiens, defis, plan_croissance)
 - **Wrapper w()** : centralise try/catch + toast + reload pour toutes les opérations async
 - **Body scroll lock** modales via `body:has(.modal-overlay){overflow:hidden}`
+- **Éligibilité cohérente** : trigger SQL recalcule `eligible` quand `date_inscription` change
+- **Avertissement** visible quand on modifie une date d'inscription (recalcul des présences)
+- **Import CSV** : batching 50 lignes, feedback progressif, gestion encodage UTF-8/Windows-1252/BOM
 
 ---
 
@@ -237,7 +267,7 @@ npm run build       → dossier dist/
 ### v2 — Valeur pastorale forte
 - Notifications email hebdomadaires (Supabase Edge Functions + Resend)
 - Rapports mensuels PDF
-- Dashboard personnalisé Pilier
+- ~~Dashboard personnalisé Pilier~~ ✓ (bandeau "Mes suivis" sur l'accueil)
 - Log de communication (appels, SMS)
 
 ### v3 — Fonctionnalités avancées
