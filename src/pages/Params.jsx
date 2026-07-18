@@ -15,7 +15,7 @@ const REF_TABLES = [
   { key: 'ref_motifs_depart', label: 'Motifs de départ', fields: ['nom'] },
 ]
 
-function AccordionRefTable({ table, label, fields, showToast }) {
+function AccordionRefTable({ table, label, fields, showToast, familleId }) {
   const [open, setOpen] = useState(false)
   return (
     <div style={{ marginBottom: 4 }}>
@@ -23,17 +23,20 @@ function AccordionRefTable({ table, label, fields, showToast }) {
         <span style={{ fontSize: 13, fontWeight: 600, color: open ? '#0ea888' : '#5a6480' }}>{label}</span>
         <span style={{ fontSize: 12, color: '#6b7280' }}>{open ? '▲' : '▼'}</span>
       </div>
-      {open && <div style={{ padding: '10px 4px' }}><RefTable table={table} label={label} fields={fields} showToast={showToast} /></div>}
+      {open && <div style={{ padding: '10px 4px' }}><RefTable table={table} label={label} fields={fields} showToast={showToast} familleId={familleId} /></div>}
     </div>
   )
 }
 
-function RefTable({ table, label, fields, showToast }) {
-  const { rows, ajouter, modifier, desactiver } = useRefAdmin(table)
+function RefTable({ table, label, fields, showToast, familleId }) {
+  const { rows: allRows, ajouter, modifier, desactiver, reload } = useRefAdmin(table)
   const [newNom, setNewNom] = useState('')
 
+  // Activités : filtrer par famille_id de l'utilisateur
+  const rows = familleId ? allRows.filter(r => r.famille_id === familleId) : allRows
+
   const slugify = (s) => s.toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')  // remove accents
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '_')
     .replace(/^_+|_+$/g, '')
     .slice(0, 30)
@@ -41,10 +44,11 @@ function RefTable({ table, label, fields, showToast }) {
   const handleAdd = async () => {
     if (!newNom.trim()) return
     const payload = { nom: newNom.trim() }
-    // Auto-générer le code pour la table activités (contrainte NOT NULL sur ancien schéma)
     if (fields.includes('code') || table === 'activites') {
       payload.code = slugify(newNom.trim())
     }
+    // Rattacher automatiquement à la famille
+    if (familleId) payload.famille_id = familleId
     try { await ajouter(payload); setNewNom(''); showToast('✓ Ajouté') }
     catch (e) { showToast(e.message?.includes('duplicate') ? '⚠ Ce nom existe déjà' : '⚠ ' + e.message) }
   }
@@ -62,7 +66,7 @@ function RefTable({ table, label, fields, showToast }) {
               try {
                 const { error } = await supabase.from(table).update({ jour_semaine: v, est_recurrente: v !== null }).eq('id', r.id)
                 if (error) throw error
-                showToast('✓ Mis à jour'); load()
+                showToast('✓ Mis à jour'); reload()
               } catch (err) { showToast('⚠ ' + err.message) }
             }} style={{ fontSize: 11, padding: '3px 6px', border: '1px solid #e0e4ec', borderRadius: 4, background: '#f0f2f6', fontFamily: 'inherit' }}>
               <option value="">Ponctuelle</option>
@@ -296,9 +300,21 @@ function EglisePanel({ showToast }) {
   const addFamille = async () => {
     if (!newFamille.eglise_id || !newFamille.nom.trim()) return
     try {
-      const { error } = await supabase.from('familles_disciples').insert({ eglise_id: newFamille.eglise_id, nom: newFamille.nom.trim() })
+      const { data, error } = await supabase.from('familles_disciples').insert({ eglise_id: newFamille.eglise_id, nom: newFamille.nom.trim() }).select().single()
       if (error) throw error
-      showToast('✓ Famille ajoutée'); setNewFamille({ eglise_id: '', nom: '' }); loadAll()
+
+      // Créer automatiquement les activités de base pour cette famille
+      const defaultActivites = [
+        { nom: 'Culte du dimanche', code: 'culte', icone: '⛪', couleur: '#0ea888', jour_semaine: 0, est_recurrente: true },
+        { nom: 'Enseignement', code: 'enseignement', icone: '📖', couleur: '#3060d0', jour_semaine: null, est_recurrente: false },
+        { nom: 'Réunion de prière', code: 'priere', icone: '🙏', couleur: '#7040d0', jour_semaine: null, est_recurrente: false },
+      ]
+      const { error: actErr } = await supabase.from('activites').insert(
+        defaultActivites.map(a => ({ ...a, famille_id: data.id }))
+      )
+      if (actErr) console.error('Activités auto:', actErr)
+
+      showToast('✓ Famille ajoutée avec ses activités'); setNewFamille({ eglise_id: '', nom: '' }); loadAll()
     } catch (e) { showToast('⚠ ' + e.message) }
   }
 
@@ -383,8 +399,24 @@ function EglisePanel({ showToast }) {
   )
 }
 
-export default function ParamsPage({ showToast, actifs, refs }) {
+export default function ParamsPage({ showToast, actifs, refs, auth }) {
   const [tab, setTab] = useState('refs')
+  const [familles, setFamilles] = useState([])
+  const [selectedFamilleId, setSelectedFamilleId] = useState(auth?.profil?.famille_id || '')
+
+  // Charger les familles accessibles
+  useState(() => {
+    supabase.from('familles_disciples').select('*, eglises(nom)').eq('actif', true).order('nom').then(({ data }) => {
+      setFamilles(data || [])
+      // Si l'admin n'a pas de famille, sélectionner la première
+      if (!auth?.profil?.famille_id && data?.length) setSelectedFamilleId(data[0].id)
+    })
+  })
+
+  // Tables partagées (pas de famille_id)
+  const sharedTables = REF_TABLES.filter(t => t.key !== 'activites')
+  // Table activités (par famille)
+  const activitesTable = REF_TABLES.find(t => t.key === 'activites')
 
   return (
     <div>
@@ -396,7 +428,23 @@ export default function ParamsPage({ showToast, actifs, refs }) {
       <div style={S.card}>
         {tab === 'users' ? <UsersTable showToast={showToast} actifs={actifs} refs={refs} />
           : tab === 'eglise' ? <EglisePanel showToast={showToast} />
-          : REF_TABLES.map(t => <AccordionRefTable key={t.key} table={t.key} label={t.label} fields={t.fields} showToast={showToast} />)}
+          : <>
+            {sharedTables.map(t => <AccordionRefTable key={t.key} table={t.key} label={t.label} fields={t.fields} showToast={showToast} />)}
+
+            {/* Activités — par famille */}
+            {activitesTable && (
+              <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px dashed #e0e4ec' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: '#0ea888' }}>Activités</span>
+                  <select value={selectedFamilleId} onChange={e => setSelectedFamilleId(e.target.value)} style={{ flex: 1, padding: '5px 8px', borderRadius: 6, border: '1px solid #c8cfe0', background: '#f0f2f6', fontSize: 12 }}>
+                    {familles.map(f => <option key={f.id} value={f.id}>{f.nom}{f.eglises?.nom ? ' (' + f.eglises.nom + ')' : ''}</option>)}
+                  </select>
+                </div>
+                {selectedFamilleId && <RefTable table={activitesTable.key} label="" fields={activitesTable.fields} showToast={showToast} familleId={selectedFamilleId} />}
+                {!selectedFamilleId && <div style={{ fontSize: 12, color: '#6b7280', padding: 8 }}>Sélectionnez une famille pour gérer ses activités.</div>}
+              </div>
+            )}
+          </>}
       </div>
     </div>
   )
