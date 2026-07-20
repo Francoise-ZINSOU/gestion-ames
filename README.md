@@ -45,6 +45,8 @@ src/
     ├── Historique.jsx         Graphique + tableau présences par activité
     ├── Filiation.jsx          Arbre de suivi récursif
     ├── Export.jsx             Export CSV + reset données
+    ├── Rapport.jsx           Rapport mensuel imprimable
+    ├── CGU.jsx                Conditions d'utilisation (template RGPD)
     ├── Params.jsx             Paramètres (Références, Utilisateurs, Église)
     └── VueEglise.jsx          Vue macro multi-familles (Berger d'église)
 ```
@@ -267,7 +269,20 @@ npm run build       → dossier dist/
 ### v2 — Valeur pastorale forte
 - Notifications email hebdomadaires (Supabase Edge Functions + Resend)
 - Rapports mensuels PDF
+- Rapport mensuel imprimable (Imprimer → PDF natif)
+- Page CGU / conditions d'utilisation (template RGPD)
 - ~~Dashboard personnalisé Pilier~~ ✓ (bandeau "Mes suivis" sur l'accueil)
+
+### Qualité production
+- ErrorBoundary global (écran "Quelque chose s'est mal passé" au lieu d'écran blanc)
+- Version visible (v1.0.0) dans le footer sidebar et menu mobile
+- Sauvegarde JSON manuelle (Export → Télécharger le backup JSON)
+- Skeleton loading animé pendant le chargement des données
+- Transitions CSS sur boutons et modales
+- Toast animé (slide-up)
+- Empty states engageants ("Votre famille est prête 🌱")
+- Colonnes triables dans la liste des âmes (clic sur l'en-tête)
+- Reset données : admin-only avec avertissement multi-tenant
 - Log de communication (appels, SMS)
 
 ### v3 — Fonctionnalités avancées

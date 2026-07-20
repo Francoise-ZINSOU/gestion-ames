@@ -63,6 +63,13 @@ export default function PresencesPage({ actifs, presences, refs, enregistrerPres
     })
   }
 
+  if (!activites.length) return (
+    <div style={{ ...S.card, textAlign: 'center', color: '#6b7280', fontSize: 14, lineHeight: 1.7, padding: 30 }}>
+      Aucune activité configurée pour votre famille.<br />
+      Demandez à un admin d'en créer dans <strong>Paramètres → Activités</strong>.
+    </div>
+  )
+
   return (
     <div>
       <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', marginBottom: 12 }}>

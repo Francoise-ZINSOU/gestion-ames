@@ -6,6 +6,10 @@ export default function EntretiensPage({ entretiens, membres, actifs, refs, h, o
   const [modal, setModal] = useState(null)
   const [fd, setFd] = useState({})
   const [showCount, setShowCount] = useState(30)
+  const [fDateDe, setFDateDe] = useState('')
+  const [fDateA, setFDateA] = useState('')
+  const [fAvec, setFAvec] = useState('')
+  const [fStatut, setFStatut] = useState('')
   const uf = (k, v) => setFd(prev => ({ ...prev, [k]: v }))
 
   // Statut "planifié" = ordre 2 dans ref_statuts_entretien (dynamique)
@@ -17,6 +21,13 @@ export default function EntretiensPage({ entretiens, membres, actifs, refs, h, o
     const avecM = membres.find(x => x.id === e.avec_qui)
     return m ? { ...e, mn: m.prenom + ' ' + m.nom, sujet, avecNom: avecM ? avecM.prenom + ' ' + avecM.nom : '—' } : null
   }).filter(Boolean)
+    .filter(e => {
+      if (fDateDe && e.date_entretien < fDateDe) return false
+      if (fDateA && e.date_entretien > fDateA) return false
+      if (fAvec && e.avec_qui !== fAvec) return false
+      if (fStatut && e.statut !== fStatut) return false
+      return true
+    })
 
   // Entretiens planifiés en retard
   const planifiesRetard = plannedStatus ? all.filter(e => e.statut === plannedStatus && e.date_entretien && new Date(e.date_entretien) < new Date(today())) : []
@@ -47,8 +58,21 @@ export default function EntretiensPage({ entretiens, membres, actifs, refs, h, o
       )}
 
       <div style={S.card}>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10, alignItems: 'center' }}>
+          <input type="date" value={fDateDe} onChange={e => setFDateDe(e.target.value)} title="Du" style={{ padding: '5px 8px', borderRadius: 6, border: '1px solid #c8cfe0', background: '#f0f2f6', fontSize: 12, boxSizing: 'border-box' }} />
+          <input type="date" value={fDateA} onChange={e => setFDateA(e.target.value)} title="Au" style={{ padding: '5px 8px', borderRadius: 6, border: '1px solid #c8cfe0', background: '#f0f2f6', fontSize: 12, boxSizing: 'border-box' }} />
+          <select value={fAvec} onChange={e => setFAvec(e.target.value)} style={{ padding: '5px 8px', borderRadius: 6, border: '1px solid #c8cfe0', background: '#f0f2f6', fontSize: 12 }}>
+            <option value="">Tous les accompagnants</option>
+            {actifs.filter(m => h.canSuivre(m.role)).map(m => <option key={m.id} value={m.id}>{m.prenom} {m.nom}</option>)}
+          </select>
+          <select value={fStatut} onChange={e => setFStatut(e.target.value)} style={{ padding: '5px 8px', borderRadius: 6, border: '1px solid #c8cfe0', background: '#f0f2f6', fontSize: 12 }}>
+            <option value="">Tous statuts</option>
+            {(refs.statutsEntretien || []).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}
+          </select>
+          {(fDateDe || fDateA || fAvec || fStatut) && <button onClick={() => { setFDateDe(''); setFDateA(''); setFAvec(''); setFStatut('') }} style={{ background: 'none', border: 'none', fontSize: 11, color: '#e03050', cursor: 'pointer' }}>✕ Effacer</button>}
+        </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-          <div style={{ fontSize: 14, fontWeight: 600 }}>Tous les entretiens ({all.length})</div>
+          <div style={{ fontSize: 14, fontWeight: 600 }}>Entretiens ({all.length})</div>
           <button onClick={() => { setFd({ statut: h.defaultStatutEnt, date_entretien: today() }); setModal('new') }} style={{ ...S.btn('#3060d0', false), display: 'flex', alignItems: 'center', gap: 4 }}><Plus size={13} /> Entretien</button>
         </div>
         {all.length === 0 ? <div style={{ padding: 12, textAlign: 'center', color: '#6b7280', fontSize: 13 }}>Aucun entretien enregistré. <span onClick={() => { setFd({ statut: h.defaultStatutEnt, date_entretien: today() }); setModal('new') }} style={{ color: '#3060d0', cursor: 'pointer', textDecoration: 'underline' }}>Créer le premier</span></div>

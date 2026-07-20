@@ -38,6 +38,13 @@ export default function HistoriquePage({ presences, refs, datesAnnulees }) {
   const expectedDates = generateExpected()
 
   // Timeline complète avec statuts : saved / cancelled / missing
+  if (!activites || !activites.length) return (
+    <div style={{ ...S.card, textAlign: 'center', color: '#6b7280', fontSize: 14, padding: 30, lineHeight: 1.7 }}>
+      Aucune activité configurée pour votre famille.<br />
+      Demandez à un admin d'en créer dans <strong>Paramètres → Activités</strong>.
+    </div>
+  )
+
   const buildTimeline = () => {
     const map = {}
     // Toutes les dates attendues d'abord (filtrées par période)

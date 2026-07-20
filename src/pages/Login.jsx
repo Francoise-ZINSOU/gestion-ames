@@ -65,7 +65,7 @@ export default function LoginPage() {
             </button>
 
             <div style={{ textAlign: 'center', marginTop: 14, fontSize: 12, color: '#6b7280' }}>
-              Accès réservé aux responsables.<br />Contactez l'administrateur pour obtenir un compte.
+              Accès réservé aux responsables.<br />Contactez l'administrateur pour obtenir un compte.<br /><a href="#cgu" style={{ color: '#6b7280', fontSize: 11 }}>Conditions d'utilisation</a>
             </div>
           </form>
         )}

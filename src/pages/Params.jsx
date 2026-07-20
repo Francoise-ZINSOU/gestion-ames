@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { S } from '../lib/ui'
 import { useRefAdmin, useProfils } from '../lib/data'
@@ -7,7 +7,7 @@ const REF_TABLES = [
   { key: 'ref_statuts', label: 'Statuts des membres', fields: ['nom', 'couleur'] },
   { key: 'ref_roles', label: 'Rôles des membres', fields: ['nom', 'couleur'] },
   { key: 'activites', label: 'Activités', fields: ['nom', 'code', 'icone', 'couleur', 'jour_semaine'] },
-  { key: 'modules', label: 'Modules de croissance', fields: ['nom'] },
+  { key: 'modules', label: 'Parcours de formation', fields: ['nom', 'description', 'url'] },
   { key: 'sujets_entretien', label: "Sujets d'entretien", fields: ['nom'] },
   { key: 'ref_types_defi', label: 'Types de défis', fields: ['nom'] },
   { key: 'ref_statuts_defi', label: 'Statuts des défis', fields: ['nom', 'couleur'] },
@@ -57,31 +57,50 @@ function RefTable({ table, label, fields, showToast, familleId }) {
     <div style={{ marginBottom: 16 }}>
       <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>{label}</div>
       {rows.map(r => (
-        <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0', borderBottom: '1px solid #e0e4ec', opacity: r.actif ? 1 : 0.4 }}>
-          {r.couleur && <div style={{ width: 12, height: 12, borderRadius: 3, background: r.couleur, flexShrink: 0 }} />}
-          <span style={{ flex: 1, fontSize: 13 }}>{r.nom}</span>
-          {fields.includes('jour_semaine') && (
-            <select value={r.jour_semaine ?? ''} onChange={async e => {
-              const v = e.target.value === '' ? null : parseInt(e.target.value)
-              try {
-                const { error } = await supabase.from(table).update({ jour_semaine: v, est_recurrente: v !== null }).eq('id', r.id)
-                if (error) throw error
-                showToast('✓ Mis à jour'); reload()
-              } catch (err) { showToast('⚠ ' + err.message) }
-            }} style={{ fontSize: 11, padding: '3px 6px', border: '1px solid #e0e4ec', borderRadius: 4, background: '#f0f2f6', fontFamily: 'inherit' }}>
-              <option value="">Ponctuelle</option>
-              <option value="0">Dimanche</option>
-              <option value="1">Lundi</option>
-              <option value="2">Mardi</option>
-              <option value="3">Mercredi</option>
-              <option value="4">Jeudi</option>
-              <option value="5">Vendredi</option>
-              <option value="6">Samedi</option>
-            </select>
+        <div key={r.id} style={{ padding: '6px 0', borderBottom: '1px solid #e0e4ec', opacity: r.actif ? 1 : 0.4 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {r.couleur && <div style={{ width: 12, height: 12, borderRadius: 3, background: r.couleur, flexShrink: 0 }} />}
+            <span style={{ flex: 1, fontSize: 13 }}>{r.nom}</span>
+            {fields.includes('jour_semaine') && (
+              <select value={r.jour_semaine ?? ''} onChange={async e => {
+                const v = e.target.value === '' ? null : parseInt(e.target.value)
+                try {
+                  const { error } = await supabase.from(table).update({ jour_semaine: v, est_recurrente: v !== null }).eq('id', r.id)
+                  if (error) throw error
+                  showToast('✓ Mis à jour'); reload()
+                } catch (err) { showToast('⚠ ' + err.message) }
+              }} style={{ fontSize: 11, padding: '3px 6px', border: '1px solid #e0e4ec', borderRadius: 4, background: '#f0f2f6', fontFamily: 'inherit' }}>
+                <option value="">Ponctuelle</option>
+                <option value="0">Dimanche</option>
+                <option value="1">Lundi</option>
+                <option value="2">Mardi</option>
+                <option value="3">Mercredi</option>
+                <option value="4">Jeudi</option>
+                <option value="5">Vendredi</option>
+                <option value="6">Samedi</option>
+              </select>
+            )}
+            <button onClick={() => desactiver(r.id, !r.actif)} style={{ background: 'none', border: 'none', fontSize: 11, color: r.actif ? '#6b7280' : '#0ea888', cursor: 'pointer' }}>
+              {r.actif ? 'Désactiver' : 'Réactiver'}
+            </button>
+          </div>
+          {fields.includes('url') && (
+            <div style={{ marginTop: 4, marginLeft: 20, display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <input defaultValue={r.description || ''} placeholder="Description courte..." onBlur={async e => {
+                if (e.target.value !== (r.description || '')) {
+                  try { await modifier(r.id, { description: e.target.value }); showToast('✓') } catch(err) { showToast('⚠ ' + err.message) }
+                }
+              }} style={{ fontSize: 12, padding: '4px 8px', border: '1px solid #e0e4ec', borderRadius: 4, background: '#f4f6f9', boxSizing: 'border-box', width: '100%' }} />
+              <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                <input defaultValue={r.url || ''} placeholder="Lien (YouTube, PDF, Drive...)" onBlur={async e => {
+                  if (e.target.value !== (r.url || '')) {
+                    try { await modifier(r.id, { url: e.target.value }); showToast('✓') } catch(err) { showToast('⚠ ' + err.message) }
+                  }
+                }} style={{ fontSize: 12, padding: '4px 8px', border: '1px solid #e0e4ec', borderRadius: 4, background: '#f4f6f9', boxSizing: 'border-box', flex: 1 }} />
+                {r.url && <a href={r.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: '#3060d0', flexShrink: 0 }}>Ouvrir</a>}
+              </div>
+            </div>
           )}
-          <button onClick={() => desactiver(r.id, !r.actif)} style={{ background: 'none', border: 'none', fontSize: 11, color: r.actif ? '#6b7280' : '#0ea888', cursor: 'pointer' }}>
-            {r.actif ? 'Désactiver' : 'Réactiver'}
-          </button>
         </div>
       ))}
       <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
@@ -99,9 +118,9 @@ function UsersTable({ showToast, actifs, refs }) {
   const [inviteData, setInviteData] = useState({ email: '', nom_affiche: '', membre_id: '', famille_id: '', est_admin: false, est_responsable: true, est_berger_eglise: false, eglise_id: '' })
   const [inviting, setInviting] = useState(false)
 
-  useState(() => {
+  useEffect(() => {
     supabase.from('familles_disciples').select('*, eglises(nom, actif)').order('nom').then(({ data }) => setFamilles(data || []))
-  })
+  }, [])
 
   const handleInvite = async () => {
     if (!inviteData.email?.trim()) { showToast('⚠ Email requis'); return }
@@ -286,7 +305,7 @@ function EglisePanel({ showToast }) {
     const { data: fa } = await supabase.from('familles_disciples').select('*').order('nom')
     setEglises(eg || []); setFamilles(fa || [])
   }
-  useState(() => { loadAll() })
+  useEffect(() => { loadAll() }, [])
 
   const addEglise = async () => {
     if (!newEglise.trim()) return
@@ -405,13 +424,12 @@ export default function ParamsPage({ showToast, actifs, refs, auth }) {
   const [selectedFamilleId, setSelectedFamilleId] = useState(auth?.profil?.famille_id || '')
 
   // Charger les familles accessibles
-  useState(() => {
+  useEffect(() => {
     supabase.from('familles_disciples').select('*, eglises(nom)').eq('actif', true).order('nom').then(({ data }) => {
       setFamilles(data || [])
-      // Si l'admin n'a pas de famille, sélectionner la première
       if (!auth?.profil?.famille_id && data?.length) setSelectedFamilleId(data[0].id)
     })
-  })
+  }, [])
 
   // Tables partagées (pas de famille_id)
   const sharedTables = REF_TABLES.filter(t => t.key !== 'activites')

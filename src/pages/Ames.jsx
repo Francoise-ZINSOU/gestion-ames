@@ -12,6 +12,8 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
   const [saving, setSaving] = useState(false)
   const [bulkMode, setBulkMode] = useState(false)
   const [bulkSel, setBulkSel] = useState({})
+  const [sortCol, setSortCol] = useState('nom')
+  const [sortDir, setSortDir] = useState('asc')
   const uf = (k, v) => setFd(prev => ({ ...prev, [k]: v }))
 
   // Trouver le membre lié au profil connecté (membre_id direct, sinon fallback email)
@@ -29,6 +31,17 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
     return !m.archive
   }).sort((a, b) => a.nom.localeCompare(b.nom))
 
+  // Sort
+  filt.sort((a, b) => {
+    const dir = sortDir === 'asc' ? 1 : -1
+    if (sortCol === 'nom') return dir * (a.nom + a.prenom).localeCompare(b.nom + b.prenom)
+    if (sortCol === 'role') return dir * (a.role || '').localeCompare(b.role || '')
+    if (sortCol === 'statut') return dir * (a.statut || '').localeCompare(b.statut || '')
+    if (sortCol === 'inscr') return dir * ((a.date_inscription || '').localeCompare(b.date_inscription || ''))
+    if (sortCol === 'taux') return dir * ((taux(a.id) || 0) - (taux(b.id) || 0))
+    return 0
+  })
+
   const leaders = actifs.filter(m => {
     const role = (refs.roles || []).find(r => r.nom === m.role)
     return role?.peut_suivre
@@ -44,6 +57,12 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
   }
 
   const mEn = (id) => entretiens.filter(e => e.membre_id === id).length
+  const toggleSort = (col) => {
+    if (sortCol === col) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    else { setSortCol(col); setSortDir('asc') }
+  }
+  const sortIcon = (col) => sortCol === col ? (sortDir === 'asc' ? ' ↑' : ' ↓') : ''
+  
   const getSuiveur = (id) => { if (!id) return '—'; const m = membres.find(x => x.id === id); return m ? `${m.prenom} ${m.nom}${m.archive ? ' (archivé)' : ''}` : '—' }
   const getSuivis = (id) => actifs.filter(m => m.suivi_par === id)
 
@@ -88,7 +107,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
         // Vérifier Berger principal à l'édition aussi
         if (h.isBergerRole(fd.role)) {
           const existingBerger = membres.find(m => h.isBergerRole(m.role) && !m.archive && m.id !== fd.id)
-          if (existingBerger) { showToast('⚠ Un Berger principal existe déjà : ' + existingBerger.prenom + ' ' + existingBerger.nom); setSaving(false); return }
+          if (existingBerger) { showToast('⚠ Un Chef de famille existe déjà : ' + existingBerger.prenom + ' ' + existingBerger.nom); setSaving(false); return }
         }
         const { id, created_at, created_by, updated_at, updated_by, _reassignFrom, _reassignSuivis, ...updates } = fd
         await modifierMembre(id, updates)
@@ -96,7 +115,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
       } else {
         if (h.isBergerRole(fd.role)) {
           const existingBerger = membres.find(m => h.isBergerRole(m.role) && !m.archive)
-          if (existingBerger) { showToast('⚠ Un Berger principal existe déjà : ' + existingBerger.prenom + ' ' + existingBerger.nom); setSaving(false); return }
+          if (existingBerger) { showToast('⚠ Un Chef de famille existe déjà : ' + existingBerger.prenom + ' ' + existingBerger.nom); setSaving(false); return }
         }
         const { id, _reassignFrom, _reassignSuivis, ...data } = fd
         const inserted = await ajouterMembre({ ...data, statut: data.statut || h.defaultStatut, role: data.role || h.defaultRole })
@@ -141,7 +160,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
             <option value="all">Tout afficher</option>
           </optgroup>
         </select>
-        <button onClick={() => { setFd({ statut: h.defaultStatut, role: h.defaultRole, date_inscription: today() }); setModal('add') }} style={{ ...S.btn('#0ea888', false), whiteSpace: 'nowrap', padding: '6px 12px', fontSize: 13 }}>+ Âme</button>
+        <button onClick={() => { setFd({ statut: h.defaultStatut, role: h.defaultRole, date_inscription: today() }); setModal('add') }} style={{ ...S.btn('#0ea888', false), whiteSpace: 'nowrap', padding: '6px 12px', fontSize: 13 }}>+ Membre</button>
         <button onClick={() => setModal('import')} style={{ ...S.btn('#3060d0', true), display: 'flex', alignItems: 'center', gap: 3, whiteSpace: 'nowrap', padding: '6px 10px', fontSize: 12 }}><Upload size={12} /> CSV</button>
         <button onClick={() => setBulkMode(!bulkMode)} style={{ ...S.btn(bulkMode ? '#7040d0' : '#6b7280', true), padding: '6px 10px', fontSize: 12 }}>{bulkMode ? '✓ Sélection' : '☐ Sélection'}</button>
       </div>
@@ -206,7 +225,9 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead><tr>
                   {bulkMode && <th style={{ ...S.th, width: 32 }}></th>}
-                  {['Nom', 'Rôle', 'Inscr.', 'Suivi par', 'Statut', 'Prés.', 'Ent.'].map(h => <th key={h} style={S.th}>{h}</th>)}
+                  {[['Nom','nom'],['Rôle','role'],['Inscr.','inscr'],['Suivi par',null],['Statut','statut'],['Prés.','taux'],['Ent.',null]].map(([label, col]) => (
+                    <th key={label} onClick={col ? () => toggleSort(col) : undefined} style={{ ...S.th, cursor: col ? 'pointer' : 'default', userSelect: 'none', whiteSpace: 'nowrap' }}>{label}{col ? sortIcon(col) : ''}</th>
+                  ))}
                 </tr></thead>
                 <tbody>{filt.map(m => {
                   const t = taux(m.id)

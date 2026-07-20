@@ -170,13 +170,7 @@ export function useAlertes() {
   return { alertes, loading, reload: load }
 }
 
-export function useStatsResponsable() {
-  const [stats, setStats] = useState([])
-  const [loading, setLoading] = useState(true)
-  const load = useCallback(async () => {
-    const { data } = await supabase.from('v_stats_responsable').select('*')
-    setStats(data || []); setLoading(false)
-  }, [])
+, [])
   useEffect(() => { load() }, [load])
   return { stats, loading, reload: load }
 }
@@ -286,7 +280,7 @@ export function refHelpers(refs) {
   const pilierRoles = (refs.roles || []).filter(r => r.peut_suivre && r.niveau !== 0)
   return {
     // Rôles
-    bergerRoleName: bergerRole?.nom || 'Berger principal',
+    bergerRoleName: bergerRole?.nom || 'Chef de famille',
     isBergerRole: (role) => !!bergerRole && role === bergerRole.nom,
     defaultRole: defaultRole?.nom || 'Membre',
     isPilierRole: (role) => pilierRoles.some(r => r.nom === role),

@@ -16,6 +16,8 @@ import CroissancePage from './pages/Croissance'
 import HistoriquePage from './pages/Historique'
 import FiliationPage from './pages/Filiation'
 import ExportPage from './pages/Export'
+import RapportPage from './pages/Rapport'
+import CGUPage from './pages/CGU'
 import ParamsPage from './pages/Params'
 import VueEglisePage from './pages/VueEglise'
 import SetPasswordPage from './pages/SetPassword'
@@ -113,7 +115,7 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
   }
 
   if (dataLoading) return (
-    <Layout page={page} setPage={setPage} alertCount={0} membreCount={0} selectedMembre={null} auth={auth}>
+    <Layout page={page} setPage={setPage} alertCount={0} membreCount={0} selectedMembre={null} auth={auth} actifs={[]} onOpenFiche={() => {}}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 20px', color: '#6b7280', fontSize: 13 }}>Chargement des données...</div>
     </Layout>
   )
@@ -130,6 +132,8 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
     case 'timeline': content = <HistoriquePage {...ctx} />; break
     case 'filia': content = <FiliationPage {...ctx} />; break
     case 'export': content = <ExportPage {...ctx} />; break
+    case 'rapport': content = <RapportPage {...ctx} />; break
+    case 'cgu': content = <CGUPage />; break
     case 'vueEglise': content = (auth.isBergerEglise || auth.isAdmin) ? <VueEglisePage auth={auth} refs={rf.refs} h={h} /> : null; break
     case 'params': content = auth.isAdmin ? <ParamsPage {...ctx} /> : null; break
     case 'menu': content = <MenuMobile setPage={setPage} isAdmin={auth.isAdmin} selectedMembre={selectedMembre} auth={auth} />; break
@@ -137,7 +141,7 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
   }
 
   return (
-    <Layout page={page} setPage={setPage} alertCount={alertesFiltrees.length} membreCount={mb.actifs.length} selectedMembre={selectedMembre} auth={auth}>
+    <Layout page={page} setPage={setPage} alertCount={alertesFiltrees.length} membreCount={mb.actifs.length} selectedMembre={selectedMembre} auth={auth} actifs={mb.actifs} onOpenFiche={openFiche}>
       {content}
       <Toast message={toast} />
     </Layout>

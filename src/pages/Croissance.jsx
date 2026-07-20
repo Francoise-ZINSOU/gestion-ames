@@ -7,6 +7,12 @@ export default function CroissancePage({ plans, refs }) {
     return { id: mod.id, nom: mod.nom, an: a.length, vn: v.length, pc: a.length ? Math.round(v.length / a.length * 100) : 0 }
   })
 
+  if (!actifs || !actifs.length) return (
+    <div style={{ ...S.card, textAlign: 'center', color: '#6b7280', fontSize: 14, padding: 30, lineHeight: 1.7 }}>
+      Aucun membre pour le moment. Ajoutez des âmes pour commencer le suivi de croissance.
+    </div>
+  )
+
   return (
     <div style={S.card}>
       <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10 }}>Avancement des plans de croissance</div>

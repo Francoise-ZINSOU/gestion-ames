@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { toLocalDate, S, fmtS, dago, today, getStatutColor } from '../lib/ui'
 import { AlertTriangle, Clock, BookOpen, CheckSquare, TrendingDown } from 'lucide-react'
 
-export default function HomePage({ actifs, alertes, presences, defis, plans, refs, h, openFiche, setPage, datesAnnulees, auth }) {
+export default function HomePage({ actifs, alertes, presences, entretiens, defis, plans, refs, h, openFiche, setPage, datesAnnulees, auth }) {
   const [showNotifs, setShowNotifs] = useState(true)
 
   // KPIs figés : Total actifs / Nouveaux / Statut critique / Taux culte
@@ -61,7 +61,7 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
   const mySuivisEnDifficulte = mySuivis.filter(m => m.statut === statutCritique).length
   const myEntretiensCeMois = (() => {
     const monthAgo = new Date(); monthAgo.setDate(monthAgo.getDate() - 30)
-    return (window.__allEntretiens || []).filter(e => mySuivis.some(m => m.id === e.membre_id) && new Date(e.date_entretien) >= monthAgo).length
+    return (entretiens || []).filter(e => mySuivis.some(m => m.id === e.membre_id) && new Date(e.date_entretien) >= monthAgo).length
   })()
 
   const familleInactive = auth?.profil?.familles_disciples && (auth.profil.familles_disciples.actif === false || auth.profil.familles_disciples.eglises?.actif === false)
@@ -84,11 +84,26 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
         </div>
       )}
       {actifs.length === 0 && (
-        <div style={{ ...S.card, marginBottom: 16, border: '1px solid #0ea88833', background: '#0ea88808' }}>
-          <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 8, color: '#0ea888' }}>Bienvenue dans Gestion des Âmes</div>
-          <div style={{ fontSize: 13, color: '#5a6480', lineHeight: 1.7 }}>
-            Pour commencer :<br/>
-            <strong>1.</strong> Ajoutez vos membres dans <span onClick={() => setPage('ames')} style={{ color: '#0ea888', cursor: 'pointer', textDecoration: 'underline' }}>Âmes</span><br/>
+        <div style={{ ...S.card, padding: '30px 20px' }}>
+          <div style={{ fontSize: 40, marginBottom: 12, textAlign: 'center' }}>🌱</div>
+          <div style={{ fontSize: 16, fontWeight: 700, fontFamily: "'Outfit', sans-serif", marginBottom: 6, textAlign: 'center' }}>Bienvenue ! Votre espace est prêt.</div>
+          <div style={{ fontSize: 14, color: '#5a6480', lineHeight: 1.7, marginBottom: 20, textAlign: 'center' }}>Voici les premières étapes pour démarrer :</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div onClick={() => setPage('ames')} style={{ padding: '12px 14px', background: '#0ea88808', border: '1px solid #0ea88833', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 20 }}>1</span>
+              <div><div style={{ fontSize: 14, fontWeight: 600, color: '#0ea888' }}>Ajouter vos premiers membres</div><div style={{ fontSize: 12, color: '#5a6480' }}>Les personnes que vous suivez dans votre groupe</div></div>
+            </div>
+            <div onClick={() => setPage('pres')} style={{ padding: '12px 14px', background: '#3060d008', border: '1px solid #3060d033', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 20 }}>2</span>
+              <div><div style={{ fontSize: 14, fontWeight: 600, color: '#3060d0' }}>Pointer les présences</div><div style={{ fontSize: 12, color: '#5a6480' }}>Chaque dimanche, cochez qui était au culte</div></div>
+            </div>
+            <div onClick={() => setPage('params')} style={{ padding: '12px 14px', background: '#7040d008', border: '1px solid #7040d033', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 20 }}>3</span>
+              <div><div style={{ fontSize: 14, fontWeight: 600, color: '#7040d0' }}>Inviter d'autres responsables</div><div style={{ fontSize: 12, color: '#5a6480' }}>Chaque pilier aura son propre accès</div></div>
+            </div>
+          </div>
+        </div>
+      )} style={{ color: '#0ea888', cursor: 'pointer', textDecoration: 'underline' }}>Âmes</span><br/>
             <strong>2.</strong> Saisissez les présences dans <span onClick={() => setPage('pres')} style={{ color: '#0ea888', cursor: 'pointer', textDecoration: 'underline' }}>Saisie</span><br/>
             <strong>3.</strong> Planifiez des entretiens dans les fiches membres
           </div>
@@ -97,11 +112,11 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10, marginBottom: 16 }}>
         <div onClick={() => setPage('ames')} style={{ ...S.kpi(statutColor(statutCritique)), cursor: 'pointer' }}>
-          <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }}>{statutCritique}</div>
+          <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }} title="Nombre de membres dans le statut le plus préoccupant">{statutCritique}</div>
           <div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: statutColor(statutCritique) }}>{statutCount(statutCritique)}</div>
         </div>
         <div onClick={() => setPage('ames')} style={{ ...S.kpi(statutColor(h.defaultStatut) || '#3060d0'), cursor: 'pointer' }}>
-          <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }}>{h.defaultStatut || 'Nouveaux'}</div>
+          <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }} title="Membres récemment inscrits, en phase d'intégration">{h.defaultStatut || 'Nouveaux'}</div>
           <div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: statutColor(h.defaultStatut) || '#3060d0' }}>{statutCount(h.defaultStatut)}</div>
         </div>
         <div onClick={() => setPage('ames')} style={{ ...S.kpi('#0ea888'), cursor: 'pointer' }}>
@@ -109,7 +124,7 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
           <div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: '#0ea888' }}>{actifs.length}</div>
         </div>
         <div style={S.kpi(tG >= 80 ? '#1a9c60' : tG >= 50 ? '#d48f00' : '#e03050')}>
-          <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }}>Taux culte</div>
+          <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }} title="Pourcentage moyen de présence aux cultes des 4 dernières semaines">Taux culte</div>
           <div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: tG >= 80 ? '#1a9c60' : tG >= 50 ? '#d48f00' : '#e03050' }}>{culte ? tG + '%' : '—'}</div>
         </div>
       </div>
@@ -177,7 +192,7 @@ export default function HomePage({ actifs, alertes, presences, defis, plans, ref
                 {thisWeekBdays.length > 0 && (
                   <div style={{ padding: '8px 10px', borderRadius: 6, background: '#C49A2008', borderLeft: '3px solid #C49A20', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{ fontSize: 14 }}>🎂</span>
-                    <span style={{ fontSize: 13, color: '#8B6914' }}><strong>{thisWeekBdays.length}</strong> anniversaire(s) : {thisWeekBdays.map(m => m.prenom).join(', ')}</span>
+                    <span style={{ fontSize: 13, color: '#C49A20' }}><strong>{thisWeekBdays.length}</strong> anniversaire(s) : {thisWeekBdays.map(m => m.prenom).join(', ')}</span>
                   </div>
                 )}
                 {declining.length > 0 && (

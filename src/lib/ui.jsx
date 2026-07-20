@@ -121,3 +121,26 @@ export function useToast() {
   const show = useCallback((m) => { setMsg(m); setTimeout(() => setMsg(''), 3500) }, [])
   return { toast: msg, showToast: show }
 }
+
+
+// Skeleton loader
+export function Skeleton({ width, height, style }) {
+  return <div className="skeleton" style={{ width: width || '100%', height: height || 16, ...style }} />
+}
+
+export function SkeletonCard() {
+  return (
+    <div style={{ padding: 16, background: '#fff', borderRadius: 10, border: '1px solid #e0e4ec' }}>
+      <Skeleton height={12} width="40%" style={{ marginBottom: 10 }} />
+      <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
+        <Skeleton height={60} width="25%" />
+        <Skeleton height={60} width="25%" />
+        <Skeleton height={60} width="25%" />
+        <Skeleton height={60} width="25%" />
+      </div>
+      <Skeleton height={12} width="60%" style={{ marginBottom: 6 }} />
+      <Skeleton height={12} width="80%" style={{ marginBottom: 6 }} />
+      <Skeleton height={12} width="50%" />
+    </div>
+  )
+}

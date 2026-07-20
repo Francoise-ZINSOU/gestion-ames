@@ -285,9 +285,9 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
         <div style={S.card}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
             <div><div style={{ fontSize: 14, fontWeight: 600 }}>Défis</div><div style={{ fontSize: 12, color: '#6b7280' }}>identifié → en cours → résolu</div></div>
-            <button onClick={() => { setFd({}); setModal('defi') }} style={S.btn('#d86820', false)}>+ Défi</button>
+            <button onClick={() => { setFd({}); setModal('defi') }} style={S.btn('#d48f00', false)}>+ Défi</button>
           </div>
-          {mDf.length === 0 ? <div style={{ color: '#6b7280', fontSize: 13, padding: 8 }}>Aucun défi. <span onClick={() => { setFd({}); setModal('defi') }} style={{ color: '#d86820', cursor: 'pointer', textDecoration: 'underline' }}>Ajouter le premier</span></div>
+          {mDf.length === 0 ? <div style={{ color: '#6b7280', fontSize: 13, padding: 8 }}>Aucun défi. <span onClick={() => { setFd({}); setModal('defi') }} style={{ color: '#d48f00', cursor: 'pointer', textDecoration: 'underline' }}>Ajouter le premier</span></div>
             : mDf.map(d => {
               const stColor = (refs.statutsDefi || []).find(s => s.nom === d.statut)?.couleur || '#6b7280'
               return (
@@ -486,7 +486,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
             </div>
             <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#6b7280', true)}>Annuler</button>
-              <button onClick={handleSaveDefi} style={S.btn('#d86820', false)}>Enregistrer</button>
+              <button onClick={handleSaveDefi} style={S.btn('#d48f00', false)}>Enregistrer</button>
             </div>
           </div>
         </div>
@@ -509,7 +509,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
                   await modifierDefi(fd._editDefiId, { type_defi: fd.type_defi, description: fd.description, statut: fd.statut_defi })
                   setModal(null); setFd({})
                 } catch (e) { showToast('⚠ ' + e.message) }
-              }} style={S.btn('#d86820', false)}>Enregistrer</button>
+              }} style={S.btn('#d48f00', false)}>Enregistrer</button>
             </div>
           </div>
         </div>
@@ -556,7 +556,11 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
                         <div style={{ width: 20, height: 20, borderRadius: 4, border: '2px solid ' + (sel[mod.id] ? '#7040d0' : '#e0e4ec'), background: sel[mod.id] ? '#7040d0' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, color: '#fff', flexShrink: 0 }}>
                           {sel[mod.id] ? '✓' : ''}
                         </div>
-                        <span style={{ fontSize: 13, flex: 1 }}>{mod.nom}</span>
+                        <div style={{ flex: 1 }}>
+                          <span style={{ fontSize: 13 }}>{mod.nom}</span>
+                          {mod.description && <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2 }}>{mod.description}</div>}
+                          {mod.url && <a href={mod.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: '#3060d0', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 3, marginTop: 2 }}>Accéder au contenu →</a>}
+                        </div>
                       </div>
                     ))}
                   </div>

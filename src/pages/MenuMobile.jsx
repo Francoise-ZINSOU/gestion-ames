@@ -1,22 +1,25 @@
 import { S } from '../lib/ui'
+
+const APP_VERSION = 'v1.0.0'
 import { useAuth } from '../lib/auth'
-import { Home, CheckSquare, TrendingUp, Users, GitBranch, Bell, MessageCircle, BookOpen, Download, Settings, LogOut, Search, Building2 } from 'lucide-react'
+import { Home, CheckSquare, TrendingUp, Users, GitBranch, Bell, MessageCircle, BookOpen, Download, Settings, LogOut, Search, Building2, FileText } from 'lucide-react'
 
 export default function MenuMobile({ setPage, isAdmin, selectedMembre, auth }) {
   const { logout, profil } = useAuth()
 
   const items = [
     { id: 'home', Icon: Home, label: 'Accueil' },
-    { id: 'pres', Icon: CheckSquare, label: 'Saisie' },
+    { id: 'pres', Icon: CheckSquare, label: 'Présences' },
     { id: 'timeline', Icon: TrendingUp, label: 'Historique' },
-    { id: 'ames', Icon: Users, label: 'Âmes' },
-    { id: 'filia', Icon: GitBranch, label: 'Arbre de suivi' },
+    { id: 'ames', Icon: Users, label: 'Membres' },
+    { id: 'filia', Icon: GitBranch, label: 'Organisation' },
     { id: 'alerts', Icon: Bell, label: 'Alertes' },
     { id: 'ents', Icon: MessageCircle, label: 'Entretiens' },
-    { id: 'protos', Icon: BookOpen, label: 'Plan de croissance' },
-    { id: 'export', Icon: Download, label: 'Export' },
+    { id: 'protos', Icon: BookOpen, label: 'Parcours de formation' },
+    { id: 'rapport', Icon: FileText, label: 'Rapport mensuel' },
+    { id: 'export', Icon: Download, label: 'Export & sauvegarde' },
   ]
-  if (auth?.isBergerEglise || isAdmin) items.push({ id: 'vueEglise', Icon: Building2, label: 'Vue église' })
+  if (auth?.isBergerEglise || isAdmin) items.push({ id: 'vueEglise', Icon: Building2, label: 'Synthèse église' })
   if (isAdmin) items.push({ id: 'params', Icon: Settings, label: 'Paramètres' })
 
   return (
@@ -51,6 +54,7 @@ export default function MenuMobile({ setPage, isAdmin, selectedMembre, auth }) {
         <button onClick={logout} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: '1px solid #e03050', borderRadius: 7, padding: '8px 14px', color: '#e03050', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', width: '100%', justifyContent: 'center' }}>
           <LogOut size={14} /> Se déconnecter
         </button>
+        <div style={{ textAlign: 'center', fontSize: 10, color: '#c8cfe0', marginTop: 8 }}>{APP_VERSION}</div>
       </div>
     </div>
   )

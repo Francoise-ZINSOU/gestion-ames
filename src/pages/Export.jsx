@@ -3,9 +3,26 @@ import { S, today } from '../lib/ui'
 import { resetAllData } from '../lib/data'
 import { Users, CheckSquare, MessageCircle, Zap, Download, Trash2 } from 'lucide-react'
 
-export default function ExportPage({ membres, presences, entretiens, defis, refs, showToast }) {
+export default function ExportPage({ membres, presences, entretiens, defis, refs, showToast, auth }) {
   const [confirmAction, setConfirmAction] = useState(null)
   const [resetting, setResetting] = useState(false)
+
+  const doBackup = async () => {
+    try {
+      const tables = ['membres', 'presences', 'entretiens', 'defis', 'plan_croissance', 'journal_pastoral', 'dates_annulees', 'historique_statuts']
+      const backup = { date: new Date().toISOString(), version: 'v1.0.0' }
+      for (const t of tables) {
+        const { data } = await import('../lib/supabase').then(m => m.supabase.from(t).select('*'))
+        backup[t] = data || []
+      }
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url; a.download = 'backup_' + today() + '.json'; a.click()
+      URL.revokeObjectURL(url)
+      showToast('✓ Backup exporté (' + tables.reduce((s, t) => s + (backup[t]?.length || 0), 0) + ' lignes)')
+    } catch (e) { showToast('⚠ ' + (e.message || 'Erreur backup')) }
+  }
 
   const doExport = (type) => {
     let rows = [], header = ''
@@ -41,7 +58,7 @@ export default function ExportPage({ membres, presences, entretiens, defis, refs
     { t: 'membres', Icon: Users, l: 'Membres', n: membres.length, c: '#0ea888' },
     { t: 'presences', Icon: CheckSquare, l: 'Présences', n: presences.length, c: '#3060d0' },
     { t: 'entretiens', Icon: MessageCircle, l: 'Entretiens', n: entretiens.length, c: '#d48f00' },
-    { t: 'defis', Icon: Zap, l: 'Défis', n: defis.length, c: '#d86820' }
+    { t: 'defis', Icon: Zap, l: 'Défis', n: defis.length, c: '#d48f00' }
   ]
 
   return (
@@ -57,9 +74,10 @@ export default function ExportPage({ membres, presences, entretiens, defis, refs
         ))}
       </div>
       <div style={{ ...S.card, marginTop: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, fontWeight: 600, marginBottom: 4, color: '#e03050' }}><Trash2 size={14} /> Réinitialiser</div>
+        {!auth?.isAdmin && <div style={{ fontSize: 13, color: '#6b7280' }}>Seuls les admins peuvent réinitialiser les données.</div>}
+        {auth?.isAdmin && <><div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, fontWeight: 600, marginBottom: 4, color: '#e03050' }}><Trash2 size={14} /> Réinitialiser</div>
         <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 10 }}>Supprime tous les membres, présences, entretiens et défis. Les tables de référence sont conservées.</div>
-        <button onClick={() => setConfirmAction({ msg: 'Supprimer TOUTES les données pastorales ?\n\nCette action est irréversible.', fn: doReset })} style={S.btn('#e03050', true)}>Réinitialiser</button>
+        <button onClick={() => setConfirmAction({ msg: 'Supprimer TOUTES les données de votre famille ?\n\nCette action est irréversible. Les autres familles ne sont pas affectées.', fn: doReset })} style={S.btn('#e03050', true)}>Réinitialiser</button></>}
       </div>
       {confirmAction && (
         <div className="modal-overlay danger">
