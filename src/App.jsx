@@ -56,7 +56,16 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
   const al = useAlertes()
   const rf = useRefs()
   const da = useDatesAnnulees()
-  const h = refHelpers(rf.refs)
+
+  // Activités : ne garder que celles de la famille de travail de l'utilisateur.
+  // Un super-admin ou un Berger d'église voit les activités de TOUTES les familles
+  // via la RLS (voulu pour la Synthèse église), mais les pages opérationnelles
+  // (Présences, Historique, Fiche...) ne doivent afficher que celles de SA famille,
+  // sinon chaque activité apparaît en plusieurs exemplaires.
+  const _actsAll = rf.refs.activites || []
+  const _actsMine = auth.profil?.famille_id ? _actsAll.filter(a => a.famille_id === auth.profil.famille_id) : _actsAll
+  const refsOp = { ...rf.refs, activites: _actsMine.length ? _actsMine : _actsAll }
+  const h = refHelpers(refsOp)
 
   const dataLoading = mb.loading || pr.loading || rf.loading
 
@@ -84,7 +93,7 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
   const ctx = {
     membres: mb.membres, actifs: mb.actifs, presences: pr.presences,
     entretiens: en.entretiens, defis: df.defis, plans: pt.plans,
-    alertes: alertesFiltrees, refs: rf.refs, h,
+    alertes: alertesFiltrees, refs: refsOp, h,
     openFiche, showToast, selectedMembre, selectedId, auth, prevPage,
     // Membres
     ajouterMembre: w(mb.ajouter, '✓ Membre ajouté'),
