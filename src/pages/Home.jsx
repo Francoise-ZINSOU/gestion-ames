@@ -118,13 +118,13 @@ export default function HomePage({ actifs, alertes, presences, entretiens, defis
           <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#64748B', marginBottom: 6 }}>Total actifs</div>
           <div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: '#185FA5' }}>{actifs.length}</div>
         </div>
-        <div style={S.kpi(tG >= 80 ? '#059669' : tG >= 50 ? '#BA7517' : '#E11D48')}>
+        <div style={S.kpi(actifs.length === 0 ? '#64748B' : tG >= 80 ? '#059669' : tG >= 50 ? '#BA7517' : '#E11D48')}>
           <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#64748B', marginBottom: 6 }} title="Pourcentage moyen de présence aux cultes des 4 dernières semaines">Taux culte</div>
-          <div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: tG >= 80 ? '#059669' : tG >= 50 ? '#BA7517' : '#E11D48' }}>{culte ? tG + '%' : '—'}</div>
+          <div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: actifs.length === 0 ? '#64748B' : tG >= 80 ? '#059669' : tG >= 50 ? '#BA7517' : '#E11D48' }}>{culte && actifs.length > 0 ? tG + '%' : '—'}</div>
         </div>
       </div>
 
-      {!lastSundaySaved && (
+      {actifs.length > 0 && !lastSundaySaved && (
         <div onClick={() => setPage('pres')} style={{ padding: '8px 12px', borderRadius: 7, border: '1px solid #185FA533', background: '#185FA508', marginBottom: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
           <CheckSquare size={14} color="#185FA5" />
           <span style={{ fontSize: 13, color: '#185FA5' }}>Les présences du <strong>dimanche {fmtS(lastSunday)}</strong> n'ont pas été saisies</span>
@@ -133,6 +133,8 @@ export default function HomePage({ actifs, alertes, presences, entretiens, defis
       )}
 
       {(() => {
+        // Église vide : aucun signal d'urgence n'a de sens sans membres
+        if (actifs.length === 0) return null
         // Anniversaires cette semaine
         const now = new Date()
         const thisWeekBdays = actifs.filter(m => {

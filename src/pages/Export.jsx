@@ -9,7 +9,7 @@ export default function ExportPage({ membres, presences, entretiens, defis, refs
 
   const doBackup = async () => {
     try {
-      const tables = ['membres', 'presences', 'entretiens', 'defis', 'plan_croissance', 'journal_pastoral', 'dates_annulees', 'historique_statuts']
+      const tables = ['membres', 'presences', 'entretiens', 'defis', 'plan_croissance', 'journal_pastoral', 'dates_annulees', 'historique_statuts', 'historique_suivi']
       const backup = { date: new Date().toISOString(), version: 'v1.0.0' }
       for (const t of tables) {
         const { data } = await import('../lib/supabase').then(m => m.supabase.from(t).select('*'))

@@ -111,7 +111,7 @@ function RefTable({ table, label, fields, showToast, familleId }) {
   )
 }
 
-function UsersTable({ showToast, actifs, refs }) {
+function UsersTable({ showToast, actifs, refs, auth }) {
   const { profils, setRole, reload: reloadProfils } = useProfils()
   const [familles, setFamilles] = useState([])
   const [showInvite, setShowInvite] = useState(false)
@@ -258,13 +258,28 @@ function UsersTable({ showToast, actifs, refs }) {
                 <input type="checkbox" checked={p.est_admin || false} onChange={e => handleRole(p.id, p.est_responsable, e.target.checked)} />
                 Admin
               </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, cursor: 'pointer', color: '#7040d0' }}>
-                <input type="checkbox" checked={p.est_berger_eglise || false} onChange={e => {
-                  const famille = familles.find(f => f.id === p.famille_id)
-                  linkBergerEglise(p.id, e.target.checked, famille?.eglise_id)
-                }} />
-                Berger d'église
-              </label>
+              {auth?.isSuperAdmin ? (
+                <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, cursor: 'pointer', color: '#7040d0' }}>
+                  <input type="checkbox" checked={p.est_berger_eglise || false} onChange={e => {
+                    const famille = familles.find(f => f.id === p.famille_id)
+                    linkBergerEglise(p.id, e.target.checked, famille?.eglise_id)
+                  }} />
+                  Berger d'église
+                </label>
+              ) : p.est_berger_eglise ? (
+                <span style={{ fontSize: 12, color: '#7040d0', fontWeight: 600 }} title="Attribué par le super-admin">Berger d'église</span>
+              ) : null}
+              {auth?.isSuperAdmin && (
+                <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, cursor: 'pointer', color: '#E11D48' }} title="Accès technique total (bypass RLS). À n'accorder qu'en connaissance de cause.">
+                  <input type="checkbox" checked={p.est_super_admin || false} onChange={async e => {
+                    if (e.target.checked && !window.confirm('Donner le rôle SUPER-ADMIN à ' + (p.nom_affiche || p.email) + ' ? Ce rôle donne un accès technique total, toutes églises confondues.')) return
+                    const { supabase } = await import('../lib/supabase')
+                    const { error } = await supabase.from('profils').update({ est_super_admin: e.target.checked }).eq('id', p.id)
+                    if (error) showToast('⚠ ' + error.message); else { showToast('✓ Rôle mis à jour'); reloadProfils() }
+                  }} />
+                  Super-admin
+                </label>
+              )}
             </div>
             <div style={{ marginTop: 4 }}>
               <select value={p.membre_id || ''} onChange={e => linkMembre(p.id, e.target.value || null)} style={{ fontSize: 11, padding: '3px 6px', border: '1px solid #E2E8F0', borderRadius: 4, background: '#F8F9FB', color: '#475569', fontFamily: 'inherit', width: '100%', maxWidth: 250 }}>
@@ -444,7 +459,7 @@ export default function ParamsPage({ showToast, actifs, refs, auth }) {
         <button onClick={() => setTab('eglise')} style={{ ...S.btn(tab === 'eglise' ? '#185FA5' : '#64748B', tab !== 'eglise'), fontFamily: 'inherit' }}>Église</button>
       </div>
       <div style={S.card}>
-        {tab === 'users' ? <UsersTable showToast={showToast} actifs={actifs} refs={refs} />
+        {tab === 'users' ? <UsersTable showToast={showToast} actifs={actifs} refs={refs} auth={auth} />
           : tab === 'eglise' ? <EglisePanel showToast={showToast} />
           : <>
             {sharedTables.map(t => <AccordionRefTable key={t.key} table={t.key} label={t.label} fields={t.fields} showToast={showToast} />)}

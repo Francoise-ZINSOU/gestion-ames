@@ -38,11 +38,10 @@ export default function App() {
   if (auth.needsPassword) return <SetPasswordPage profil={auth.profil} onDone={auth.clearNeedsPassword} />
   if (!auth.isResponsable) return <AccessDenied />
 
-  // Si famille_id est requis (multi-église activé) et pas super-admin
-  const hasFamille = auth.profil?.famille_id || auth.profil?.est_super_admin
-  // On ne bloque que si le système multi-église est activé (au moins 1 famille existe)
-  // Pour le savoir sans query, on check si famille_id est null ET est_super_admin est false
-  // Le blocage se fera côté RLS — pas de blocage frontend pour ne pas casser l'existant
+  // Utilisateur sans famille assignée (et non super-admin) : la RLS lui
+  // renverrait des listes vides et des alertes absurdes — on affiche la page
+  // dédiée avec les instructions, plutôt qu'une app vide et anxiogène.
+  if (!auth.profil?.famille_id && !auth.profil?.est_super_admin) return <NoFamillePage />
 
   return <AuthorizedApp auth={auth} toast={toast} showToast={showToast} page={page} setPage={setPage} selectedId={selectedId} setSelectedId={setSelectedId} />
 }
