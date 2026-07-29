@@ -7,7 +7,7 @@ export default function HomePage({ actifs, alertes, presences, entretiens, defis
 
   // KPIs figés : Total actifs / Nouveaux / Statut critique / Taux culte
   const statutCount = (nom) => actifs.filter(m => m.statut === nom).length
-  const statutColor = (nom) => (refs.statuts || []).find(s => s.nom === nom)?.couleur || '#6b7280'
+  const statutColor = (nom) => (refs.statuts || []).find(s => s.nom === nom)?.couleur || '#64748B'
   // Statut "critique" = celui avec l'ordre le plus élevé parmi les non-archivés (par convention: le pire)
   const statutCritique = (refs.statuts || []).filter(s => !s.est_archive).sort((a, b) => b.ordre - a.ordre)[0]?.nom || 'En difficulté'
 
@@ -71,69 +71,64 @@ export default function HomePage({ actifs, alertes, presences, entretiens, defis
       {mySuivis.length > 0 && (
         <div style={{ ...S.card, borderLeft: '3px solid #7040d0', background: '#7040d008', marginBottom: 12 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: '#7040d0', marginBottom: 6 }}>★ Mes suivis ({mySuivis.length})</div>
-          <div style={{ display: 'flex', gap: 12, fontSize: 12, color: '#5a6480', flexWrap: 'wrap' }}>
-            {mySuivisEnDifficulte > 0 && <span><strong style={{ color: '#e03050' }}>{mySuivisEnDifficulte}</strong> en {statutCritique?.toLowerCase() || 'difficulté'}</span>}
+          <div style={{ display: 'flex', gap: 12, fontSize: 12, color: '#475569', flexWrap: 'wrap' }}>
+            {mySuivisEnDifficulte > 0 && <span><strong style={{ color: '#E11D48' }}>{mySuivisEnDifficulte}</strong> en {statutCritique?.toLowerCase() || 'difficulté'}</span>}
             <span onClick={() => setPage('ames')} style={{ color: '#7040d0', cursor: 'pointer', textDecoration: 'underline', marginLeft: 'auto' }}>Voir la liste →</span>
           </div>
         </div>
       )}
       {familleInactive && (
-        <div style={{ ...S.card, borderLeft: '3px solid #6b7280', background: '#f4f6f9', marginBottom: 12 }}>
+        <div style={{ ...S.card, borderLeft: '3px solid #64748B', background: '#EEF2F7', marginBottom: 12 }}>
           <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Famille désactivée</div>
-          <div style={{ fontSize: 12, color: '#5a6480' }}>Les données restent consultables mais aucune alerte ou détection n'est calculée.</div>
+          <div style={{ fontSize: 12, color: '#475569' }}>Les données restent consultables mais aucune alerte ou détection n'est calculée.</div>
         </div>
       )}
       {actifs.length === 0 && (
         <div style={{ ...S.card, padding: '30px 20px' }}>
           <div style={{ fontSize: 40, marginBottom: 12, textAlign: 'center' }}>🌱</div>
           <div style={{ fontSize: 16, fontWeight: 700, fontFamily: "'Outfit', sans-serif", marginBottom: 6, textAlign: 'center' }}>Bienvenue ! Votre espace est prêt.</div>
-          <div style={{ fontSize: 14, color: '#5a6480', lineHeight: 1.7, marginBottom: 20, textAlign: 'center' }}>Voici les premières étapes pour démarrer :</div>
+          <div style={{ fontSize: 14, color: '#475569', lineHeight: 1.7, marginBottom: 20, textAlign: 'center' }}>Voici les premières étapes pour démarrer :</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div onClick={() => setPage('ames')} style={{ padding: '12px 14px', background: '#0ea88808', border: '1px solid #0ea88833', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div onClick={() => setPage('ames')} style={{ padding: '12px 14px', background: '#185FA508', border: '1px solid #185FA533', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}>
               <span style={{ fontSize: 20 }}>1</span>
-              <div><div style={{ fontSize: 14, fontWeight: 600, color: '#0ea888' }}>Ajouter vos premiers membres</div><div style={{ fontSize: 12, color: '#5a6480' }}>Les personnes que vous suivez dans votre groupe</div></div>
+              <div><div style={{ fontSize: 14, fontWeight: 600, color: '#185FA5' }}>Ajouter vos premiers membres</div><div style={{ fontSize: 12, color: '#475569' }}>Les personnes que vous suivez dans votre groupe</div></div>
             </div>
-            <div onClick={() => setPage('pres')} style={{ padding: '12px 14px', background: '#3060d008', border: '1px solid #3060d033', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div onClick={() => setPage('pres')} style={{ padding: '12px 14px', background: '#185FA508', border: '1px solid #185FA533', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}>
               <span style={{ fontSize: 20 }}>2</span>
-              <div><div style={{ fontSize: 14, fontWeight: 600, color: '#3060d0' }}>Pointer les présences</div><div style={{ fontSize: 12, color: '#5a6480' }}>Chaque dimanche, cochez qui était au culte</div></div>
+              <div><div style={{ fontSize: 14, fontWeight: 600, color: '#185FA5' }}>Pointer les présences</div><div style={{ fontSize: 12, color: '#475569' }}>Chaque dimanche, cochez qui était au culte</div></div>
             </div>
             <div onClick={() => setPage('params')} style={{ padding: '12px 14px', background: '#7040d008', border: '1px solid #7040d033', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}>
               <span style={{ fontSize: 20 }}>3</span>
-              <div><div style={{ fontSize: 14, fontWeight: 600, color: '#7040d0' }}>Inviter d'autres responsables</div><div style={{ fontSize: 12, color: '#5a6480' }}>Chaque pilier aura son propre accès</div></div>
+              <div><div style={{ fontSize: 14, fontWeight: 600, color: '#7040d0' }}>Inviter d'autres responsables</div><div style={{ fontSize: 12, color: '#475569' }}>Chaque pilier aura son propre accès</div></div>
             </div>
-          </div>
-        </div>
-      )} style={{ color: '#0ea888', cursor: 'pointer', textDecoration: 'underline' }}>Âmes</span><br/>
-            <strong>2.</strong> Saisissez les présences dans <span onClick={() => setPage('pres')} style={{ color: '#0ea888', cursor: 'pointer', textDecoration: 'underline' }}>Saisie</span><br/>
-            <strong>3.</strong> Planifiez des entretiens dans les fiches membres
           </div>
         </div>
       )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10, marginBottom: 16 }}>
         <div onClick={() => setPage('ames')} style={{ ...S.kpi(statutColor(statutCritique)), cursor: 'pointer' }}>
-          <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }} title="Nombre de membres dans le statut le plus préoccupant">{statutCritique}</div>
+          <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#64748B', marginBottom: 6 }} title="Nombre de membres dans le statut le plus préoccupant">{statutCritique}</div>
           <div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: statutColor(statutCritique) }}>{statutCount(statutCritique)}</div>
         </div>
-        <div onClick={() => setPage('ames')} style={{ ...S.kpi(statutColor(h.defaultStatut) || '#3060d0'), cursor: 'pointer' }}>
-          <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }} title="Membres récemment inscrits, en phase d'intégration">{h.defaultStatut || 'Nouveaux'}</div>
-          <div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: statutColor(h.defaultStatut) || '#3060d0' }}>{statutCount(h.defaultStatut)}</div>
+        <div onClick={() => setPage('ames')} style={{ ...S.kpi(statutColor(h.defaultStatut) || '#185FA5'), cursor: 'pointer' }}>
+          <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#64748B', marginBottom: 6 }} title="Membres récemment inscrits, en phase d'intégration">{h.defaultStatut || 'Nouveaux'}</div>
+          <div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: statutColor(h.defaultStatut) || '#185FA5' }}>{statutCount(h.defaultStatut)}</div>
         </div>
-        <div onClick={() => setPage('ames')} style={{ ...S.kpi('#0ea888'), cursor: 'pointer' }}>
-          <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }}>Total actifs</div>
-          <div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: '#0ea888' }}>{actifs.length}</div>
+        <div onClick={() => setPage('ames')} style={{ ...S.kpi('#185FA5'), cursor: 'pointer' }}>
+          <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#64748B', marginBottom: 6 }}>Total actifs</div>
+          <div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: '#185FA5' }}>{actifs.length}</div>
         </div>
-        <div style={S.kpi(tG >= 80 ? '#1a9c60' : tG >= 50 ? '#d48f00' : '#e03050')}>
-          <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }} title="Pourcentage moyen de présence aux cultes des 4 dernières semaines">Taux culte</div>
-          <div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: tG >= 80 ? '#1a9c60' : tG >= 50 ? '#d48f00' : '#e03050' }}>{culte ? tG + '%' : '—'}</div>
+        <div style={S.kpi(tG >= 80 ? '#059669' : tG >= 50 ? '#BA7517' : '#E11D48')}>
+          <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#64748B', marginBottom: 6 }} title="Pourcentage moyen de présence aux cultes des 4 dernières semaines">Taux culte</div>
+          <div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: tG >= 80 ? '#059669' : tG >= 50 ? '#BA7517' : '#E11D48' }}>{culte ? tG + '%' : '—'}</div>
         </div>
       </div>
 
       {!lastSundaySaved && (
-        <div onClick={() => setPage('pres')} style={{ padding: '8px 12px', borderRadius: 7, border: '1px solid #3060d033', background: '#3060d008', marginBottom: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <CheckSquare size={14} color="#3060d0" />
-          <span style={{ fontSize: 13, color: '#3060d0' }}>Les présences du <strong>dimanche {fmtS(lastSunday)}</strong> n'ont pas été saisies</span>
-          <span style={{ fontSize: 12, color: '#0ea888', marginLeft: 'auto', textDecoration: 'underline' }}>Saisir</span>
+        <div onClick={() => setPage('pres')} style={{ padding: '8px 12px', borderRadius: 7, border: '1px solid #185FA533', background: '#185FA508', marginBottom: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <CheckSquare size={14} color="#185FA5" />
+          <span style={{ fontSize: 13, color: '#185FA5' }}>Les présences du <strong>dimanche {fmtS(lastSunday)}</strong> n'ont pas été saisies</span>
+          <span style={{ fontSize: 12, color: '#185FA5', marginLeft: 'auto', textDecoration: 'underline' }}>Saisir</span>
         </div>
       )}
 
@@ -162,49 +157,49 @@ export default function HomePage({ actifs, alertes, presences, entretiens, defis
         if (totalNotif === 0) return null
 
         return (
-          <div style={{ marginBottom: 14, border: '1px solid #e0e4ec', borderRadius: 8, background: '#fff', overflow: 'hidden' }}>
-            <div onClick={() => setShowNotifs(!showNotifs)} style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', background: '#f4f6f9', flexWrap: 'wrap' }}>
+          <div style={{ marginBottom: 14, border: '1px solid #E2E8F0', borderRadius: 8, background: '#fff', overflow: 'hidden' }}>
+            <div onClick={() => setShowNotifs(!showNotifs)} style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', background: '#EEF2F7', flexWrap: 'wrap' }}>
               <span style={{ fontSize: 16 }}>🔔</span>
               <strong style={{ fontSize: 14 }}>{totalNotif} notification(s)</strong>
               <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                {(alertes.length + missingCulteDates.length + declining.length) > 0 && <span style={{ padding: '1px 6px', borderRadius: 8, background: '#e03050', color: '#fff', fontSize: 11, fontWeight: 600 }}>{alertes.length + missingCulteDates.length + declining.length} urgent</span>}
-                {(staleNouveau.length + defisSansModule.length) > 0 && <span style={{ padding: '1px 6px', borderRadius: 8, background: '#d48f00', color: '#fff', fontSize: 11, fontWeight: 600 }}>{staleNouveau.length + defisSansModule.length} attention</span>}
-                {thisWeekBdays.length > 0 && <span style={{ padding: '1px 6px', borderRadius: 8, background: '#C49A20', color: '#fff', fontSize: 11, fontWeight: 600 }}>{thisWeekBdays.length} 🎂</span>}
+                {(alertes.length + missingCulteDates.length + declining.length) > 0 && <span style={{ padding: '1px 6px', borderRadius: 8, background: '#E11D48', color: '#fff', fontSize: 11, fontWeight: 600 }}>{alertes.length + missingCulteDates.length + declining.length} urgent</span>}
+                {(staleNouveau.length + defisSansModule.length) > 0 && <span style={{ padding: '1px 6px', borderRadius: 8, background: '#BA7517', color: '#fff', fontSize: 11, fontWeight: 600 }}>{staleNouveau.length + defisSansModule.length} attention</span>}
+                {thisWeekBdays.length > 0 && <span style={{ padding: '1px 6px', borderRadius: 8, background: '#BA7517', color: '#fff', fontSize: 11, fontWeight: 600 }}>{thisWeekBdays.length} 🎂</span>}
               </div>
-              <span style={{ marginLeft: 'auto', fontSize: 12, color: '#6b7280' }}>{showNotifs ? '▲' : '▼'}</span>
+              <span style={{ marginLeft: 'auto', fontSize: 12, color: '#64748B' }}>{showNotifs ? '▲' : '▼'}</span>
             </div>
             {showNotifs && (
               <div style={{ padding: '4px 14px 10px' }}>
                 {missingCulteDates.length > 0 && (
-                  <div onClick={() => setPage('pres')} style={{ padding: '8px 10px', borderRadius: 6, background: '#e0305008', borderLeft: '3px solid #e03050', marginTop: 6, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <AlertTriangle size={13} color="#e03050" />
-                    <span style={{ fontSize: 13, color: '#e03050' }}><strong>{missingCulteDates.length}</strong> culte(s) non saisi(s) sur les 30 derniers jours</span>
-                    <span style={{ marginLeft: 'auto', fontSize: 11, color: '#0ea888' }}>Saisir →</span>
+                  <div onClick={() => setPage('pres')} style={{ padding: '8px 10px', borderRadius: 6, background: '#E11D4808', borderLeft: '3px solid #E11D48', marginTop: 6, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <AlertTriangle size={13} color="#E11D48" />
+                    <span style={{ fontSize: 13, color: '#E11D48' }}><strong>{missingCulteDates.length}</strong> culte(s) non saisi(s) sur les 30 derniers jours</span>
+                    <span style={{ marginLeft: 'auto', fontSize: 11, color: '#185FA5' }}>Saisir →</span>
                   </div>
                 )}
                 {alertes.length > 0 && (
-                  <div onClick={() => setPage('alerts')} style={{ padding: '8px 10px', borderRadius: 6, background: '#e0305008', borderLeft: '3px solid #e03050', marginTop: 6, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <AlertTriangle size={13} color="#e03050" />
-                    <span style={{ fontSize: 13, color: '#e03050' }}><strong>{alertes.length}</strong> alerte(s) de suivi</span>
-                    <span style={{ marginLeft: 'auto', fontSize: 11, color: '#0ea888' }}>Voir →</span>
+                  <div onClick={() => setPage('alerts')} style={{ padding: '8px 10px', borderRadius: 6, background: '#E11D4808', borderLeft: '3px solid #E11D48', marginTop: 6, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <AlertTriangle size={13} color="#E11D48" />
+                    <span style={{ fontSize: 13, color: '#E11D48' }}><strong>{alertes.length}</strong> alerte(s) de suivi</span>
+                    <span style={{ marginLeft: 'auto', fontSize: 11, color: '#185FA5' }}>Voir →</span>
                   </div>
                 )}
                 {thisWeekBdays.length > 0 && (
-                  <div style={{ padding: '8px 10px', borderRadius: 6, background: '#C49A2008', borderLeft: '3px solid #C49A20', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{ padding: '8px 10px', borderRadius: 6, background: '#BA751708', borderLeft: '3px solid #BA7517', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{ fontSize: 14 }}>🎂</span>
-                    <span style={{ fontSize: 13, color: '#C49A20' }}><strong>{thisWeekBdays.length}</strong> anniversaire(s) : {thisWeekBdays.map(m => m.prenom).join(', ')}</span>
+                    <span style={{ fontSize: 13, color: '#BA7517' }}><strong>{thisWeekBdays.length}</strong> anniversaire(s) : {thisWeekBdays.map(m => m.prenom).join(', ')}</span>
                   </div>
                 )}
                 {declining.length > 0 && (
-                  <div style={{ padding: '8px 10px', borderRadius: 6, background: '#e0305008', borderLeft: '3px solid #e03050', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <TrendingDown size={13} color="#e03050" />
-                    <span style={{ fontSize: 13, color: '#e03050' }}><strong>{declining.length}</strong> membre(s) avec présence en baisse</span>
+                  <div style={{ padding: '8px 10px', borderRadius: 6, background: '#E11D4808', borderLeft: '3px solid #E11D48', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <TrendingDown size={13} color="#E11D48" />
+                    <span style={{ fontSize: 13, color: '#E11D48' }}><strong>{declining.length}</strong> membre(s) avec présence en baisse</span>
                   </div>
                 )}
                 {staleNouveau.length > 0 && (
-                  <div style={{ padding: '8px 10px', borderRadius: 6, background: '#d48f0008', borderLeft: '3px solid #d48f00', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <Clock size={13} color="#d48f00" />
-                    <span style={{ fontSize: 13, color: '#d48f00' }}><strong>{staleNouveau.length}</strong> "Nouveau" depuis + de 3 mois</span>
+                  <div style={{ padding: '8px 10px', borderRadius: 6, background: '#BA751708', borderLeft: '3px solid #BA7517', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Clock size={13} color="#BA7517" />
+                    <span style={{ fontSize: 13, color: '#BA7517' }}><strong>{staleNouveau.length}</strong> "Nouveau" depuis + de 3 mois</span>
                   </div>
                 )}
                 {defisSansModule.length > 0 && (
@@ -220,18 +215,18 @@ export default function HomePage({ actifs, alertes, presences, entretiens, defis
       })()}
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
-        <button onClick={() => setPage('pres')} style={{ ...S.btn('#1a9c60', true), display: 'flex', alignItems: 'center', gap: 4, padding: '8px 16px', fontSize: 13 }}>Saisir présences</button>
-        <button onClick={() => setPage('ents')} style={{ ...S.btn('#3060d0', true), display: 'flex', alignItems: 'center', gap: 4, padding: '8px 16px', fontSize: 13 }}>+ Entretien</button>
+        <button onClick={() => setPage('pres')} style={{ ...S.btn('#059669', true), display: 'flex', alignItems: 'center', gap: 4, padding: '8px 16px', fontSize: 13 }}>Saisir présences</button>
+        <button onClick={() => setPage('ents')} style={{ ...S.btn('#185FA5', true), display: 'flex', alignItems: 'center', gap: 4, padding: '8px 16px', fontSize: 13 }}>+ Entretien</button>
       </div>
 
       <div style={S.card}>
         <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10 }}>Inscriptions récentes</div>
         {recent.length === 0
-          ? <div style={{ color: '#6b7280', fontSize: 13 }}>Aucune inscription récente.</div>
+          ? <div style={{ color: '#64748B', fontSize: 13 }}>Aucune inscription récente.</div>
           : recent.map(m => (
-            <div key={m.id} onClick={() => openFiche(m.id)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 0', borderBottom: '1px solid #e0e4ec', cursor: 'pointer' }}>
+            <div key={m.id} onClick={() => openFiche(m.id)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 0', borderBottom: '1px solid #E2E8F0', cursor: 'pointer' }}>
               <div style={{ flex: 1 }}><span style={{ fontSize: 12, fontWeight: 600 }}>{m.prenom} {m.nom}</span></div>
-              <span style={{ fontSize: 11, color: '#6b7280' }}>{fmtS(m.date_inscription)}</span>
+              <span style={{ fontSize: 11, color: '#64748B' }}>{fmtS(m.date_inscription)}</span>
               <span style={S.pill(getStatutColor(refs, m.statut))}>{m.statut}</span>
             </div>
           ))

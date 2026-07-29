@@ -170,11 +170,6 @@ export function useAlertes() {
   return { alertes, loading, reload: load }
 }
 
-, [])
-  useEffect(() => { load() }, [load])
-  return { stats, loading, reload: load }
-}
-
 // ── Tables de référence ──
 export function useRefs() {
   const [refs, setRefs] = useState({

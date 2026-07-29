@@ -30,8 +30,8 @@ export default function App() {
   const [selectedId, setSelectedId] = useState(null)
 
   if (auth.loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100dvh', fallback: '100vh', fontFamily: 'DM Sans, sans-serif' }}>
-      <div style={{ color: '#5a6480', fontSize: 14 }}>Chargement...</div>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100dvh', fontFamily: 'DM Sans, sans-serif' }}>
+      <div style={{ color: '#475569', fontSize: 14 }}>Chargement...</div>
     </div>
   )
   if (!auth.session) return <LoginPage />
@@ -116,7 +116,7 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
 
   if (dataLoading) return (
     <Layout page={page} setPage={setPage} alertCount={0} membreCount={0} selectedMembre={null} auth={auth} actifs={[]} onOpenFiche={() => {}}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 20px', color: '#6b7280', fontSize: 13 }}>Chargement des données...</div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 20px', color: '#64748B', fontSize: 13 }}>Chargement des données...</div>
     </Layout>
   )
 
