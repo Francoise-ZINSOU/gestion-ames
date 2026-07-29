@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from './supabase'
 
-const today = () => new Date().toISOString().slice(0, 10)
+// Date locale (évite le bug UTC de toISOString : autour de minuit, la date UTC diffère)
+const today = () => { const d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2) }
 
 // ── Hook générique : charger une table ──
 export function useTable(table, options = {}) {
@@ -255,12 +256,28 @@ export function useHistoriqueStatuts(membreId) {
 }
 
 // ── Reset toutes les données ──
+// Ordre imposé par les clés étrangères : d'abord les tables qui référencent
+// membres (journal, historiques, plan, défis, entretiens, présences),
+// puis délier profils.membre_id, puis membres.
+// Chaque étape est vérifiée : la moindre erreur interrompt et remonte,
+// au lieu d'afficher un faux succès avec des données à moitié supprimées.
 export async function resetAllData() {
-  await supabase.from('plan_croissance').delete().gte('created_at', '1970-01-01')
-  await supabase.from('defis').delete().gte('created_at', '1970-01-01')
-  await supabase.from('entretiens').delete().gte('created_at', '1970-01-01')
-  await supabase.from('presences').delete().gte('created_at', '1970-01-01')
-  await supabase.from('membres').delete().gte('created_at', '1970-01-01')
+  const steps = [
+    ['journal_pastoral',   () => supabase.from('journal_pastoral').delete().gte('created_at', '1970-01-01')],
+    ['historique_suivi',   () => supabase.from('historique_suivi').delete().gte('date_changement', '1970-01-01')],
+    ['historique_statuts', () => supabase.from('historique_statuts').delete().gte('date_changement', '1970-01-01')],
+    ['plan_croissance',    () => supabase.from('plan_croissance').delete().gte('created_at', '1970-01-01')],
+    ['defis',              () => supabase.from('defis').delete().gte('created_at', '1970-01-01')],
+    ['entretiens',         () => supabase.from('entretiens').delete().gte('created_at', '1970-01-01')],
+    ['presences',          () => supabase.from('presences').delete().gte('created_at', '1970-01-01')],
+    ['dates_annulees',     () => supabase.from('dates_annulees').delete().gte('created_at', '1970-01-01')],
+    ['profils (délier)',   () => supabase.from('profils').update({ membre_id: null }).not('membre_id', 'is', null)],
+    ['membres',            () => supabase.from('membres').delete().gte('created_at', '1970-01-01')],
+  ]
+  for (const [nom, fn] of steps) {
+    const { error } = await fn()
+    if (error) throw new Error('Échec sur ' + nom + ' : ' + error.message)
+  }
 }
 
 // ── Helpers pour lookups dynamiques ──

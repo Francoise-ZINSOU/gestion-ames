@@ -22,7 +22,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
   const [confirmAction, setConfirmAction] = useState(null)
   const uf = (k, v) => setFd(prev => ({ ...prev, [k]: v }))
 
-  if (!m) return <div style={{ padding: 24, textAlign: 'center', color: '#64748B' }}>Sélectionnez une âme depuis la liste</div>
+  if (!m) return <div style={{ padding: 24, textAlign: 'center', color: '#64748B' }}>Sélectionnez un membre depuis la liste</div>
 
   const mEn = entretiens.filter(e => e.membre_id === m.id).sort((a, b) => new Date(b.date_entretien) - new Date(a.date_entretien))
   const mDf = defis.filter(d => d.membre_id === m.id)
@@ -56,9 +56,9 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
   const leaders = actifs.filter(x => { const r = (refs.roles || []).find(r => r.nom === x.role); return r?.peut_suivre && x.id !== m.id })
 
   const handleArchive = async () => {
-    // Protection: ne pas archiver le Berger principal s'il est le seul
+    // Protection: ne pas archiver le Chef de famille s'il est le seul
     if (h.isBergerRole(m.role)) {
-      showToast('⚠ Impossible d\'archiver le Berger principal. Transférez d\'abord le rôle à quelqu\'un d\'autre.')
+      showToast('⚠ Impossible d\'archiver le ' + h.bergerRoleName + '. Transférez d\'abord le rôle à quelqu\'un d\'autre.')
       return
     }
     const mesSuivis = getSuivis()
@@ -110,7 +110,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
       <div style={{ display: 'flex', gap: 5, marginBottom: 10, alignItems: 'center', position: 'sticky', top: 48, zIndex: 40, background: '#EEF2F7', paddingBottom: 4 }}>
         <button onClick={() => setPage(prevPage || 'ames')} style={{ ...S.btn('#475569', true), flexShrink: 0 }}>{({ alerts: '← Alertes', ames: '← Liste', ents: '← Entretiens', home: '← Accueil' })[prevPage] || '← Liste'}</button>
         <div className="hide-scrollbar scroll-fade" style={{ display: 'flex', gap: 5, alignItems: 'center', overflowX: 'auto', WebkitOverflowScrolling: 'touch', flex: 1, minWidth: 0 }}>
-          {[['id', 'Identité', ClipboardList], ['jn', 'Journal', NotebookPen], ['en', 'Entretiens', MessageCircle], ['pr', 'Présences', BarChart3], ['df', 'Défis', Zap], ['pt', 'Plan', BookOpen]].map(([id, label, Icon]) => (
+          {[['id', 'Identité', ClipboardList], ['jn', 'Journal', NotebookPen], ['en', 'Entretiens', MessageCircle], ['pr', 'Présences', BarChart3], ['df', 'Défis', Zap], ['pt', 'Formation', BookOpen]].map(([id, label, Icon]) => (
             <button key={id} onClick={() => setFtab(id)} style={{ padding: '4px 12px', borderRadius: 14, border: '1px solid ' + (ftab === id ? '#185FA5' : '#E2E8F0'), background: ftab === id ? '#185FA514' : '#F8F9FB', color: ftab === id ? '#185FA5' : '#475569', fontSize: 12, fontWeight: ftab === id ? 600 : 500, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap', flexShrink: 0 }}><Icon size={12} /> {label}</button>
           ))}
         </div>
@@ -310,11 +310,11 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
         </div>
       )}
 
-      {/* Tab: Plan de croissance */}
+      {/* Tab: Parcours de formation */}
       {ftab === 'pt' && (
         <div style={S.card}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-            <div style={{ fontSize: 14, fontWeight: 600 }}>Plan de croissance</div>
+            <div style={{ fontSize: 14, fontWeight: 600 }}>Parcours de formation</div>
             {mDf.length > 0 && <button onClick={() => { setFd({ _asDefiId: mDf[0]?.id }); setModal('asMod') }} style={S.btn('#7040d0', false)}>+ Assigner</button>}
           </div>
           {mDf.length === 0 ? (

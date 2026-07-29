@@ -141,7 +141,7 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
 
       {/* Nav mobile */}
       <nav className="nv" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderTop: '1px solid #E2E8F0', display: 'none', zIndex: 200, padding: '4px 0 calc(2px + env(safe-area-inset-bottom, 0px))' }}>
-        {[['home', 'Accueil', Home], ['pres', 'Saisie', CheckSquare], ['ames', 'Âmes', Users], ['alerts', 'Alertes', Bell], ['menu', 'Plus', Menu]].map(([id, label, Icon]) => (
+        {[['home', 'Accueil', Home], ['pres', 'Présences', CheckSquare], ['ames', 'Membres', Users], ['alerts', 'Alertes', Bell], ['menu', 'Plus', Menu]].map(([id, label, Icon]) => (
           <button key={id} onClick={() => id === 'menu' ? setPage('menu') : setPage(id)} style={{
             flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
             padding: '4px 2px', border: 'none', background: 'transparent', cursor: 'pointer',

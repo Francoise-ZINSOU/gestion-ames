@@ -11,8 +11,24 @@ Application web de gestion pastorale pour le suivi individualisé des membres d'
 - **Frontend** : React 18 + Vite
 - **Backend** : Supabase (PostgreSQL + Auth + Realtime + Row-Level Security)
 - **Hébergement** : Netlify (auto-deploy depuis GitHub)
+- **Tests** : Vitest + Testing Library (jsdom), exécutés via GitHub Actions
 - **Polices** : DM Sans (corps), Outfit (titres), Roboto Mono (code)
 - **Icônes** : Lucide React
+
+---
+
+## Vocabulaire de l'interface
+
+Les libellés ont été finalisés en v2.2. Les noms de fichiers conservent l'ancien vocabulaire (renommer les fichiers casserait l'historique Git pour un gain nul) :
+
+| Libellé affiché | Fichier / concept technique |
+|---|---|
+| Membres | `Ames.jsx`, table `membres` |
+| Présences | `Presences.jsx` |
+| Organisation | `Filiation.jsx` (arbre de suivi) |
+| Parcours de formation | `Croissance.jsx`, table `plan_croissance` |
+| Synthèse église | `VueEglise.jsx` |
+| Chef de famille | ex-"Berger principal" (`ref_roles`) |
 
 ---
 
@@ -37,18 +53,18 @@ src/
     ├── MenuMobile.jsx         Menu "Plus" mobile
     ├── Home.jsx               Dashboard (4 KPIs figés, bandeau Pilier, notifications badges)
     ├── Presences.jsx          Saisie des présences par activité/date
-    ├── Ames.jsx               Liste + création + import CSV + actions en masse
-    ├── Fiche.jsx              Fiche 360° (6 onglets : Identité, Journal, Entretiens, Présences, Défis, Plan)
+    ├── Ames.jsx               Membres : liste + création + import CSV + actions en masse
+    ├── Fiche.jsx              Fiche 360° (6 onglets : Identité, Journal, Entretiens, Présences, Défis, Formation)
     ├── Alertes.jsx            Alertes de suivi avec détail du score
     ├── EntretiensGlobal.jsx   Vue globale des entretiens
-    ├── Croissance.jsx         Plan de croissance
+    ├── Croissance.jsx         Parcours de formation
     ├── Historique.jsx         Graphique + tableau présences par activité
-    ├── Filiation.jsx          Arbre de suivi récursif
-    ├── Export.jsx             Export CSV + reset données
-    ├── Rapport.jsx           Rapport mensuel imprimable
-    ├── CGU.jsx                Conditions d'utilisation (template RGPD)
+    ├── Filiation.jsx          Organisation : arbre de suivi récursif
+    ├── Export.jsx             Export CSV + backup JSON + reset données
+    ├── Rapport.jsx            Rapport mensuel imprimable (Imprimer → PDF natif)
+    ├── CGU.jsx                Conditions d'utilisation (template RGPD — contenu juridique à finaliser)
     ├── Params.jsx             Paramètres (Références, Utilisateurs, Église)
-    └── VueEglise.jsx          Vue macro multi-familles (Berger d'église)
+    └── VueEglise.jsx          Synthèse église : vue macro multi-familles (Berger d'église)
 ```
 
 ---
@@ -72,13 +88,13 @@ src/
 - Conflit multi-utilisateur détecté
 
 ### Fiche 360°
-- 6 onglets (ordre pastoral) : Identité, Journal, Entretiens, Présences, Défis, Plan de croissance
+- 6 onglets (ordre pastoral) : Identité, Journal, Entretiens, Présences, Défis, Formation
 - Menu "⋯ Actions" : Modifier / Archiver / Restaurer / Transférer (admin)
 - Raccourci "Marquer présent aujourd'hui" (en haut de l'onglet Identité)
 - Historique du suivi pastoral (5 derniers changements de suiveur)
 - Détection présences orphelines (membre dont la date d'inscription a changé)
 - Bouton retour contextuel (← Alertes / ← Liste / ← Entretiens / ← Accueil)
-- KPIs : jours depuis inscription, absences consécutives, entretiens, plan validé
+- KPIs : jours depuis inscription, absences consécutives, entretiens, parcours validé
 - Suggestion "Passer en Résolu" quand tous les modules d'un défi sont validés
 
 ### Alertes de suivi
@@ -96,16 +112,19 @@ src/
 
 ### Entretiens
 - Création depuis la Fiche ou la page globale
-- Filtre "Avec qui" = uniquement Bergers + Piliers (peut_suivre)
+- Filtre "Avec qui" = uniquement Chefs de famille + Piliers (peut_suivre)
 - Détection des entretiens planifiés en retard
+- Statuts complets : Planifié / Réalisé / Reporté / Annulé (traçabilité)
 - Pagination "Voir plus" (30 par batch)
 
-### Plan de croissance
+### Parcours de formation
 - Modules liés à des défis via `defi_id`
 - Suivi individuel + collectif
+- Chaque module a une **description** + un **lien externe** (`url`) : bouton "Accéder au contenu →" dans la fiche membre
+- 12 modules pré-remplis (enseignements, livres et audio du Pasteur Yvan Castanou / ICC — Impact Centre Chrétien)
 
-### Filiation
-- Arbre récursif (Berger → Pilier → Pilier → Membre)
+### Organisation
+- Arbre de suivi récursif (Chef de famille → Pilier → Pilier → Membre)
 - Piliers non rattachés = signal d'anomalie
 - Membres sans suiveur affichés séparément
 
@@ -120,15 +139,15 @@ src/
 - Super-admin bypass total
 
 ### Gestion des utilisateurs
-- Invitation par email via Edge Function Supabase (`invite-user`)
+- Invitation par email via Edge Function Supabase (`invite-user`, **v3** : polling pour contourner la race condition entre le trigger DB et l'écriture du flag `est_responsable`)
 - Formulaire : email, nom affiché, famille, rôle (Responsable/Admin)
 - L'invité reçoit un email → clique → définit son mot de passe → accès
 - Page "Définir mon mot de passe" pour les nouveaux arrivants
 - Mot de passe oublié (3 modes : connexion / réinitialisation / confirmation)
 - Protection : impossible de retirer le dernier admin
 
-### Berger d'église (vue macro)
-- Nouvelle page "Vue église"
+### Berger d'église (Synthèse église)
+- Page "Synthèse église"
 - Accès en lecture seule à toutes les familles de son église
 - 4 KPIs : total actifs, taux culte moyen (4 dernières sem), nouveaux 30j, familles à risque
 - 2 sections critiques : familles < 80% au dernier dimanche + familles en baisse de -10 pts
@@ -148,16 +167,17 @@ src/
 ### Filtres de dates
 - Page Entretiens : filtre par période (date début → date fin)
 - Page Historique : filtre par période avec bouton effacer
-- Vue église : filtre automatique des dates annulées
+- Synthèse église : filtre automatique des dates annulées
 
 ### Détection des dates manquantes
 - Activités récurrentes : chaque activité peut avoir un jour de la semaine (`jour_semaine`)
 - Historique : 3 états visuels distincts (saisie / annulée / non saisie)
-- Dashboard : notification "X culte(s) non saisi(s) sur les 30 derniers jours" 
+- Dashboard : notification "X culte(s) non saisi(s) sur les 30 derniers jours"
 
 ### PWA
 - Installable sur écran d'accueil (mobile + desktop)
-- Icône dédiée, plein écran, theme-color
+- Icône dédiée, plein écran, theme-color aligné sur la couleur primaire (`#185FA5`)
+- ⚠️ iOS exige un PNG pour `apple-touch-icon` : fournir `/public/icon-180.png` (les SVG sont ignorés)
 
 ---
 
@@ -168,7 +188,7 @@ src/
 | **Membre** (par défaut) | Aucun accès à l'app |
 | **Responsable** (`est_responsable`) | Lire et modifier les données de sa famille |
 | **Admin** (`est_admin`) | + Modifier les tables de référence, gérer les utilisateurs |
-| **Berger d'église** (`est_berger_eglise`) | + Lire toutes les familles de son église (page "Vue église") |
+| **Berger d'église** (`est_berger_eglise`) | + Lire toutes les familles de son église (page "Synthèse église") |
 | **Super-admin** (`est_super_admin`) | + Bypass RLS, accès total |
 
 Un utilisateur peut cumuler plusieurs rôles.
@@ -182,19 +202,25 @@ Un utilisateur peut cumuler plusieurs rôles.
 - `presences` : présences par membre/activité/date
 - `entretiens` : entretiens pastoraux
 - `defis` : défis à surmonter
-- `plan_croissance` : modules assignés/validés
+- `plan_croissance` : modules assignés/validés (parcours de formation)
 - `historique_statuts` : trace des changements de statut
+- `historique_suivi` : trace des changements de suiveur (v1.9)
 - `journal_pastoral` : notes libres
 - `dates_annulees` : dates où les absences ne comptent pas
 
 ### Tables de référence
-- `ref_roles` : Berger principal / Pilier / Membre
-- `ref_statuts` : Nouveau / STAR / Intégré / En difficulté / Archivé
-- `ref_statuts_defi`, `ref_statuts_entretien`
-- `ref_sujets_entretien`, `ref_types_defi`
+- `ref_roles` : Chef de famille / Pilier / Membre
+- `ref_statuts` : Nouveau / Intégré / En difficulté / Archivé *(STAR supprimé en v2.2, membres migrés vers Intégré)*
+- `ref_statuts_defi` : ... + Abandonné (état final)
+- `ref_statuts_entretien` : ... + Reporté, Annulé
+- `sujets_entretien` (⚠️ sans préfixe `ref_`), `ref_types_defi`, `ref_motifs_depart`
 - `activites` : Culte, Enseignement, Prière, etc. (par famille)
-- `modules` : modules du plan de croissance
+- `modules` : modules du parcours de formation (avec `description` + `url`)
 - `ref_parametres` : seuils configurables
+
+⚠️ **Périmètre des référentiels** : `modules`, `ref_parametres` et toutes les tables `ref_*` / `sujets_entretien` sont **globales** (pas de `famille_id`) — partagées entre toutes les églises. Neutre en mono-église, à cloisonner avant la monétisation multi-église (voir section 6 de `evolution-v2.4-integrite-schema.sql`).
+
+Les FK `membres.statut`, `membres.role`, `defis.statut`, `defis.type_defi`, `entretiens.statut`, `membres.motif_depart` référencent la colonne `nom` (texte) avec `ON UPDATE CASCADE` (v2.4) : renommer un libellé dans Paramètres → Références propage automatiquement.
 
 ### Multi-tenant
 - `eglises` : églises
@@ -206,7 +232,7 @@ Un utilisateur peut cumuler plusieurs rôles.
 
 ## Migrations SQL
 
-Les évolutions sont fournies en fichiers séparés à exécuter dans Supabase SQL Editor :
+Les évolutions sont fournies en fichiers séparés à exécuter dans Supabase SQL Editor, **dans l'ordre des versions** (des dépendances de colonnes existent entre fichiers) :
 
 - `evolution-v1.1.sql` : Seuils alertes configurables, dates annulées, vue alertes robuste
 - `evolution-v1.2.sql` : Statut STAR, lien profil ↔ membre, fondations multi-église
@@ -218,7 +244,16 @@ Les évolutions sont fournies en fichiers séparés à exécuter dans Supabase S
 - `evolution-v1.8-eligibilite-coherence.sql` : Trigger recalcul éligibilité présences + code activités nullable + fix ponctuel
 - `evolution-v1.9-audit-experts.sql` : Historique du suivi pastoral, contrainte anti-auto-suivi
 - `evolution-v2.0-multi-tenant-fix.sql` : Triggers auto `famille_id` sur 9 tables, protection auto-transfert
+- `evolution-v2.1-modules-enrichis.sql` : Colonnes `description` + `url` sur modules, statuts Abandonné (défis) / Reporté, Annulé (entretiens)
+- `evolution-v2.2-statuts-roles-modules.sql` : Suppression STAR (migration vers Intégré), renommage Berger principal → Chef de famille, 12 modules de formation pré-remplis (ICC / Yvan Castanou)
+  ⚠️ **v2.1 doit impérativement précéder v2.2** (v2.2 insère dans les colonnes créées par v2.1)
+- `evolution-v2.4-integrite-schema.sql` : FK `ON UPDATE CASCADE` sur les référentiels (renommage sûr), unicité présences/dates annulées, contraintes anti-auto-suivi, `famille_id NOT NULL` sur les 9 tables de données, indexes sur les FK
+- `audit-coherence-v2.3.sql` : Script d'audit idempotent — vérifie que v2.1/v2.2 sont bien appliquées, l'absence d'orphelins `famille_id`, de policies RLS avec fallback NULL et de policies en doublon
+
+Correctifs critiques autonomes :
 - `fix-rls-isolation.sql` : Suppression policies RLS doublons, retrait fallback `IS NULL`, isolation complète
+- `fix-rls-doublons-v2.5.sql` : Purge des policies héritées (génération `is_*`) qui court-circuitaient l'isolation sur `activites`/`eglises`/`ref_statuts` + trigger anti-escalade de privilèges sur `profils`
+- `fix-rls-berger-lecture-seule-v2.6.sql` : Berger d'église strictement lecture seule (retrait de la branche berger des policies d'écriture sur 8 tables), correction de la fuite « Admin familles ». Décision produit : le Berger d'église **lit** le journal pastoral (lecture seule) — à mentionner explicitement dans la page CGU/confidentialité (transparence RGPD)
 - `migration-isolation-familles.sql` : Rattachement données orphelines, création activités par famille
 
 ---
@@ -227,15 +262,23 @@ Les évolutions sont fournies en fichiers séparés à exécuter dans Supabase S
 
 Pas de Node.js local requis — édition via GitHub web editor, Netlify redéploie automatiquement.
 
+### Tests & CI
+- Framework : **Vitest** (environnement `jsdom`, configuré dans `vite.config.js`) + Testing Library
+- Sans environnement local, les tests s'exécutent dans **GitHub Actions** (`.github/workflows/ci.yml`) à chaque push, avant le déploiement Netlify
+- Convention : fichiers `*.test.jsx` à côté du composant testé
+- `passWithNoTests: true` tant que la suite de tests est en cours de constitution
+
 ### Build
 ```
 npm run build       → dossier dist/
+npm run test        → Vitest (CI uniquement, pas de Node local)
 ```
 
 ### Structure des styles
-- Palette : `#0ea888` (vert primaire), `#3060d0` (bleu info), `#d48f00` (orange warning), `#e03050` (rouge danger), `#7040d0` (violet)
-- Grays : `#1a1e2e` texte, `#5a6480` sub-texte, `#6b7280` meta (WCAG AA), `#e0e4ec` bordures
+- Palette réelle du code : `#185FA5` (bleu primaire — nav, focus, accent-color), `#059669` (vert succès), `#E11D48` (rouge danger), `#7040d0` (violet formation)
+- Grays (slate) : `#1E293B` texte, `#475569` sub-texte, `#64748B` meta, `#E2E8F0` bordures, `#EEF2F7` fond
 - Polices : DM Sans / Outfit / Roboto Mono via Google Fonts CDN
+- `theme-color` (index.html + manifest.json) : `#185FA5`
 
 ### Responsive / UX mobile
 - Mobile-first : `mob-only` / `desk-only` classes
@@ -245,8 +288,8 @@ npm run build       → dossier dist/
 - Sidebar fixe 210px desktop
 - `box-sizing: border-box` global (aucun overflow)
 - `font-family: inherit` sur tous les form controls
-- `accent-color: #0ea888` sur checkboxes/radios
-- Focus visible clavier : `outline: 2px solid #0ea888`
+- `accent-color: #185FA5` sur checkboxes/radios
+- Focus visible clavier : `outline: 2px solid #185FA5`
 - Tailles minimales : body 14px, texte courant 13px, meta 12px, micro 10-11px
 - Cartes membres compactes (~60px), bulk bar conditionnelle
 - Dropdown activités sur mobile (boutons sur desktop)
@@ -267,10 +310,10 @@ npm run build       → dossier dist/
 ## Feuille de route
 
 ### v2 — Valeur pastorale forte
-- Notifications email hebdomadaires (Supabase Edge Functions + Resend)
-- Rapports mensuels PDF
-- Rapport mensuel imprimable (Imprimer → PDF natif)
-- Page CGU / conditions d'utilisation (template RGPD)
+- Notifications email hebdomadaires (Supabase Edge Functions + Resend) — **blocker monétisation**
+- Rapports mensuels PDF automatisés (le rapport imprimable natif existe déjà : `Rapport.jsx`)
+- Contenu juridique de la page CGU (le template `CGU.jsx` existe, textes RGPD à finaliser) — **blocker monétisation**
+- ~~Rapport mensuel imprimable (Imprimer → PDF natif)~~ ✓
 - ~~Dashboard personnalisé Pilier~~ ✓ (bandeau "Mes suivis" sur l'accueil)
 
 ### Qualité production
@@ -281,12 +324,14 @@ npm run build       → dossier dist/
 - Transitions CSS sur boutons et modales
 - Toast animé (slide-up)
 - Empty states engageants ("Votre famille est prête 🌱")
-- Colonnes triables dans la liste des âmes (clic sur l'en-tête)
+- Colonnes triables dans la liste des membres (clic sur l'en-tête)
 - Reset données : admin-only avec avertissement multi-tenant
 - Log de communication (appels, SMS)
+- Premiers tests Vitest (fmt/dago, refHelpers, calcul du score d'alerte)
+- Icône `icon-180.png` (PNG) pour iOS
 
 ### v3 — Fonctionnalités avancées
-- Mode hors-ligne (Service Worker + IndexedDB)
+- Mode hors-ligne (Service Worker + IndexedDB) — **blocker monétisation**
 - Cellules de maison / groupes
 - Événements (retraites, baptêmes)
 - Recherche globale

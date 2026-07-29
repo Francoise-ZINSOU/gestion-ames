@@ -217,7 +217,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
       {/* Liste — CARTES sur mobile, tableau sur desktop */}
       <div style={S.card}>
         {filt.length === 0 ? (
-          <div style={{ padding: 16, textAlign: 'center', color: '#64748B' }}>Aucune âme. <span onClick={() => { setFd({ statut: h.defaultStatut, role: h.defaultRole, date_inscription: today() }); setModal('add') }} style={{ color: '#185FA5', cursor: 'pointer', textDecoration: 'underline' }}>+ Ajouter</span></div>
+          <div style={{ padding: 16, textAlign: 'center', color: '#64748B' }}>Aucun membre. <span onClick={() => { setFd({ statut: h.defaultStatut, role: h.defaultRole, date_inscription: today() }); setModal('add') }} style={{ color: '#185FA5', cursor: 'pointer', textDecoration: 'underline' }}>+ Ajouter</span></div>
         ) : (
           <div>
             {/* Desktop: tableau */}

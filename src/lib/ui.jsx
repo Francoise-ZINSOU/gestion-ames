@@ -105,8 +105,9 @@ export function Toast({ message }) {
   if (!message) return null
   const isError = message.startsWith('⚠')
   return (
-    <div style={{
-      position: 'fixed', top: 12, right: 12, padding: '10px 18px', borderRadius: 8,
+    <div className="toast-msg" style={{
+      position: 'fixed', bottom: 20, left: '50%', transform: 'translateX(-50%)',
+      padding: '10px 18px', borderRadius: 8, maxWidth: 'calc(100vw - 32px)',
       background: isError ? '#E11D48' : '#059669', color: '#fff', fontSize: 14,
       fontWeight: 600, zIndex: 999, boxShadow: '0 4px 12px rgba(0,0,0,.15)'
     }}>{message}</div>

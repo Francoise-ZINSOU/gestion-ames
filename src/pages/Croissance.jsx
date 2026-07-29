@@ -9,7 +9,7 @@ export default function CroissancePage({ plans, refs, actifs }) {
 
   if (!actifs || !actifs.length) return (
     <div style={{ ...S.card, textAlign: 'center', color: '#64748B', fontSize: 14, padding: 30, lineHeight: 1.7 }}>
-      Aucun membre pour le moment. Ajoutez des âmes pour commencer le suivi de croissance.
+      Aucun membre pour le moment. Ajoutez des membres pour commencer le parcours de formation.
     </div>
   )
 

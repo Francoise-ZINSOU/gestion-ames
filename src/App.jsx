@@ -68,9 +68,9 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
   const w = (fn, msg) => async (...args) => { try { const r = await fn(...args); showToast(msg); return r } catch (e) { showToast('⚠ ' + (e.message || 'Erreur inattendue')) } }
 
   // Alertes filtrées (masquer les membres avec entretien planifié dans les 30j)
-  const _todayStr = new Date().toISOString().slice(0, 10)
+  const _todayStr = today()
   const _in30 = new Date(); _in30.setDate(_in30.getDate() + 30)
-  const _in30Str = _in30.toISOString().slice(0, 10)
+  const _in30Str = _in30.getFullYear() + '-' + ('0' + (_in30.getMonth() + 1)).slice(-2) + '-' + ('0' + _in30.getDate()).slice(-2)
   const _statutPlanifie = (rf.refs?.statutsEntretien || []).find(s => s.nom?.toLowerCase().includes('planif'))?.nom || 'Planifié'
   const alertesFiltrees = al.alertes.filter(a => {
     const hasPlanned = (en.entretiens || []).some(e =>
