@@ -38,10 +38,12 @@ export default function App() {
   if (auth.needsPassword) return <SetPasswordPage profil={auth.profil} onDone={auth.clearNeedsPassword} />
   if (!auth.isResponsable) return <AccessDenied />
 
-  // Utilisateur sans famille assignée (et non super-admin) : la RLS lui
-  // renverrait des listes vides et des alertes absurdes — on affiche la page
-  // dédiée avec les instructions, plutôt qu'une app vide et anxiogène.
-  if (!auth.profil?.famille_id && !auth.profil?.est_super_admin) return <NoFamillePage />
+  // Utilisateur sans famille assignée : la RLS lui renverrait des listes
+  // vides et des alertes absurdes → page dédiée avec instructions.
+  // Portes de sortie : super-admin (administration de plateforme) et admin
+  // sans famille (peut se réassigner lui-même dans Paramètres → Utilisateurs).
+  // Un responsable simple reste bloqué : c'est à l'admin de le rattacher.
+  if (!auth.profil?.famille_id && !auth.profil?.est_super_admin && !auth.profil?.est_admin) return <NoFamillePage />
 
   return <AuthorizedApp auth={auth} toast={toast} showToast={showToast} page={page} setPage={setPage} selectedId={selectedId} setSelectedId={setSelectedId} />
 }
