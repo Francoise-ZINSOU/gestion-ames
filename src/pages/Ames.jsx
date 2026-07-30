@@ -21,6 +21,15 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
   const myEmail = auth?.profil?.email?.toLowerCase()
   const myMembre = myMembreId ? actifs.find(m => m.id === myMembreId) : (myEmail ? actifs.find(m => m.email?.toLowerCase() === myEmail) : null)
 
+  const taux = (id) => {
+    const culte = h.culteId ? { id: h.culteId } : null
+    if (!culte) return null
+    const cancelledDates = new Set((datesAnnulees || []).filter(d => d.activite_id === culte.id).map(d => d.date_annulee))
+    const ps = presences.filter(p => p.membre_id === id && p.activite_id === culte.id && p.eligible && !cancelledDates.has(p.date_presence))
+    if (!ps.length) return null
+    return Math.round(ps.filter(p => p.present).length / ps.length * 100)
+  }
+
   const filt = membres.filter(m => {
     if (fSt === 'actifs' && m.archive) return false
     if (fSt === '__archived' && !m.archive) return false
@@ -28,8 +37,8 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
     if (fSt !== 'all' && fSt !== 'actifs' && fSt !== '__archived' && fSt !== '__mysuivis' && m.statut !== fSt) return false
     if (fRole !== 'all' && m.role !== fRole) return false
     if (q) return (m.nom + ' ' + m.prenom).toLowerCase().includes(q.toLowerCase())
-    return !m.archive
-  }).sort((a, b) => a.nom.localeCompare(b.nom))
+    return true
+  })
 
   // Sort
   filt.sort((a, b) => {
@@ -46,15 +55,6 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
     const role = (refs.roles || []).find(r => r.nom === m.role)
     return role?.peut_suivre
   })
-
-  const taux = (id) => {
-    const culte = h.culteId ? { id: h.culteId } : null
-    if (!culte) return null
-    const cancelledDates = new Set((datesAnnulees || []).filter(d => d.activite_id === culte.id).map(d => d.date_annulee))
-    const ps = presences.filter(p => p.membre_id === id && p.activite_id === culte.id && p.eligible && !cancelledDates.has(p.date_presence))
-    if (!ps.length) return null
-    return Math.round(ps.filter(p => p.present).length / ps.length * 100)
-  }
 
   const mEn = (id) => entretiens.filter(e => e.membre_id === id).length
   const toggleSort = (col) => {
@@ -104,7 +104,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
     try {
       const isEdit = (modal === 'edit' || modal === 'add') && fd.id && membres.some(m => m.id === fd.id)
       if (isEdit) {
-        // Vérifier Chef de famille à l'édition aussi
+        // Vérifier Berger principal à l'édition aussi
         if (h.isBergerRole(fd.role)) {
           const existingBerger = membres.find(m => h.isBergerRole(m.role) && !m.archive && m.id !== fd.id)
           if (existingBerger) { showToast('⚠ Un Chef de famille existe déjà : ' + existingBerger.prenom + ' ' + existingBerger.nom); setSaving(false); return }
@@ -140,16 +140,16 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
     <div>
       {/* Barre de recherche */}
       <div style={{ position: 'relative', marginBottom: 8 }}>
-        <Search size={14} style={{ position: 'absolute', left: 10, top: 9, color: '#6b7280' }} />
+        <Search size={14} style={{ position: 'absolute', left: 10, top: 9, color: '#64748B' }} />
         <input value={q} onChange={e => setQ(e.target.value)} placeholder="Rechercher..." style={{ ...S.inp, paddingLeft: 30, width: '100%', boxSizing: 'border-box' }} />
       </div>
       {/* Filtres + actions — une seule ligne */}
       <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 12, flexWrap: 'wrap' }}>
-        <select value={fRole} onChange={e => setFRole(e.target.value)} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #c8cfe0', background: '#f0f2f6', fontFamily: 'inherit', fontSize: 12, color: '#1a1e2e', outline: 'none' }}>
+        <select value={fRole} onChange={e => setFRole(e.target.value)} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #CBD5E1', background: '#F8F9FB', fontFamily: 'inherit', fontSize: 12, color: '#1E293B', outline: 'none' }}>
           <option value="all">Tous rôles</option>
           {(refs.roles || []).map(r => <option key={r.nom} value={r.nom}>{r.nom}</option>)}
         </select>
-        <select value={fSt} onChange={e => setFSt(e.target.value)} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #c8cfe0', background: '#f0f2f6', fontFamily: 'inherit', fontSize: 12, color: '#1a1e2e', outline: 'none' }}>
+        <select value={fSt} onChange={e => setFSt(e.target.value)} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #CBD5E1', background: '#F8F9FB', fontFamily: 'inherit', fontSize: 12, color: '#1E293B', outline: 'none' }}>
           <option value="actifs">Actifs</option>
           {myMembre && <option value="__mysuivis">★ Mes suivis</option>}
           <optgroup label="— Par statut —">
@@ -160,9 +160,9 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
             <option value="all">Tout afficher</option>
           </optgroup>
         </select>
-        <button onClick={() => { setFd({ statut: h.defaultStatut, role: h.defaultRole, date_inscription: today() }); setModal('add') }} style={{ ...S.btn('#0ea888', false), whiteSpace: 'nowrap', padding: '6px 12px', fontSize: 13 }}>+ Membre</button>
-        <button onClick={() => setModal('import')} style={{ ...S.btn('#3060d0', true), display: 'flex', alignItems: 'center', gap: 3, whiteSpace: 'nowrap', padding: '6px 10px', fontSize: 12 }}><Upload size={12} /> CSV</button>
-        <button onClick={() => setBulkMode(!bulkMode)} style={{ ...S.btn(bulkMode ? '#7040d0' : '#6b7280', true), padding: '6px 10px', fontSize: 12 }}>{bulkMode ? '✓ Sélection' : '☐ Sélection'}</button>
+        <button onClick={() => { setFd({ statut: h.defaultStatut, role: h.defaultRole, date_inscription: today() }); setModal('add') }} style={{ ...S.btn('#185FA5', false), whiteSpace: 'nowrap', padding: '6px 12px', fontSize: 13 }}>+ Membre</button>
+        <button onClick={() => setModal('import')} style={{ ...S.btn('#185FA5', true), display: 'flex', alignItems: 'center', gap: 3, whiteSpace: 'nowrap', padding: '6px 10px', fontSize: 12 }}><Upload size={12} /> CSV</button>
+        <button onClick={() => setBulkMode(!bulkMode)} style={{ ...S.btn(bulkMode ? '#7040d0' : '#64748B', true), padding: '6px 10px', fontSize: 12 }}>{bulkMode ? '✓ Sélection' : '☐ Sélection'}</button>
       </div>
 
       {/* Bulk actions */}
@@ -176,7 +176,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
           </label>
           {Object.values(bulkSel).filter(Boolean).length > 0 && (
             <>
-              <select id="bulk-statut" style={{ fontSize: 12, padding: '4px 6px', borderRadius: 4, border: '1px solid #e0e4ec' }}>
+              <select id="bulk-statut" style={{ fontSize: 12, padding: '4px 6px', borderRadius: 4, border: '1px solid #E2E8F0' }}>
                 <option value="">Statut →</option>
                 {(refs.statuts || []).filter(s => !s.est_archive).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}
               </select>
@@ -192,7 +192,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                   reloadMembres()
                 } catch (e) { showToast('⚠ ' + (e.message || 'Erreur')) }
               }} style={{ ...S.btn('#7040d0', false), padding: '4px 8px', fontSize: 12 }}>OK</button>
-              <select id="bulk-suiveur" style={{ fontSize: 12, padding: '4px 6px', borderRadius: 4, border: '1px solid #e0e4ec' }}>
+              <select id="bulk-suiveur" style={{ fontSize: 12, padding: '4px 6px', borderRadius: 4, border: '1px solid #E2E8F0' }}>
                 <option value="">Suiveur →</option>
                 {leaders.map(l => <option key={l.id} value={l.id}>{l.prenom} {l.nom}</option>)}
               </select>
@@ -207,17 +207,17 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                   setBulkSel({}); setBulkMode(false)
                   reloadMembres()
                 } catch (e) { showToast('⚠ ' + (e.message || 'Erreur')) }
-              }} style={{ ...S.btn('#0ea888', false), padding: '4px 8px', fontSize: 12 }}>OK</button>
+              }} style={{ ...S.btn('#185FA5', false), padding: '4px 8px', fontSize: 12 }}>OK</button>
             </>
           )}
-          <button onClick={() => { setBulkMode(false); setBulkSel({}) }} style={{ ...S.btn('#6b7280', true), padding: '4px 8px', fontSize: 12, marginLeft: 'auto' }}>✕</button>
+          <button onClick={() => { setBulkMode(false); setBulkSel({}) }} style={{ ...S.btn('#64748B', true), padding: '4px 8px', fontSize: 12, marginLeft: 'auto' }}>✕</button>
         </div>
       )}
 
       {/* Liste — CARTES sur mobile, tableau sur desktop */}
       <div style={S.card}>
         {filt.length === 0 ? (
-          <div style={{ padding: 16, textAlign: 'center', color: '#6b7280' }}>Aucune âme. <span onClick={() => { setFd({ statut: h.defaultStatut, role: h.defaultRole, date_inscription: today() }); setModal('add') }} style={{ color: '#0ea888', cursor: 'pointer', textDecoration: 'underline' }}>+ Ajouter</span></div>
+          <div style={{ padding: 16, textAlign: 'center', color: '#64748B' }}>Aucun membre. <span onClick={() => { setFd({ statut: h.defaultStatut, role: h.defaultRole, date_inscription: today() }); setModal('add') }} style={{ color: '#185FA5', cursor: 'pointer', textDecoration: 'underline' }}>+ Ajouter</span></div>
         ) : (
           <div>
             {/* Desktop: tableau */}
@@ -234,13 +234,13 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                   return (
                     <tr key={m.id} onClick={() => bulkMode ? setBulkSel(prev => ({ ...prev, [m.id]: !prev[m.id] })) : openFiche(m.id)} style={{ cursor: 'pointer', opacity: m.archive ? 0.5 : 1, background: bulkSel[m.id] ? '#7040d008' : 'transparent' }}>
                       {bulkMode && <td style={S.td}><input type="checkbox" checked={!!bulkSel[m.id]} readOnly /></td>}
-                      <td style={S.td}><span style={{ fontWeight: 600, color: '#0ea888' }}>{m.prenom} {m.nom}</span></td>
+                      <td style={S.td}><span style={{ fontWeight: 600, color: '#185FA5' }}>{m.prenom} {m.nom}</span></td>
                       <td style={S.td}><span style={S.pill(getRoleColor(refs, m.role))}>{m.role}</span></td>
-                      <td style={{ ...S.td, color: '#5a6480' }}>{fmtS(m.date_inscription)}</td>
-                      <td style={{ ...S.td, color: '#5a6480' }}>{getSuiveur(m.suivi_par)}</td>
+                      <td style={{ ...S.td, color: '#475569' }}>{fmtS(m.date_inscription)}</td>
+                      <td style={{ ...S.td, color: '#475569' }}>{getSuiveur(m.suivi_par)}</td>
                       <td style={S.td}><span style={S.pill(getStatutColor(refs, m.statut))}>{m.statut}</span></td>
-                      <td style={{ ...S.td, fontWeight: 600, color: t !== null ? (t >= 80 ? '#1a9c60' : t >= 50 ? '#d48f00' : '#e03050') : '#6b7280' }}>{t !== null ? t + '%' : '—'}</td>
-                      <td style={{ ...S.td, fontWeight: 600, color: mEn(m.id) ? '#3060d0' : '#6b7280' }}>{mEn(m.id)}</td>
+                      <td style={{ ...S.td, fontWeight: 600, color: t !== null ? (t >= 80 ? '#059669' : t >= 50 ? '#BA7517' : '#E11D48') : '#64748B' }}>{t !== null ? t + '%' : '—'}</td>
+                      <td style={{ ...S.td, fontWeight: 600, color: mEn(m.id) ? '#185FA5' : '#64748B' }}>{mEn(m.id)}</td>
                     </tr>
                   )
                 })}</tbody>
@@ -251,16 +251,16 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
               {filt.map(m => {
                 const t = taux(m.id)
                 return (
-                  <div key={m.id} onClick={() => bulkMode ? setBulkSel(prev => ({ ...prev, [m.id]: !prev[m.id] })) : openFiche(m.id)} style={{ padding: '10px 8px', borderBottom: '1px solid #e0e4ec', cursor: 'pointer', opacity: m.archive ? 0.5 : 1, background: bulkSel[m.id] ? '#7040d008' : 'transparent' }}>
+                  <div key={m.id} onClick={() => bulkMode ? setBulkSel(prev => ({ ...prev, [m.id]: !prev[m.id] })) : openFiche(m.id)} style={{ padding: '10px 8px', borderBottom: '1px solid #E2E8F0', cursor: 'pointer', opacity: m.archive ? 0.5 : 1, background: bulkSel[m.id] ? '#7040d008' : 'transparent' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
                       {bulkMode && <input type="checkbox" checked={!!bulkSel[m.id]} readOnly />}
-                      <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: '#0ea888', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.prenom} {m.nom}</span>
+                      <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: '#185FA5', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.prenom} {m.nom}</span>
                       <span style={S.pill(getStatutColor(refs, m.statut))}>{m.statut}</span>
                     </div>
-                    <div style={{ display: 'flex', gap: 8, fontSize: 11, color: '#6b7280', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', gap: 8, fontSize: 11, color: '#64748B', alignItems: 'center', flexWrap: 'wrap' }}>
                       <span style={{ ...S.pill(getRoleColor(refs, m.role)), fontSize: 10, padding: '1px 6px' }}>{m.role}</span>
-                      {t !== null && <span style={{ fontWeight: 600, color: t >= 80 ? '#1a9c60' : t >= 50 ? '#d48f00' : '#e03050' }}>{t}%</span>}
-                      {mEn(m.id) > 0 && <span style={{ color: '#3060d0' }}>{mEn(m.id)} ent.</span>}
+                      {t !== null && <span style={{ fontWeight: 600, color: t >= 80 ? '#059669' : t >= 50 ? '#BA7517' : '#E11D48' }}>{t}%</span>}
+                      {mEn(m.id) > 0 && <span style={{ color: '#185FA5' }}>{mEn(m.id)} ent.</span>}
                       {m.suivi_par && <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>→ {getSuiveur(m.suivi_par)}</span>}
                     </div>
                   </div>
@@ -275,17 +275,17 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
       {(modal === 'add' || modal === 'edit') && (
         <div className="modal-overlay">
           <div className="modal-box" style={{ maxWidth: 500 }}>
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid #e0e4ec' }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid #E2E8F0' }}>
               <div style={{ fontSize: 15, fontWeight: 700, fontFamily: "'Outfit', sans-serif" }}>{modal === 'edit' ? 'Modifier' : 'Nouveau membre'}</div>
             </div>
             <div style={{ padding: '16px 20px', maxHeight: '55dvh', overflowY: 'auto' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px' }}>
-                <div style={{ marginBottom: 8 }}><label style={S.label}>Nom</label><input value={fd.nom || ''} onChange={e => uf('nom', e.target.value)} style={{ ...S.inp, borderColor: fd.nom === '' ? '#e03050' : '#c8cfe0' }} /></div>
-                <div style={{ marginBottom: 8 }}><label style={S.label}>Prénom</label><input value={fd.prenom || ''} onChange={e => uf('prenom', e.target.value)} style={{ ...S.inp, borderColor: fd.prenom === '' ? '#e03050' : '#c8cfe0' }} /></div>
+                <div style={{ marginBottom: 8 }}><label style={S.label}>Nom</label><input value={fd.nom || ''} onChange={e => uf('nom', e.target.value)} style={{ ...S.inp, borderColor: fd.nom === '' ? '#E11D48' : '#CBD5E1' }} /></div>
+                <div style={{ marginBottom: 8 }}><label style={S.label}>Prénom</label><input value={fd.prenom || ''} onChange={e => uf('prenom', e.target.value)} style={{ ...S.inp, borderColor: fd.prenom === '' ? '#E11D48' : '#CBD5E1' }} /></div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px' }}>
-                <div style={{ marginBottom: 8 }}><label style={S.label}>Téléphone</label><input value={fd.telephone || ''} onChange={e => uf('telephone', e.target.value)} style={{ ...S.inp, borderColor: fd.telephone && !validTel(fd.telephone) ? '#e03050' : '#c8cfe0' }} placeholder="+225 07..." /></div>
-                <div style={{ marginBottom: 8 }}><label style={S.label}>Email</label><input value={fd.email || ''} onChange={e => uf('email', e.target.value)} style={{ ...S.inp, borderColor: fd.email && !validEmail(fd.email) ? '#e03050' : '#c8cfe0' }} type="email" /></div>
+                <div style={{ marginBottom: 8 }}><label style={S.label}>Téléphone</label><input value={fd.telephone || ''} onChange={e => uf('telephone', e.target.value)} style={{ ...S.inp, borderColor: fd.telephone && !validTel(fd.telephone) ? '#E11D48' : '#CBD5E1' }} placeholder="+225 07..." /></div>
+                <div style={{ marginBottom: 8 }}><label style={S.label}>Email</label><input value={fd.email || ''} onChange={e => uf('email', e.target.value)} style={{ ...S.inp, borderColor: fd.email && !validEmail(fd.email) ? '#E11D48' : '#CBD5E1' }} type="email" /></div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px' }}>
                 <div style={{ marginBottom: 8 }}>
@@ -294,7 +294,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                   {modal === 'edit' && fd.id && (() => {
                     const original = membres.find(x => x.id === fd.id)
                     return original && fd.date_inscription && fd.date_inscription !== original.date_inscription && (
-                      <div style={{ fontSize: 11, color: '#d48f00', marginTop: 4, padding: '4px 8px', background: '#d48f0008', border: '1px solid #d48f0033', borderRadius: 4 }}>
+                      <div style={{ fontSize: 11, color: '#BA7517', marginTop: 4, padding: '4px 8px', background: '#BA751708', border: '1px solid #BA751733', borderRadius: 4 }}>
                         ⚠ Modifier la date recalcule l'éligibilité des présences passées.
                       </div>
                     )
@@ -309,9 +309,9 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
               {(!h.isBergerRole(fd.role)) && <div style={{ marginBottom: 8 }}><label style={S.label}>Suivi par</label><select value={fd.suivi_par || ''} onChange={e => uf('suivi_par', e.target.value || null)} style={S.inp}><option value="">— Aucun —</option>{leaders.filter(l => l.id !== fd.id).map(l => <option key={l.id} value={l.id}>{l.prenom} {l.nom} ({l.role})</option>)}</select></div>}
               <div style={{ marginBottom: 8 }}><label style={S.label}>Notes</label><textarea value={fd.notes || ''} onChange={e => uf('notes', e.target.value)} rows={2} style={{ ...S.inp, resize: 'vertical' }} /></div>
             </div>
-            <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#6b7280', true)}>Annuler</button>
-              <button onClick={handleSave} disabled={saving} style={{ ...S.btn('#0ea888', false), opacity: saving ? 0.6 : 1 }}>{saving ? 'Enregistrement...' : 'Enregistrer'}</button>
+            <div style={{ padding: '12px 20px', borderTop: '1px solid #E2E8F0', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#64748B', true)}>Annuler</button>
+              <button onClick={handleSave} disabled={saving} style={{ ...S.btn('#185FA5', false), opacity: saving ? 0.6 : 1 }}>{saving ? 'Enregistrement...' : 'Enregistrer'}</button>
             </div>
           </div>
         </div>
@@ -321,19 +321,19 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
       {modal === 'reassign' && fd._reassignSuivis && (
         <div className="modal-overlay">
           <div className="modal-box" style={{ maxWidth: 460 }}>
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid #e0e4ec' }}>
-              <div style={{ fontSize: 15, fontWeight: 700, color: '#d48f00' }}>Réassigner avant changement de rôle</div>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid #E2E8F0' }}>
+              <div style={{ fontSize: 15, fontWeight: 700, color: '#BA7517' }}>Réassigner avant changement de rôle</div>
             </div>
             <div style={{ padding: '16px 20px' }}>
-              <div style={{ fontSize: 13, color: '#5a6480', marginBottom: 10 }}>Ce membre suit {fd._reassignSuivis.length} personne(s). Choisissez un nouveau responsable :</div>
-              <div style={{ marginBottom: 8, padding: '8px 10px', background: '#f0f2f6', borderRadius: 6, fontSize: 12, color: '#5a6480' }}>
+              <div style={{ fontSize: 13, color: '#475569', marginBottom: 10 }}>Ce membre suit {fd._reassignSuivis.length} personne(s). Choisissez un nouveau responsable :</div>
+              <div style={{ marginBottom: 8, padding: '8px 10px', background: '#F8F9FB', borderRadius: 6, fontSize: 12, color: '#475569' }}>
                 {fd._reassignSuivis.map(s => s.prenom + ' ' + s.nom).join(', ')}
               </div>
               <div style={{ marginBottom: 8 }}><label style={S.label}>Nouveau responsable</label><select value={fd._newSuivId || ''} onChange={e => uf('_newSuivId', e.target.value || null)} style={S.inp}><option value="">— Choisir —</option>{leaders.filter(l => l.id !== fd._reassignFrom).map(l => <option key={l.id} value={l.id}>{l.prenom} {l.nom} ({l.role})</option>)}</select></div>
             </div>
-            <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#6b7280', true)}>Annuler</button>
-              <button onClick={doReassign} style={S.btn('#d48f00', false)}>Réassigner et modifier</button>
+            <div style={{ padding: '12px 20px', borderTop: '1px solid #E2E8F0', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#64748B', true)}>Annuler</button>
+              <button onClick={doReassign} style={S.btn('#BA7517', false)}>Réassigner et modifier</button>
             </div>
           </div>
         </div>
@@ -343,15 +343,15 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
       {modal === 'import' && (
         <div className="modal-overlay">
           <div className="modal-box" style={{ maxWidth: 520 }}>
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid #e0e4ec' }}><div style={{ fontSize: 15, fontWeight: 700 }}>Importer des membres (CSV)</div></div>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid #E2E8F0' }}><div style={{ fontSize: 15, fontWeight: 700 }}>Importer des membres (CSV)</div></div>
             <div style={{ padding: '16px 20px' }}>
               {!fd._csvRows ? (
                 <div>
-                  <div style={{ fontSize: 13, color: '#5a6480', marginBottom: 10, lineHeight: 1.6 }}>Préparez un fichier CSV avec les colonnes : Prénom, Nom, Téléphone, Email, Date inscription</div>
-                  <div style={{ padding: '8px 12px', background: '#f0f2f6', borderRadius: 6, fontSize: 12, fontFamily: "'Roboto Mono', monospace", marginBottom: 12, lineHeight: 1.8 }}>
+                  <div style={{ fontSize: 13, color: '#475569', marginBottom: 10, lineHeight: 1.6 }}>Préparez un fichier CSV avec les colonnes : Prénom, Nom, Téléphone, Email, Date inscription</div>
+                  <div style={{ padding: '8px 12px', background: '#F8F9FB', borderRadius: 6, fontSize: 12, fontFamily: "'Roboto Mono', monospace", marginBottom: 12, lineHeight: 1.8 }}>
                     Prénom,Nom,Téléphone,Email<br/>Marina,N'GUESSAN,+225 07 12 34 56,marina@email.com<br/>David,Mensah,+225 05 33 44 55,
                   </div>
-                  <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 10 }}>Seuls Prénom et Nom sont obligatoires. Statut = Nouveau, Rôle = Membre par défaut.</div>
+                  <div style={{ fontSize: 12, color: '#64748B', marginBottom: 10 }}>Seuls Prénom et Nom sont obligatoires. Statut = Nouveau, Rôle = Membre par défaut.</div>
                   <input type="file" accept=".csv,.txt,text/csv,text/plain,text/comma-separated-values,application/csv,application/vnd.ms-excel" onChange={e => {
                     const file = e.target.files?.[0]
                     if (!file) return
@@ -407,16 +407,16 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                 </div>
               ) : (
                 <div>
-                  <div style={{ fontSize: 13, color: '#5a6480', marginBottom: 8 }}>
-                    {fd._csvRows.length} ligne(s). {fd._csvRows.filter(r => r._dup).length > 0 && <span style={{ color: '#d48f00' }}>⚠ {fd._csvRows.filter(r => r._dup).length} doublon(s) en jaune.</span>}
+                  <div style={{ fontSize: 13, color: '#475569', marginBottom: 8 }}>
+                    {fd._csvRows.length} ligne(s). {fd._csvRows.filter(r => r._dup).length > 0 && <span style={{ color: '#BA7517' }}>⚠ {fd._csvRows.filter(r => r._dup).length} doublon(s) en jaune.</span>}
                   </div>
                   <div style={{ maxHeight: '30dvh', overflowY: 'auto' }}>
                     {fd._csvRows.map((r, i) => (
-                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 6px', borderBottom: '1px solid #e0e4ec', background: r._dup ? '#FAEEDA' : 'transparent', opacity: r._skip ? 0.4 : 1 }}>
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 6px', borderBottom: '1px solid #E2E8F0', background: r._dup ? '#FAEEDA' : 'transparent', opacity: r._skip ? 0.4 : 1 }}>
                         <input type="checkbox" checked={!r._skip} onChange={() => { const rows = [...fd._csvRows]; rows[i] = { ...rows[i], _skip: !rows[i]._skip }; setFd(prev => ({ ...prev, _csvRows: rows })) }} />
                         <div style={{ flex: 1 }}>
                           <div style={{ fontSize: 13, fontWeight: 600 }}>{r.prenom} {r.nom}</div>
-                          <div style={{ fontSize: 11, color: '#6b7280' }}>{[r.telephone, r.email].filter(Boolean).join(' · ')}</div>
+                          <div style={{ fontSize: 11, color: '#64748B' }}>{[r.telephone, r.email].filter(Boolean).join(' · ')}</div>
                         </div>
                       </div>
                     ))}
@@ -424,8 +424,8 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                 </div>
               )}
             </div>
-            <div style={{ padding: '12px 20px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#6b7280', true)}>Annuler</button>
+            <div style={{ padding: '12px 20px', borderTop: '1px solid #E2E8F0', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => { setModal(null); setFd({}) }} style={S.btn('#64748B', true)}>Annuler</button>
               {fd._csvRows && (() => {
                 const toImport = fd._csvRows.filter(r => !r._skip)
                 return toImport.length > 0 && (
@@ -445,7 +445,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                       showToast(`✓ ${rows.length} membre(s) importé(s)`)
                     } catch (e) { showToast('⚠ ' + e.message) }
                     setSaving(false)
-                  }} style={{ ...S.btn('#3060d0', false), opacity: saving ? 0.6 : 1 }}>
+                  }} style={{ ...S.btn('#185FA5', false), opacity: saving ? 0.6 : 1 }}>
                     {saving ? 'Import...' : `Importer ${toImport.length}`}
                   </button>
                 )
@@ -459,10 +459,10 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
       {confirmAction && (
         <div className="modal-overlay danger">
           <div className="modal-box" style={{ maxWidth: 380 }}>
-            <div style={{ padding: '20px 24px' }}><div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Confirmation</div><div style={{ fontSize: 14, color: '#5a6480', lineHeight: 1.6 }}>{confirmAction.msg}</div></div>
-            <div style={{ padding: '12px 24px', borderTop: '1px solid #e0e4ec', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => setConfirmAction(null)} style={S.btn('#6b7280', true)}>Annuler</button>
-              <button onClick={() => { confirmAction.fn(); setConfirmAction(null) }} style={S.btn('#e03050', false)}>Confirmer</button>
+            <div style={{ padding: '20px 24px' }}><div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Confirmation</div><div style={{ fontSize: 14, color: '#475569', lineHeight: 1.6 }}>{confirmAction.msg}</div></div>
+            <div style={{ padding: '12px 24px', borderTop: '1px solid #E2E8F0', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => setConfirmAction(null)} style={S.btn('#64748B', true)}>Annuler</button>
+              <button onClick={() => { confirmAction.fn(); setConfirmAction(null) }} style={S.btn('#E11D48', false)}>Confirmer</button>
             </div>
           </div>
         </div>
