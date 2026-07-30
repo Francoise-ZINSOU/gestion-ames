@@ -5,24 +5,24 @@ export const S = {
     fontSize: 11, fontWeight: 600, background: color + '18', color, whiteSpace: 'nowrap', marginRight: 2
   }),
   card: {
-    background: '#fff', border: '1px solid #E2E8F0', borderRadius: 10,
+    background: '#fff', border: '1px solid #e0e4ec', borderRadius: 10,
     padding: '16px 18px', marginBottom: 12
   },
   th: {
     textAlign: 'left', padding: '6px 8px', fontSize: 10, fontWeight: 600,
-    letterSpacing: 1, textTransform: 'uppercase', color: '#64748B',
-    borderBottom: '2px solid #E2E8F0', background: '#F8F9FB'
+    letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280',
+    borderBottom: '2px solid #e0e4ec', background: '#f0f2f6'
   },
-  td: { padding: '7px 8px', borderBottom: '1px solid #E2E8F0', fontSize: 13 },
+  td: { padding: '7px 8px', borderBottom: '1px solid #e0e4ec', fontSize: 13 },
   inp: {
     width: '100%', padding: '7px 10px', borderRadius: 6,
-    border: '1px solid #CBD5E1', background: '#F8F9FB', color: '#1E293B',
+    border: '1px solid #c8cfe0', background: '#f0f2f6', color: '#1a1e2e',
     fontFamily: 'inherit', fontSize: 13, outline: '2px solid transparent', outlineOffset: '2px',
     boxSizing: 'border-box'
   },
   label: {
     display: 'block', fontSize: 11, fontWeight: 600, letterSpacing: 1,
-    textTransform: 'uppercase', color: '#475569', marginBottom: 3
+    textTransform: 'uppercase', color: '#5a6480', marginBottom: 3
   },
   btn: (c, outline) => ({
     padding: '7px 14px', borderRadius: 7,
@@ -32,7 +32,7 @@ export const S = {
     fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'opacity 0.15s'
   }),
   kpi: (c) => ({
-    background: '#fff', border: '1px solid #E2E8F0', borderRadius: 10,
+    background: '#fff', border: '1px solid #e0e4ec', borderRadius: 10,
     padding: '14px 16px', flex: '1 1 130px', minWidth: 120,
     borderBottom: '3px solid ' + c
   }),
@@ -92,12 +92,12 @@ export const validTel = (t) => !t || /^[+\d\s()-]{6,}$/.test(t)
 // ── Couleur par statut ──
 export function getStatutColor(refs, statut) {
   const found = (refs.statuts || []).find(s => s.nom === statut)
-  return found?.couleur || '#64748B'
+  return found?.couleur || '#6b7280'
 }
 
 export function getRoleColor(refs, role) {
   const found = (refs.roles || []).find(r => r.nom === role)
-  return found?.couleur || '#64748B'
+  return found?.couleur || '#6b7280'
 }
 
 // ── Toast ──
@@ -105,10 +105,9 @@ export function Toast({ message }) {
   if (!message) return null
   const isError = message.startsWith('⚠')
   return (
-    <div className="toast-msg" style={{
-      position: 'fixed', bottom: 20, left: '50%', transform: 'translateX(-50%)',
-      padding: '10px 18px', borderRadius: 8, maxWidth: 'calc(100vw - 32px)',
-      background: isError ? '#E11D48' : '#059669', color: '#fff', fontSize: 14,
+    <div style={{
+      position: 'fixed', top: 12, right: 12, padding: '10px 18px', borderRadius: 8,
+      background: isError ? '#e03050' : '#1a9c60', color: '#fff', fontSize: 14,
       fontWeight: 600, zIndex: 999, boxShadow: '0 4px 12px rgba(0,0,0,.15)'
     }}>{message}</div>
   )
@@ -131,7 +130,7 @@ export function Skeleton({ width, height, style }) {
 
 export function SkeletonCard() {
   return (
-    <div style={{ padding: 16, background: '#fff', borderRadius: 10, border: '1px solid #E2E8F0' }}>
+    <div style={{ padding: 16, background: '#fff', borderRadius: 10, border: '1px solid #e0e4ec' }}>
       <Skeleton height={12} width="40%" style={{ marginBottom: 10 }} />
       <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
         <Skeleton height={60} width="25%" />

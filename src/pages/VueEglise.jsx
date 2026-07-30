@@ -36,18 +36,18 @@ export default function VueEglisePage({ auth, refs, h }) {
       setRawData({ membres: membres || [], presences: presences || [], entretiens: entretiens || [], activites: activites || [], datesAnn: datesAnn || [] })
       setLoading(false)
     })()
-  }, [auth?.profil?.eglise_id])
+  }, [auth, h])
 
-  if (loading) return <div style={{ padding: 40, textAlign: 'center', color: '#64748B' }}>Chargement...</div>
+  if (loading) return <div style={{ padding: 40, textAlign: 'center', color: '#6b7280' }}>Chargement...</div>
   if (!egliseActive) return (
-    <div style={{ ...S.card, borderLeft: '3px solid #64748B', background: '#EEF2F7' }}>
+    <div style={{ ...S.card, borderLeft: '3px solid #6b7280', background: '#f4f6f9' }}>
       <div style={{ fontSize: 15, fontWeight: 700, fontFamily: "'Outfit', sans-serif", marginBottom: 6 }}>Église désactivée</div>
-      <div style={{ fontSize: 13, color: '#475569', lineHeight: 1.6 }}>
+      <div style={{ fontSize: 13, color: '#5a6480', lineHeight: 1.6 }}>
         Cette église a été désactivée. Les données historiques sont conservées mais aucune analyse n'est effectuée. Contactez un administrateur pour la réactiver.
       </div>
     </div>
   )
-  if (!familles.length) return <div style={{ ...S.card, textAlign: 'center', color: '#64748B' }}>Aucune famille dans cette église.</div>
+  if (!familles.length) return <div style={{ ...S.card, textAlign: 'center', color: '#6b7280' }}>Aucune famille dans cette église.</div>
 
   // ── Calcul dynamique basé sur le filtre de dates ──
   const now = new Date()
@@ -136,11 +136,11 @@ export default function VueEglisePage({ auth, refs, h }) {
 
   const kpi = (Icon, label, value, sub, color) => (
     <div style={{ ...S.kpi(color), flex: '1 1 140px' }}>
-      <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#64748B', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 4 }}>
+      <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 4 }}>
         <Icon size={11} /> {label}
       </div>
       <div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color }}>{value}</div>
-      {sub && <div style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>{sub}</div>}
+      {sub && <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2 }}>{sub}</div>}
     </div>
   )
 
@@ -148,40 +148,40 @@ export default function VueEglisePage({ auth, refs, h }) {
     <div>
       {/* Filtre de période — les inputs sont pré-remplis avec la période effective */}
       <div style={{ marginBottom: 12 }}>
-        <div style={{ fontSize: 12, color: '#64748B', fontWeight: 600, marginBottom: 6, display: 'flex', gap: 6, alignItems: 'center' }}>
+        <div style={{ fontSize: 12, color: '#6b7280', fontWeight: 600, marginBottom: 6, display: 'flex', gap: 6, alignItems: 'center' }}>
           <span>Période</span>
-          {!fDateDe && !fDateA && <span style={{ fontSize: 11, color: '#64748B', fontStyle: 'italic', fontWeight: 400 }}>(par défaut : 4 dernières semaines)</span>}
-          {(fDateDe || fDateA) && <button onClick={() => { setFDateDe(''); setFDateA('') }} style={{ background: 'none', border: 'none', fontSize: 11, color: '#E11D48', cursor: 'pointer', marginLeft: 'auto' }}>✕ Réinitialiser</button>}
+          {!fDateDe && !fDateA && <span style={{ fontSize: 11, color: '#6b7280', fontStyle: 'italic', fontWeight: 400 }}>(par défaut : 4 dernières semaines)</span>}
+          {(fDateDe || fDateA) && <button onClick={() => { setFDateDe(''); setFDateA('') }} style={{ background: 'none', border: 'none', fontSize: 11, color: '#e03050', cursor: 'pointer', marginLeft: 'auto' }}>✕ Réinitialiser</button>}
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <input type="date" value={fDateDe || defaultDeStr} onChange={e => setFDateDe(e.target.value)} max={toLocalDate(now)} style={{ flex: 1, padding: '6px 8px', borderRadius: 6, border: '1px solid #CBD5E1', background: fDateDe ? '#F8F9FB' : '#EEF2F7', fontSize: 12, fontFamily: 'inherit', minWidth: 0, color: fDateDe ? '#1E293B' : '#475569' }} />
-          <span style={{ fontSize: 12, color: '#64748B', flexShrink: 0 }}>→</span>
-          <input type="date" value={fDateA || toLocalDate(now)} onChange={e => setFDateA(e.target.value)} max={toLocalDate(now)} style={{ flex: 1, padding: '6px 8px', borderRadius: 6, border: '1px solid #CBD5E1', background: fDateA ? '#F8F9FB' : '#EEF2F7', fontSize: 12, fontFamily: 'inherit', minWidth: 0, color: fDateA ? '#1E293B' : '#475569' }} />
+          <input type="date" value={fDateDe || defaultDeStr} onChange={e => setFDateDe(e.target.value)} max={toLocalDate(now)} style={{ flex: 1, padding: '6px 8px', borderRadius: 6, border: '1px solid #c8cfe0', background: fDateDe ? '#f0f2f6' : '#f4f6f9', fontSize: 12, fontFamily: 'inherit', minWidth: 0, color: fDateDe ? '#1a1e2e' : '#5a6480' }} />
+          <span style={{ fontSize: 12, color: '#6b7280', flexShrink: 0 }}>→</span>
+          <input type="date" value={fDateA || toLocalDate(now)} onChange={e => setFDateA(e.target.value)} max={toLocalDate(now)} style={{ flex: 1, padding: '6px 8px', borderRadius: 6, border: '1px solid #c8cfe0', background: fDateA ? '#f0f2f6' : '#f4f6f9', fontSize: 12, fontFamily: 'inherit', minWidth: 0, color: fDateA ? '#1a1e2e' : '#5a6480' }} />
         </div>
       </div>
       {/* KPIs globaux */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 16 }}>
-        {kpi(Users, 'Total actifs', totalMembres, familles.length + ' famille(s)', '#185FA5')}
-        {kpi(TrendingUp, 'Taux culte moyen', avgCulte !== null ? avgCulte + '%' : '—', fDateDe || fDateA ? 'période sélectionnée' : '4 dernières semaines', '#185FA5')}
-        {kpi(UserPlus, 'Nouveaux', totalNouveaux, fDateDe || fDateA ? 'période sélectionnée' : '4 dernières semaines', '#059669')}
-        {kpi(AlertTriangle, 'Familles à risque', critiques.length, '< 80% dimanche dernier', critiques.length > 0 ? '#E11D48' : '#64748B')}
+        {kpi(Users, 'Total actifs', totalMembres, familles.length + ' famille(s)', '#0ea888')}
+        {kpi(TrendingUp, 'Taux culte moyen', avgCulte !== null ? avgCulte + '%' : '—', fDateDe || fDateA ? 'période sélectionnée' : '4 dernières semaines', '#3060d0')}
+        {kpi(UserPlus, 'Nouveaux', totalNouveaux, fDateDe || fDateA ? 'période sélectionnée' : '4 dernières semaines', '#1a9c60')}
+        {kpi(AlertTriangle, 'Familles à risque', critiques.length, '< 80% dimanche dernier', critiques.length > 0 ? '#e03050' : '#6b7280')}
       </div>
 
       {/* Familles à risque - critique */}
       {critiques.length > 0 && (
-        <div style={{ ...S.card, borderLeft: '3px solid #E11D48', background: '#E11D4805' }}>
-          <div style={{ fontSize: 14, fontWeight: 600, color: '#E11D48', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div style={{ ...S.card, borderLeft: '3px solid #e03050', background: '#e0305005' }}>
+          <div style={{ fontSize: 14, fontWeight: 600, color: '#e03050', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
             <AlertTriangle size={14} /> Familles avec moins de 80% au dernier culte
           </div>
           {critiques.map(f => (
-            <div key={f.id} style={{ padding: '8px 0', borderBottom: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 4 }}>
+            <div key={f.id} style={{ padding: '8px 0', borderBottom: '1px solid #e0e4ec', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 4 }}>
               <div>
                 <div style={{ fontSize: 14, fontWeight: 600 }}>{f.nom}</div>
-                <div style={{ fontSize: 11, color: '#64748B' }}>Berger : {stats[f.id].bergerName} · {stats[f.id].nbMembres} membres</div>
+                <div style={{ fontSize: 11, color: '#6b7280' }}>Berger : {stats[f.id].bergerName} · {stats[f.id].nbMembres} membres</div>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: 15, fontWeight: 700, color: '#E11D48', fontFamily: "'Outfit', sans-serif" }}>{stats[f.id].lastSundayRate}%</div>
-                <div style={{ fontSize: 11, color: '#64748B' }}>dimanche dernier</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: '#e03050', fontFamily: "'Outfit', sans-serif" }}>{stats[f.id].lastSundayRate}%</div>
+                <div style={{ fontSize: 11, color: '#6b7280' }}>dimanche dernier</div>
               </div>
             </div>
           ))}
@@ -190,19 +190,19 @@ export default function VueEglisePage({ auth, refs, h }) {
 
       {/* Familles en baisse */}
       {enBaisse.length > 0 && (
-        <div style={{ ...S.card, borderLeft: '3px solid #BA7517', background: '#BA751705' }}>
-          <div style={{ fontSize: 14, fontWeight: 600, color: '#BA7517', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div style={{ ...S.card, borderLeft: '3px solid #d48f00', background: '#d48f0005' }}>
+          <div style={{ fontSize: 14, fontWeight: 600, color: '#d48f00', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
             <TrendingDown size={14} /> Familles en tendance baissière (-10 points ou plus)
           </div>
           {enBaisse.map(f => (
-            <div key={f.id} style={{ padding: '8px 0', borderBottom: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 4 }}>
+            <div key={f.id} style={{ padding: '8px 0', borderBottom: '1px solid #e0e4ec', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 4 }}>
               <div>
                 <div style={{ fontSize: 14, fontWeight: 600 }}>{f.nom}</div>
-                <div style={{ fontSize: 11, color: '#64748B' }}>Berger : {stats[f.id].bergerName} · {stats[f.id].nbMembres} membres</div>
+                <div style={{ fontSize: 11, color: '#6b7280' }}>Berger : {stats[f.id].bergerName} · {stats[f.id].nbMembres} membres</div>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: 15, fontWeight: 700, color: '#BA7517', fontFamily: "'Outfit', sans-serif" }}>{stats[f.id].trend > 0 ? '+' : ''}{stats[f.id].trend} pts</div>
-                <div style={{ fontSize: 11, color: '#64748B' }}>vs période précédente</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: '#d48f00', fontFamily: "'Outfit', sans-serif" }}>{stats[f.id].trend > 0 ? '+' : ''}{stats[f.id].trend} pts</div>
+                <div style={{ fontSize: 11, color: '#6b7280' }}>vs période précédente</div>
               </div>
             </div>
           ))}
@@ -212,7 +212,7 @@ export default function VueEglisePage({ auth, refs, h }) {
       {/* Comparatif toutes familles */}
       <div style={S.card}>
         <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Comparatif par famille</div>
-        <div style={{ fontSize: 11, color: '#64748B', marginBottom: 10 }}>Chiffres calculés sur la {fDateDe || fDateA ? 'période sélectionnée' : 'période des 4 dernières semaines'}. "Taux dim. dernier" reste toujours le dimanche le plus récent.</div>
+        <div style={{ fontSize: 11, color: '#6b7280', marginBottom: 10 }}>Chiffres calculés sur la {fDateDe || fDateA ? 'période sélectionnée' : 'période des 4 dernières semaines'}. "Taux dim. dernier" reste toujours le dimanche le plus récent.</div>
 
         {/* Desktop table */}
         <div className="desk-only">
@@ -230,18 +230,18 @@ export default function VueEglisePage({ auth, refs, h }) {
             <tbody>
               {familles.map(f => {
                 const s = stats[f.id] || {}
-                const trendColor = s.trend > 0 ? '#059669' : s.trend < 0 ? '#E11D48' : '#64748B'
+                const trendColor = s.trend > 0 ? '#1a9c60' : s.trend < 0 ? '#e03050' : '#6b7280'
                 const trendLabel = s.trend !== null
                   ? (s.trend > 0 ? '↗ +' : s.trend < 0 ? '↘ ' : '→ ') + s.trend + ' pts'
                   : (s.recentCount || 0) < 2 ? 'Pas assez de données' : (s.prevCount || 0) < 2 ? 'Pas d\'historique' : '—'
                 return (
                   <tr key={f.id}>
-                    <td style={{ ...S.td, fontWeight: 600, color: '#185FA5' }}>{f.nom}</td>
-                    <td style={{ ...S.td, color: '#475569', fontSize: 12 }}>{s.bergerName}</td>
+                    <td style={{ ...S.td, fontWeight: 600, color: '#0ea888' }}>{f.nom}</td>
+                    <td style={{ ...S.td, color: '#5a6480', fontSize: 12 }}>{s.bergerName}</td>
                     <td style={S.td}>{s.nbMembres}</td>
-                    <td style={{ ...S.td, fontWeight: 600 }}>{s.recentAvg !== null ? s.recentAvg + '%' : '—'}<span style={{ fontSize: 10, color: '#64748B', fontWeight: 400 }}>{s.recentCount ? ' (' + s.recentCount + ' dim.)' : ''}</span></td>
-                    <td style={{ ...S.td, color: s.trend !== null ? trendColor : '#64748B', fontWeight: s.trend !== null ? 600 : 400, fontSize: s.trend !== null ? 12 : 10 }}>{trendLabel}</td>
-                    <td style={{ ...S.td, fontWeight: 600, color: s.lastSundayRate !== null ? (s.lastSundayRate < 80 ? '#E11D48' : '#059669') : '#64748B' }}>{s.lastSundayRate !== null ? s.lastSundayRate + '%' : '—'}</td>
+                    <td style={{ ...S.td, fontWeight: 600 }}>{s.recentAvg !== null ? s.recentAvg + '%' : '—'}<span style={{ fontSize: 10, color: '#6b7280', fontWeight: 400 }}>{s.recentCount ? ' (' + s.recentCount + ' dim.)' : ''}</span></td>
+                    <td style={{ ...S.td, color: s.trend !== null ? trendColor : '#6b7280', fontWeight: s.trend !== null ? 600 : 400, fontSize: s.trend !== null ? 12 : 10 }}>{trendLabel}</td>
+                    <td style={{ ...S.td, fontWeight: 600, color: s.lastSundayRate !== null ? (s.lastSundayRate < 80 ? '#e03050' : '#1a9c60') : '#6b7280' }}>{s.lastSundayRate !== null ? s.lastSundayRate + '%' : '—'}</td>
                     <td style={S.td}>{s.nouveaux}</td>
                     <td style={S.td}>{s.entMonth}</td>
                   </tr>
@@ -255,21 +255,21 @@ export default function VueEglisePage({ auth, refs, h }) {
         <div className="mob-only">
           {familles.map(f => {
             const s = stats[f.id] || {}
-            const trendColor = s.trend > 0 ? '#059669' : s.trend < 0 ? '#E11D48' : '#64748B'
+            const trendColor = s.trend > 0 ? '#1a9c60' : s.trend < 0 ? '#e03050' : '#6b7280'
             return (
-              <div key={f.id} style={{ padding: '10px 0', borderBottom: '1px solid #E2E8F0' }}>
+              <div key={f.id} style={{ padding: '10px 0', borderBottom: '1px solid #e0e4ec' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                   <div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: '#185FA5' }}>{f.nom}</div>
-                    <div style={{ fontSize: 11, color: '#64748B' }}>{s.bergerName} · {s.nbMembres} membres</div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: '#0ea888' }}>{f.nom}</div>
+                    <div style={{ fontSize: 11, color: '#6b7280' }}>{s.bergerName} · {s.nbMembres} membres</div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ fontSize: 15, fontWeight: 700, fontFamily: "'Outfit', sans-serif" }}>{s.recentAvg !== null ? s.recentAvg + '%' : '—'}</div>
-                    <div style={{ fontSize: 10, color: s.trend !== null ? trendColor : '#64748B', fontWeight: s.trend !== null ? 600 : 400 }}>{s.trend !== null ? (s.trend > 0 ? '+' : '') + s.trend + ' pts' : s.recentCount < 2 ? 'Pas assez de données' : '—'}</div>
+                    <div style={{ fontSize: 10, color: s.trend !== null ? trendColor : '#6b7280', fontWeight: s.trend !== null ? 600 : 400 }}>{s.trend !== null ? (s.trend > 0 ? '+' : '') + s.trend + ' pts' : s.recentCount < 2 ? 'Pas assez de données' : '—'}</div>
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: 10, fontSize: 11, color: '#64748B' }}>
-                  <span>Dim. dernier: <strong style={{ color: s.lastSundayRate < 80 ? '#E11D48' : '#059669' }}>{s.lastSundayRate !== null ? s.lastSundayRate + '%' : '—'}</strong></span>
+                <div style={{ display: 'flex', gap: 10, fontSize: 11, color: '#6b7280' }}>
+                  <span>Dim. dernier: <strong style={{ color: s.lastSundayRate < 80 ? '#e03050' : '#1a9c60' }}>{s.lastSundayRate !== null ? s.lastSundayRate + '%' : '—'}</strong></span>
                   <span>Nouveaux: <strong>{s.nouveaux}</strong></span>
                   <span>Entretiens: <strong>{s.entMonth}</strong></span>
                 </div>

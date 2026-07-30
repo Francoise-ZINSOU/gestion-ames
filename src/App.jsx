@@ -30,18 +30,19 @@ export default function App() {
   const [selectedId, setSelectedId] = useState(null)
 
   if (auth.loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100dvh', fontFamily: 'DM Sans, sans-serif' }}>
-      <div style={{ color: '#475569', fontSize: 14 }}>Chargement...</div>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100dvh', fallback: '100vh', fontFamily: 'DM Sans, sans-serif' }}>
+      <div style={{ color: '#5a6480', fontSize: 14 }}>Chargement...</div>
     </div>
   )
   if (!auth.session) return <LoginPage />
   if (auth.needsPassword) return <SetPasswordPage profil={auth.profil} onDone={auth.clearNeedsPassword} />
   if (!auth.isResponsable) return <AccessDenied />
 
-  // Utilisateur sans famille assignée (et non super-admin) : la RLS lui
-  // renverrait des listes vides et des alertes absurdes — on affiche la page
-  // dédiée avec les instructions, plutôt qu'une app vide et anxiogène.
-  if (!auth.profil?.famille_id && !auth.profil?.est_super_admin) return <NoFamillePage />
+  // Si famille_id est requis (multi-église activé) et pas super-admin
+  const hasFamille = auth.profil?.famille_id || auth.profil?.est_super_admin
+  // On ne bloque que si le système multi-église est activé (au moins 1 famille existe)
+  // Pour le savoir sans query, on check si famille_id est null ET est_super_admin est false
+  // Le blocage se fera côté RLS — pas de blocage frontend pour ne pas casser l'existant
 
   return <AuthorizedApp auth={auth} toast={toast} showToast={showToast} page={page} setPage={setPage} selectedId={selectedId} setSelectedId={setSelectedId} />
 }
@@ -55,16 +56,7 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
   const al = useAlertes()
   const rf = useRefs()
   const da = useDatesAnnulees()
-
-  // Activités : ne garder que celles de la famille de travail de l'utilisateur.
-  // Un super-admin ou un Berger d'église voit les activités de TOUTES les familles
-  // via la RLS (voulu pour la Synthèse église), mais les pages opérationnelles
-  // (Présences, Historique, Fiche...) ne doivent afficher que celles de SA famille,
-  // sinon chaque activité apparaît en plusieurs exemplaires.
-  const _actsAll = rf.refs.activites || []
-  const _actsMine = auth.profil?.famille_id ? _actsAll.filter(a => a.famille_id === auth.profil.famille_id) : _actsAll
-  const refsOp = { ...rf.refs, activites: _actsMine.length ? _actsMine : _actsAll }
-  const h = refHelpers(refsOp)
+  const h = refHelpers(rf.refs)
 
   const dataLoading = mb.loading || pr.loading || rf.loading
 
@@ -76,9 +68,9 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
   const w = (fn, msg) => async (...args) => { try { const r = await fn(...args); showToast(msg); return r } catch (e) { showToast('⚠ ' + (e.message || 'Erreur inattendue')) } }
 
   // Alertes filtrées (masquer les membres avec entretien planifié dans les 30j)
-  const _todayStr = today()
+  const _todayStr = new Date().toISOString().slice(0, 10)
   const _in30 = new Date(); _in30.setDate(_in30.getDate() + 30)
-  const _in30Str = _in30.getFullYear() + '-' + ('0' + (_in30.getMonth() + 1)).slice(-2) + '-' + ('0' + _in30.getDate()).slice(-2)
+  const _in30Str = _in30.toISOString().slice(0, 10)
   const _statutPlanifie = (rf.refs?.statutsEntretien || []).find(s => s.nom?.toLowerCase().includes('planif'))?.nom || 'Planifié'
   const alertesFiltrees = al.alertes.filter(a => {
     const hasPlanned = (en.entretiens || []).some(e =>
@@ -92,7 +84,7 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
   const ctx = {
     membres: mb.membres, actifs: mb.actifs, presences: pr.presences,
     entretiens: en.entretiens, defis: df.defis, plans: pt.plans,
-    alertes: alertesFiltrees, refs: refsOp, h,
+    alertes: alertesFiltrees, refs: rf.refs, h,
     openFiche, showToast, selectedMembre, selectedId, auth, prevPage,
     // Membres
     ajouterMembre: w(mb.ajouter, '✓ Membre ajouté'),
@@ -124,7 +116,7 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
 
   if (dataLoading) return (
     <Layout page={page} setPage={setPage} alertCount={0} membreCount={0} selectedMembre={null} auth={auth} actifs={[]} onOpenFiche={() => {}}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 20px', color: '#64748B', fontSize: 13 }}>Chargement des données...</div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 20px', color: '#6b7280', fontSize: 13 }}>Chargement des données...</div>
     </Layout>
   )
 

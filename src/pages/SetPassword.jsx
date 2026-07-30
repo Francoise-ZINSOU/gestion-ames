@@ -23,12 +23,12 @@ export default function SetPasswordPage({ onDone, profil }) {
   }
 
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', minHeight: '100dvh', background: '#EEF2F7', fontFamily: 'DM Sans, sans-serif', padding: '60px 16px' }}>
+    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', minHeight: '100dvh', background: '#f4f6f9', fontFamily: 'DM Sans, sans-serif', padding: '60px 16px' }}>
       <div style={{ width: '100%', maxWidth: 400, background: '#fff', borderRadius: 16, overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,.06)' }}>
-        <div style={{ padding: '28px 28px 20px', borderBottom: '1px solid #E2E8F0', textAlign: 'center' }}>
-          <div style={{ fontSize: 10, letterSpacing: 3, textTransform: 'uppercase', color: '#185FA5', fontWeight: 700, marginBottom: 6 }}>LES ENRACINÉES</div>
+        <div style={{ padding: '28px 28px 20px', borderBottom: '1px solid #e0e4ec', textAlign: 'center' }}>
+          <div style={{ fontSize: 10, letterSpacing: 3, textTransform: 'uppercase', color: '#0ea888', fontWeight: 700, marginBottom: 6 }}>LES ENRACINÉES</div>
           <div style={{ fontSize: 18, fontWeight: 700, fontFamily: "'Outfit', sans-serif", marginBottom: 4 }}>Bienvenue !</div>
-          <div style={{ fontSize: 13, color: '#475569' }}>
+          <div style={{ fontSize: 13, color: '#5a6480' }}>
             {profil?.nom_affiche || profil?.email}, définissez votre mot de passe pour accéder à l'application.
           </div>
         </div>
@@ -44,9 +44,9 @@ export default function SetPasswordPage({ onDone, profil }) {
               onKeyDown={e => e.key === 'Enter' && handleSubmit()} />
           </div>
 
-          {error && <div style={{ padding: '8px 12px', borderRadius: 6, background: '#E11D4810', color: '#E11D48', fontSize: 13, marginBottom: 12 }}>{error}</div>}
+          {error && <div style={{ padding: '8px 12px', borderRadius: 6, background: '#e0305010', color: '#e03050', fontSize: 13, marginBottom: 12 }}>{error}</div>}
 
-          <button onClick={handleSubmit} disabled={loading} style={{ ...S.btn('#185FA5', false), width: '100%', padding: '10px 14px', opacity: loading ? 0.6 : 1 }}>
+          <button onClick={handleSubmit} disabled={loading} style={{ ...S.btn('#0ea888', false), width: '100%', padding: '10px 14px', opacity: loading ? 0.6 : 1 }}>
             {loading ? 'Enregistrement...' : 'Définir mon mot de passe'}
           </button>
         </div>

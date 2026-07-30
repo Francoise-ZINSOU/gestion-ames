@@ -19,9 +19,9 @@ function AccordionRefTable({ table, label, fields, showToast, familleId }) {
   const [open, setOpen] = useState(false)
   return (
     <div style={{ marginBottom: 4 }}>
-      <div onClick={() => setOpen(!open)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: open ? '#185FA508' : '#F8F9FB', borderRadius: 7, cursor: 'pointer', border: '1px solid ' + (open ? '#185FA533' : '#E2E8F0') }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: open ? '#185FA5' : '#475569' }}>{label}</span>
-        <span style={{ fontSize: 12, color: '#64748B' }}>{open ? '▲' : '▼'}</span>
+      <div onClick={() => setOpen(!open)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: open ? '#0ea88808' : '#f0f2f6', borderRadius: 7, cursor: 'pointer', border: '1px solid ' + (open ? '#0ea88833' : '#e0e4ec') }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: open ? '#0ea888' : '#5a6480' }}>{label}</span>
+        <span style={{ fontSize: 12, color: '#6b7280' }}>{open ? '▲' : '▼'}</span>
       </div>
       {open && <div style={{ padding: '10px 4px' }}><RefTable table={table} label={label} fields={fields} showToast={showToast} familleId={familleId} /></div>}
     </div>
@@ -57,7 +57,7 @@ function RefTable({ table, label, fields, showToast, familleId }) {
     <div style={{ marginBottom: 16 }}>
       <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>{label}</div>
       {rows.map(r => (
-        <div key={r.id} style={{ padding: '6px 0', borderBottom: '1px solid #E2E8F0', opacity: r.actif ? 1 : 0.4 }}>
+        <div key={r.id} style={{ padding: '6px 0', borderBottom: '1px solid #e0e4ec', opacity: r.actif ? 1 : 0.4 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {r.couleur && <div style={{ width: 12, height: 12, borderRadius: 3, background: r.couleur, flexShrink: 0 }} />}
             <span style={{ flex: 1, fontSize: 13 }}>{r.nom}</span>
@@ -69,7 +69,7 @@ function RefTable({ table, label, fields, showToast, familleId }) {
                   if (error) throw error
                   showToast('✓ Mis à jour'); reload()
                 } catch (err) { showToast('⚠ ' + err.message) }
-              }} style={{ fontSize: 11, padding: '3px 6px', border: '1px solid #E2E8F0', borderRadius: 4, background: '#F8F9FB', fontFamily: 'inherit' }}>
+              }} style={{ fontSize: 11, padding: '3px 6px', border: '1px solid #e0e4ec', borderRadius: 4, background: '#f0f2f6', fontFamily: 'inherit' }}>
                 <option value="">Ponctuelle</option>
                 <option value="0">Dimanche</option>
                 <option value="1">Lundi</option>
@@ -80,7 +80,7 @@ function RefTable({ table, label, fields, showToast, familleId }) {
                 <option value="6">Samedi</option>
               </select>
             )}
-            <button onClick={() => desactiver(r.id, !r.actif)} style={{ background: 'none', border: 'none', fontSize: 11, color: r.actif ? '#64748B' : '#185FA5', cursor: 'pointer' }}>
+            <button onClick={() => desactiver(r.id, !r.actif)} style={{ background: 'none', border: 'none', fontSize: 11, color: r.actif ? '#6b7280' : '#0ea888', cursor: 'pointer' }}>
               {r.actif ? 'Désactiver' : 'Réactiver'}
             </button>
           </div>
@@ -90,14 +90,14 @@ function RefTable({ table, label, fields, showToast, familleId }) {
                 if (e.target.value !== (r.description || '')) {
                   try { await modifier(r.id, { description: e.target.value }); showToast('✓') } catch(err) { showToast('⚠ ' + err.message) }
                 }
-              }} style={{ fontSize: 12, padding: '4px 8px', border: '1px solid #E2E8F0', borderRadius: 4, background: '#EEF2F7', boxSizing: 'border-box', width: '100%' }} />
+              }} style={{ fontSize: 12, padding: '4px 8px', border: '1px solid #e0e4ec', borderRadius: 4, background: '#f4f6f9', boxSizing: 'border-box', width: '100%' }} />
               <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
                 <input defaultValue={r.url || ''} placeholder="Lien (YouTube, PDF, Drive...)" onBlur={async e => {
                   if (e.target.value !== (r.url || '')) {
                     try { await modifier(r.id, { url: e.target.value }); showToast('✓') } catch(err) { showToast('⚠ ' + err.message) }
                   }
-                }} style={{ fontSize: 12, padding: '4px 8px', border: '1px solid #E2E8F0', borderRadius: 4, background: '#EEF2F7', boxSizing: 'border-box', flex: 1 }} />
-                {r.url && <a href={r.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: '#185FA5', flexShrink: 0 }}>Ouvrir</a>}
+                }} style={{ fontSize: 12, padding: '4px 8px', border: '1px solid #e0e4ec', borderRadius: 4, background: '#f4f6f9', boxSizing: 'border-box', flex: 1 }} />
+                {r.url && <a href={r.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: '#3060d0', flexShrink: 0 }}>Ouvrir</a>}
               </div>
             </div>
           )}
@@ -105,13 +105,13 @@ function RefTable({ table, label, fields, showToast, familleId }) {
       ))}
       <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
         <input value={newNom} onChange={e => setNewNom(e.target.value)} placeholder="Nouveau..." style={{ ...S.inp, flex: 1 }} onKeyDown={e => e.key === 'Enter' && handleAdd()} />
-        <button onClick={handleAdd} style={S.btn('#185FA5', false)}>+</button>
+        <button onClick={handleAdd} style={S.btn('#0ea888', false)}>+</button>
       </div>
     </div>
   )
 }
 
-function UsersTable({ showToast, actifs, refs, auth }) {
+function UsersTable({ showToast, actifs, refs }) {
   const { profils, setRole, reload: reloadProfils } = useProfils()
   const [familles, setFamilles] = useState([])
   const [showInvite, setShowInvite] = useState(false)
@@ -194,12 +194,12 @@ function UsersTable({ showToast, actifs, refs, auth }) {
     <div style={{ marginBottom: 16 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
         <div style={{ fontSize: 13, fontWeight: 600 }}>Utilisateurs</div>
-        <button onClick={() => setShowInvite(!showInvite)} style={{ ...S.btn('#185FA5', false), fontSize: 12, padding: '4px 10px' }}>{showInvite ? '✕ Fermer' : '+ Inviter'}</button>
+        <button onClick={() => setShowInvite(!showInvite)} style={{ ...S.btn('#0ea888', false), fontSize: 12, padding: '4px 10px' }}>{showInvite ? '✕ Fermer' : '+ Inviter'}</button>
       </div>
 
       {showInvite && (
-        <div style={{ padding: 12, background: '#185FA508', border: '1px solid #185FA533', borderRadius: 8, marginBottom: 12 }}>
-          <div style={{ fontSize: 12, color: '#475569', marginBottom: 8, lineHeight: 1.5 }}>
+        <div style={{ padding: 12, background: '#0ea88808', border: '1px solid #0ea88833', borderRadius: 8, marginBottom: 12 }}>
+          <div style={{ fontSize: 12, color: '#5a6480', marginBottom: 8, lineHeight: 1.5 }}>
             L'utilisateur recevra un email l'invitant à définir son mot de passe.
           </div>
           <div style={{ marginBottom: 8 }}>
@@ -236,7 +236,7 @@ function UsersTable({ showToast, actifs, refs, auth }) {
               <input type="checkbox" checked={inviteData.est_admin} onChange={e => setInviteData(p => ({ ...p, est_admin: e.target.checked }))} /> Admin
             </label>
           </div>
-          <button onClick={handleInvite} disabled={inviting || !inviteData.email} style={{ ...S.btn('#185FA5', false), width: '100%', opacity: inviting || !inviteData.email ? 0.6 : 1 }}>
+          <button onClick={handleInvite} disabled={inviting || !inviteData.email} style={{ ...S.btn('#0ea888', false), width: '100%', opacity: inviting || !inviteData.email ? 0.6 : 1 }}>
             {inviting ? 'Envoi...' : 'Envoyer l\'invitation'}
           </button>
         </div>
@@ -244,11 +244,11 @@ function UsersTable({ showToast, actifs, refs, auth }) {
       {profils.map(p => {
         const linkedMembre = (actifs || []).find(m => m.id === p.membre_id)
         return (
-          <div key={p.id} style={{ padding: '8px 0', borderBottom: '1px solid #E2E8F0' }}>
+          <div key={p.id} style={{ padding: '8px 0', borderBottom: '1px solid #e0e4ec' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
               <div style={{ flex: 1, minWidth: 120 }}>
                 <div style={{ fontSize: 13, fontWeight: 600 }}>{p.nom_affiche || p.email}</div>
-                <div style={{ fontSize: 11, color: '#64748B' }}>{p.email}</div>
+                <div style={{ fontSize: 11, color: '#6b7280' }}>{p.email}</div>
               </div>
               <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, cursor: 'pointer' }}>
                 <input type="checkbox" checked={p.est_responsable || false} onChange={e => handleRole(p.id, e.target.checked, p.est_admin)} />
@@ -258,31 +258,16 @@ function UsersTable({ showToast, actifs, refs, auth }) {
                 <input type="checkbox" checked={p.est_admin || false} onChange={e => handleRole(p.id, p.est_responsable, e.target.checked)} />
                 Admin
               </label>
-              {auth?.isSuperAdmin ? (
-                <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, cursor: 'pointer', color: '#7040d0' }}>
-                  <input type="checkbox" checked={p.est_berger_eglise || false} onChange={e => {
-                    const famille = familles.find(f => f.id === p.famille_id)
-                    linkBergerEglise(p.id, e.target.checked, famille?.eglise_id)
-                  }} />
-                  Berger d'église
-                </label>
-              ) : p.est_berger_eglise ? (
-                <span style={{ fontSize: 12, color: '#7040d0', fontWeight: 600 }} title="Attribué par le super-admin">Berger d'église</span>
-              ) : null}
-              {auth?.isSuperAdmin && (
-                <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, cursor: 'pointer', color: '#E11D48' }} title="Accès technique total (bypass RLS). À n'accorder qu'en connaissance de cause.">
-                  <input type="checkbox" checked={p.est_super_admin || false} onChange={async e => {
-                    if (e.target.checked && !window.confirm('Donner le rôle SUPER-ADMIN à ' + (p.nom_affiche || p.email) + ' ? Ce rôle donne un accès technique total, toutes églises confondues.')) return
-                    const { supabase } = await import('../lib/supabase')
-                    const { error } = await supabase.from('profils').update({ est_super_admin: e.target.checked }).eq('id', p.id)
-                    if (error) showToast('⚠ ' + error.message); else { showToast('✓ Rôle mis à jour'); reloadProfils() }
-                  }} />
-                  Super-admin
-                </label>
-              )}
+              <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, cursor: 'pointer', color: '#7040d0' }}>
+                <input type="checkbox" checked={p.est_berger_eglise || false} onChange={e => {
+                  const famille = familles.find(f => f.id === p.famille_id)
+                  linkBergerEglise(p.id, e.target.checked, famille?.eglise_id)
+                }} />
+                Berger d'église
+              </label>
             </div>
             <div style={{ marginTop: 4 }}>
-              <select value={p.membre_id || ''} onChange={e => linkMembre(p.id, e.target.value || null)} style={{ fontSize: 11, padding: '3px 6px', border: '1px solid #E2E8F0', borderRadius: 4, background: '#F8F9FB', color: '#475569', fontFamily: 'inherit', width: '100%', maxWidth: 250 }}>
+              <select value={p.membre_id || ''} onChange={e => linkMembre(p.id, e.target.value || null)} style={{ fontSize: 11, padding: '3px 6px', border: '1px solid #e0e4ec', borderRadius: 4, background: '#f0f2f6', color: '#5a6480', fontFamily: 'inherit', width: '100%', maxWidth: 250 }}>
                 <option value="">— Lier à un membre —</option>
                 {(actifs || []).filter(m => {
                     const role = (refs?.roles || []).find(r => r.nom === m.role)
@@ -291,11 +276,11 @@ function UsersTable({ showToast, actifs, refs, auth }) {
                     return true
                   }).sort((a, b) => a.nom.localeCompare(b.nom)).map(m => <option key={m.id} value={m.id}>{m.prenom} {m.nom} ({m.role})</option>)}
               </select>
-              {linkedMembre && <span style={{ fontSize: 11, color: '#185FA5', marginLeft: 6 }}>→ {linkedMembre.prenom} {linkedMembre.nom}</span>}
+              {linkedMembre && <span style={{ fontSize: 11, color: '#0ea888', marginLeft: 6 }}>→ {linkedMembre.prenom} {linkedMembre.nom}</span>}
             </div>
             {familles.length > 0 && (
               <div style={{ marginTop: 4 }}>
-                <select value={p.famille_id || ''} onChange={e => linkFamille(p.id, e.target.value || null)} style={{ fontSize: 11, padding: '3px 6px', border: '1px solid #E2E8F0', borderRadius: 4, background: p.famille_id ? '#185FA508' : '#E11D4808', color: '#475569', fontFamily: 'inherit', width: '100%', maxWidth: 250 }}>
+                <select value={p.famille_id || ''} onChange={e => linkFamille(p.id, e.target.value || null)} style={{ fontSize: 11, padding: '3px 6px', border: '1px solid #e0e4ec', borderRadius: 4, background: p.famille_id ? '#0ea88808' : '#e0305008', color: '#5a6480', fontFamily: 'inherit', width: '100%', maxWidth: 250 }}>
                   <option value="">— Assigner à une famille —</option>
                   {familles.filter(f => f.actif !== false && (!f.eglises || f.eglises.actif !== false)).map(f => <option key={f.id} value={f.id}>{f.eglises?.nom} → {f.nom}</option>)}
                 </select>
@@ -339,8 +324,8 @@ function EglisePanel({ showToast }) {
 
       // Créer automatiquement les activités de base pour cette famille
       const defaultActivites = [
-        { nom: 'Culte du dimanche', code: 'culte', icone: '⛪', couleur: '#185FA5', jour_semaine: 0, est_recurrente: true },
-        { nom: 'Enseignement', code: 'enseignement', icone: '📖', couleur: '#185FA5', jour_semaine: null, est_recurrente: false },
+        { nom: 'Culte du dimanche', code: 'culte', icone: '⛪', couleur: '#0ea888', jour_semaine: 0, est_recurrente: true },
+        { nom: 'Enseignement', code: 'enseignement', icone: '📖', couleur: '#3060d0', jour_semaine: null, est_recurrente: false },
         { nom: 'Réunion de prière', code: 'priere', icone: '🙏', couleur: '#7040d0', jour_semaine: null, est_recurrente: false },
       ]
       const { error: actErr } = await supabase.from('activites').insert(
@@ -360,9 +345,9 @@ function EglisePanel({ showToast }) {
           const nbFam = familles.filter(f => f.eglise_id === e.id).length
           const nbFamActives = familles.filter(f => f.eglise_id === e.id && f.actif !== false).length
           return (
-            <div key={e.id} style={{ padding: '6px 0', borderBottom: '1px solid #E2E8F0', fontSize: 13, display: 'flex', alignItems: 'center', gap: 6, opacity: e.actif === false ? 0.4 : 1 }}>
-              <span style={{ fontWeight: 600, flex: 1 }}>{e.nom}{e.actif === false && <span style={{ fontSize: 10, marginLeft: 6, color: '#64748B' }}>(désactivée)</span>}</span>
-              <span style={{ fontSize: 11, color: '#64748B' }}>{nbFamActives}/{nbFam} famille(s)</span>
+            <div key={e.id} style={{ padding: '6px 0', borderBottom: '1px solid #e0e4ec', fontSize: 13, display: 'flex', alignItems: 'center', gap: 6, opacity: e.actif === false ? 0.4 : 1 }}>
+              <span style={{ fontWeight: 600, flex: 1 }}>{e.nom}{e.actif === false && <span style={{ fontSize: 10, marginLeft: 6, color: '#6b7280' }}>(désactivée)</span>}</span>
+              <span style={{ fontSize: 11, color: '#6b7280' }}>{nbFamActives}/{nbFam} famille(s)</span>
               <button onClick={async () => {
                 try {
                   const willDisable = e.actif !== false
@@ -377,7 +362,7 @@ function EglisePanel({ showToast }) {
                   }
                   loadAll()
                 } catch (err) { showToast('⚠ ' + err.message) }
-              }} style={{ background: 'none', border: 'none', fontSize: 11, color: e.actif !== false ? '#64748B' : '#185FA5', cursor: 'pointer' }}>
+              }} style={{ background: 'none', border: 'none', fontSize: 11, color: e.actif !== false ? '#6b7280' : '#0ea888', cursor: 'pointer' }}>
                 {e.actif !== false ? 'Désactiver' : 'Réactiver'}
               </button>
             </div>
@@ -385,7 +370,7 @@ function EglisePanel({ showToast }) {
         })}
         <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
           <input value={newEglise} onChange={e => setNewEglise(e.target.value)} placeholder="Nom de l'église..." style={{ ...S.inp, flex: 1, fontSize: 12 }} />
-          <button onClick={addEglise} style={S.btn('#185FA5', false)}>+</button>
+          <button onClick={addEglise} style={S.btn('#0ea888', false)}>+</button>
         </div>
       </div>
 
@@ -394,10 +379,10 @@ function EglisePanel({ showToast }) {
         {familles.map(f => {
           const eg = eglises.find(e => e.id === f.eglise_id)
           return (
-            <div key={f.id} style={{ padding: '6px 0', borderBottom: '1px solid #E2E8F0', fontSize: 13, display: 'flex', alignItems: 'center', gap: 6, opacity: f.actif === false ? 0.4 : 1 }}>
+            <div key={f.id} style={{ padding: '6px 0', borderBottom: '1px solid #e0e4ec', fontSize: 13, display: 'flex', alignItems: 'center', gap: 6, opacity: f.actif === false ? 0.4 : 1 }}>
               <div style={{ flex: 1 }}>
                 <span style={{ fontWeight: 600 }}>{f.nom}</span>
-                <span style={{ fontSize: 11, color: '#64748B', marginLeft: 6 }}>({eg?.nom}){f.actif === false && ' (désactivée)'}</span>
+                <span style={{ fontSize: 11, color: '#6b7280', marginLeft: 6 }}>({eg?.nom}){f.actif === false && ' (désactivée)'}</span>
               </div>
               <button onClick={async () => {
                 try {
@@ -406,7 +391,7 @@ function EglisePanel({ showToast }) {
                   showToast(f.actif !== false ? '✓ Famille désactivée' : '✓ Famille réactivée')
                   loadAll()
                 } catch (err) { showToast('⚠ ' + err.message) }
-              }} style={{ background: 'none', border: 'none', fontSize: 11, color: f.actif !== false ? '#64748B' : '#185FA5', cursor: 'pointer' }}>
+              }} style={{ background: 'none', border: 'none', fontSize: 11, color: f.actif !== false ? '#6b7280' : '#0ea888', cursor: 'pointer' }}>
                 {f.actif !== false ? 'Désactiver' : 'Réactiver'}
               </button>
             </div>
@@ -419,13 +404,13 @@ function EglisePanel({ showToast }) {
               {eglises.map(e => <option key={e.id} value={e.id}>{e.nom}</option>)}
             </select>
             <input value={newFamille.nom} onChange={e => setNewFamille(prev => ({ ...prev, nom: e.target.value }))} placeholder="Nom de la famille..." style={{ ...S.inp, flex: '2 1 150px', fontSize: 12 }} />
-            <button onClick={addFamille} style={S.btn('#185FA5', false)}>+</button>
+            <button onClick={addFamille} style={S.btn('#0ea888', false)}>+</button>
           </div>
         )}
       </div>
 
       {eglises.length === 0 && (
-        <div style={{ padding: 12, textAlign: 'center', color: '#64748B', fontSize: 12 }}>
+        <div style={{ padding: 12, textAlign: 'center', color: '#6b7280', fontSize: 12 }}>
           Créez une église pour commencer. Les familles de disciples permettront ensuite de séparer les données par groupe.
         </div>
       )}
@@ -454,27 +439,27 @@ export default function ParamsPage({ showToast, actifs, refs, auth }) {
   return (
     <div>
       <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
-        <button onClick={() => setTab('refs')} style={{ ...S.btn(tab === 'refs' ? '#185FA5' : '#64748B', tab !== 'refs'), fontFamily: 'inherit' }}>Références</button>
-        <button onClick={() => setTab('users')} style={{ ...S.btn(tab === 'users' ? '#185FA5' : '#64748B', tab !== 'users'), fontFamily: 'inherit' }}>Utilisateurs</button>
-        <button onClick={() => setTab('eglise')} style={{ ...S.btn(tab === 'eglise' ? '#185FA5' : '#64748B', tab !== 'eglise'), fontFamily: 'inherit' }}>Église</button>
+        <button onClick={() => setTab('refs')} style={{ ...S.btn(tab === 'refs' ? '#0ea888' : '#6b7280', tab !== 'refs'), fontFamily: 'inherit' }}>Références</button>
+        <button onClick={() => setTab('users')} style={{ ...S.btn(tab === 'users' ? '#0ea888' : '#6b7280', tab !== 'users'), fontFamily: 'inherit' }}>Utilisateurs</button>
+        <button onClick={() => setTab('eglise')} style={{ ...S.btn(tab === 'eglise' ? '#0ea888' : '#6b7280', tab !== 'eglise'), fontFamily: 'inherit' }}>Église</button>
       </div>
       <div style={S.card}>
-        {tab === 'users' ? <UsersTable showToast={showToast} actifs={actifs} refs={refs} auth={auth} />
+        {tab === 'users' ? <UsersTable showToast={showToast} actifs={actifs} refs={refs} />
           : tab === 'eglise' ? <EglisePanel showToast={showToast} />
           : <>
             {sharedTables.map(t => <AccordionRefTable key={t.key} table={t.key} label={t.label} fields={t.fields} showToast={showToast} />)}
 
             {/* Activités — par famille */}
             {activitesTable && (
-              <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px dashed #E2E8F0' }}>
+              <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px dashed #e0e4ec' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: '#185FA5' }}>Activités</span>
-                  <select value={selectedFamilleId} onChange={e => setSelectedFamilleId(e.target.value)} style={{ flex: 1, padding: '5px 8px', borderRadius: 6, border: '1px solid #CBD5E1', background: '#F8F9FB', fontSize: 12 }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: '#0ea888' }}>Activités</span>
+                  <select value={selectedFamilleId} onChange={e => setSelectedFamilleId(e.target.value)} style={{ flex: 1, padding: '5px 8px', borderRadius: 6, border: '1px solid #c8cfe0', background: '#f0f2f6', fontSize: 12 }}>
                     {familles.map(f => <option key={f.id} value={f.id}>{f.nom}{f.eglises?.nom ? ' (' + f.eglises.nom + ')' : ''}</option>)}
                   </select>
                 </div>
                 {selectedFamilleId && <RefTable table={activitesTable.key} label="" fields={activitesTable.fields} showToast={showToast} familleId={selectedFamilleId} />}
-                {!selectedFamilleId && <div style={{ fontSize: 12, color: '#64748B', padding: 8 }}>Sélectionnez une famille pour gérer ses activités.</div>}
+                {!selectedFamilleId && <div style={{ fontSize: 12, color: '#6b7280', padding: 8 }}>Sélectionnez une famille pour gérer ses activités.</div>}
               </div>
             )}
           </>}

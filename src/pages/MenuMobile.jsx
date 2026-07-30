@@ -27,10 +27,10 @@ export default function MenuMobile({ setPage, isAdmin, selectedMembre, auth }) {
       {selectedMembre && (
         <div style={{ ...S.card, marginBottom: 10 }}>
           <div onClick={() => setPage('fiche')} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 8px', cursor: 'pointer' }}>
-            <Search size={18} strokeWidth={1.8} color="#185FA5" />
+            <Search size={18} strokeWidth={1.8} color="#0ea888" />
             <div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: '#185FA5' }}>Fiche — {selectedMembre.prenom} {selectedMembre.nom}</div>
-              <div style={{ fontSize: 11, color: '#64748B' }}>Dernière fiche consultée</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: '#0ea888' }}>Fiche — {selectedMembre.prenom} {selectedMembre.nom}</div>
+              <div style={{ fontSize: 11, color: '#6b7280' }}>Dernière fiche consultée</div>
             </div>
           </div>
         </div>
@@ -41,20 +41,20 @@ export default function MenuMobile({ setPage, isAdmin, selectedMembre, auth }) {
         {items.map(({ id, Icon, label }) => (
           <div key={id} onClick={() => setPage(id)} style={{
             display: 'flex', alignItems: 'center', gap: 12, padding: '12px 8px',
-            borderBottom: '1px solid #E2E8F0', cursor: 'pointer'
+            borderBottom: '1px solid #e0e4ec', cursor: 'pointer'
           }}>
-            <Icon size={18} strokeWidth={1.8} color="#475569" />
+            <Icon size={18} strokeWidth={1.8} color="#5a6480" />
             <span style={{ fontSize: 14, fontWeight: 500 }}>{label}</span>
           </div>
         ))}
       </div>
 
       <div style={{ ...S.card, marginTop: 10 }}>
-        <div style={{ fontSize: 12, color: '#475569', marginBottom: 8 }}>{profil?.nom_affiche || profil?.email}</div>
-        <button onClick={logout} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: '1px solid #E11D48', borderRadius: 7, padding: '8px 14px', color: '#E11D48', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', width: '100%', justifyContent: 'center' }}>
+        <div style={{ fontSize: 12, color: '#5a6480', marginBottom: 8 }}>{profil?.nom_affiche || profil?.email}</div>
+        <button onClick={logout} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: '1px solid #e03050', borderRadius: 7, padding: '8px 14px', color: '#e03050', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', width: '100%', justifyContent: 'center' }}>
           <LogOut size={14} /> Se déconnecter
         </button>
-        <div style={{ textAlign: 'center', fontSize: 10, color: '#CBD5E1', marginTop: 8 }}>{APP_VERSION}</div>
+        <div style={{ textAlign: 'center', fontSize: 10, color: '#c8cfe0', marginTop: 8 }}>{APP_VERSION}</div>
       </div>
     </div>
   )
