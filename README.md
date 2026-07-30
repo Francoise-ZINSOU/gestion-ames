@@ -250,6 +250,7 @@ Les évolutions sont fournies en fichiers séparés à exécuter dans Supabase S
   ⚠️ **v2.1 doit impérativement précéder v2.2** (v2.2 insère dans les colonnes créées par v2.1)
 - `evolution-v2.4-integrite-schema.sql` : FK `ON UPDATE CASCADE` sur les référentiels (renommage sûr), unicité présences/dates annulées, contraintes anti-auto-suivi, `famille_id NOT NULL` sur les 9 tables de données, indexes sur les FK
 - `evolution-v2.7-nationalite-situation-pro.sql` : Champs `nationalite` + `situation_professionnelle` sur membres, table de référence `ref_situations_pro`
+- `evolution-v2.8-coherence-metier.sql` : Contraintes de cohérence — ordre des dates (naissance ≤ inscription ≤ départ ≤ retour), résolution défi ≥ identification, validation module ≥ assignation, âge plausible, triggers suiveur/interlocuteur intra-famille, nettoyage du suivi au transfert de famille
 - `audit-coherence-v2.3.sql` : Script d'audit idempotent — vérifie que v2.1/v2.2 sont bien appliquées, l'absence d'orphelins `famille_id`, de policies RLS avec fallback NULL et de policies en doublon
 
 Correctifs critiques autonomes :

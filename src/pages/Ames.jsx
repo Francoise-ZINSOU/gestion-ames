@@ -75,6 +75,10 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
     if (fd.email && !validEmail(fd.email)) { showToast('⚠ Email invalide'); return }
     if (fd.date_inscription && fd.date_inscription > today()) { showToast('⚠ La date d\'inscription ne peut pas être dans le futur'); return }
     if (fd.date_naissance && fd.date_naissance > today()) { showToast('⚠ La date de naissance ne peut pas être dans le futur'); return }
+    if (fd.date_naissance && fd.date_inscription && fd.date_naissance > fd.date_inscription) { showToast('⚠ La date de naissance doit précéder la date d\'inscription'); return }
+    if (fd.date_naissance && fd.date_naissance < '1905-01-01') { showToast('⚠ Date de naissance improbable — vérifiez l\'année'); return }
+    if (fd.est_retour && fd.date_depart && fd.date_inscription && fd.date_depart < fd.date_inscription) { showToast('⚠ La date de départ doit être postérieure à l\'inscription'); return }
+    if (fd.est_retour && fd.date_retour && fd.date_depart && fd.date_retour < fd.date_depart) { showToast('⚠ La date de retour doit être postérieure au départ'); return }
     if (fd.telephone && !validTel(fd.telephone)) { showToast('⚠ Téléphone invalide'); return }
 
     const isEdit = modal === 'edit' && fd.id
