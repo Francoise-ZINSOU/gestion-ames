@@ -72,7 +72,8 @@ src/
 ## Fonctionnalités principales
 
 ### Gestion des membres
-- CRUD complet, import CSV (auto-détection UTF-8/windows-1252)
+- CRUD complet, champs : identité, contact, date de naissance, nationalité (texte libre), situation professionnelle (liste modifiable)
+- Import CSV (auto-détection UTF-8/windows-1252)
 - Actions en masse (changer statut, assigner à un pilier)
 - Archivage réversible
 - Historique des statuts
@@ -213,7 +214,7 @@ Un utilisateur peut cumuler plusieurs rôles.
 - `ref_statuts` : Nouveau / Intégré / En difficulté / Archivé *(STAR supprimé en v2.2, membres migrés vers Intégré)*
 - `ref_statuts_defi` : ... + Abandonné (état final)
 - `ref_statuts_entretien` : ... + Reporté, Annulé
-- `sujets_entretien` (⚠️ sans préfixe `ref_`), `ref_types_defi`, `ref_motifs_depart`
+- `sujets_entretien` (⚠️ sans préfixe `ref_`), `ref_types_defi`, `ref_motifs_depart`, `ref_situations_pro`
 - `activites` : Culte, Enseignement, Prière, etc. (par famille)
 - `modules` : modules du parcours de formation (avec `description` + `url`)
 - `ref_parametres` : seuils configurables
@@ -248,6 +249,7 @@ Les évolutions sont fournies en fichiers séparés à exécuter dans Supabase S
 - `evolution-v2.2-statuts-roles-modules.sql` : Suppression STAR (migration vers Intégré), renommage Berger principal → Chef de famille, 12 modules de formation pré-remplis (ICC / Yvan Castanou)
   ⚠️ **v2.1 doit impérativement précéder v2.2** (v2.2 insère dans les colonnes créées par v2.1)
 - `evolution-v2.4-integrite-schema.sql` : FK `ON UPDATE CASCADE` sur les référentiels (renommage sûr), unicité présences/dates annulées, contraintes anti-auto-suivi, `famille_id NOT NULL` sur les 9 tables de données, indexes sur les FK
+- `evolution-v2.7-nationalite-situation-pro.sql` : Champs `nationalite` + `situation_professionnelle` sur membres, table de référence `ref_situations_pro`
 - `audit-coherence-v2.3.sql` : Script d'audit idempotent — vérifie que v2.1/v2.2 sont bien appliquées, l'absence d'orphelins `famille_id`, de policies RLS avec fallback NULL et de policies en doublon
 
 Correctifs critiques autonomes :

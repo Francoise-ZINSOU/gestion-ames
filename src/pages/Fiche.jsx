@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { S, fmt, fmtS, dago, dagoLabel, today, getStatutColor, getRoleColor } from '../lib/ui'
 import { useHistoriqueStatuts, useJournal } from '../lib/data'
-import { ClipboardList, BarChart3, MessageCircle, Zap, BookOpen, Pencil, Archive, ArchiveRestore, ArrowRightLeft, NotebookPen, Phone, Mail, CalendarDays, RotateCcw, Check, X, History } from 'lucide-react'
+import { ClipboardList, BarChart3, MessageCircle, Zap, BookOpen, Pencil, Archive, ArchiveRestore, ArrowRightLeft, NotebookPen, Phone, Mail, CalendarDays, RotateCcw, Check, X, History, Globe, Briefcase } from 'lucide-react'
 
 export default function FichePage({ membres, actifs, presences, entretiens, defis, plans, refs, h, selectedMembre: m, selectedId, openFiche, showToast, ajouterEnt, modifierEnt, supprimerEnt, ajouterDefi, modifierDefi, supprimerDefi, assignerModule, validerModule, retirerModule, modifierMembre, archiverMembre, reloadMembres, setPage, prevPage, auth, datesAnnulees }) {
   const [ftab, setFtab] = useState('id')
@@ -189,6 +189,8 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
           {m.telephone && <div style={{ fontSize: 13, marginBottom: 4 }}><a href={'tel:' + m.telephone.replace(/\s/g, '')} style={{ color: '#185FA5', textDecoration: 'none' }}><Phone size={12} style={{display:'inline',verticalAlign:'middle',marginRight:4}} />{m.telephone}</a></div>}
           {m.email && <div style={{ fontSize: 13, marginBottom: 4 }}><a href={'mailto:' + m.email} style={{ color: '#185FA5', textDecoration: 'none' }}><Mail size={12} style={{display:'inline',verticalAlign:'middle',marginRight:4}} />{m.email}</a></div>}
           <div style={{ fontSize: 13, color: '#475569', marginBottom: 4 }}><CalendarDays size={12} style={{display:'inline',verticalAlign:'middle',marginRight:4}} />Inscription : {fmt(m.date_inscription)}</div>
+          {m.nationalite && <div style={{ fontSize: 13, color: '#475569', marginBottom: 4 }}><Globe size={12} style={{display:'inline',verticalAlign:'middle',marginRight:4}} />Nationalité : {m.nationalite}</div>}
+          {m.situation_professionnelle && <div style={{ fontSize: 13, color: '#475569', marginBottom: 4 }}><Briefcase size={12} style={{display:'inline',verticalAlign:'middle',marginRight:4}} />Situation pro. : {m.situation_professionnelle}</div>}
           {m.est_retour && (
             <div style={{ marginTop: 6, padding: '6px 10px', background: '#7040d00a', borderRadius: 5, borderLeft: '3px solid #7040d0' }}>
               <div style={{ fontSize: 11, fontWeight: 600, color: '#7040d0' }}><RotateCcw size={11} style={{display:'inline',verticalAlign:'middle',marginRight:3}} />RETOUR</div>
@@ -712,6 +714,10 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
                     ⚠ Modifier la date d'inscription recalcule l'éligibilité des présences passées. Le taux du membre peut changer.
                   </div>
                 )}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px' }}>
+                <div style={{ marginBottom: 8 }}><label style={S.label}>Nationalité</label><input value={fd.nationalite || ''} onChange={e => uf('nationalite', e.target.value)} style={S.inp} placeholder="Ex. Ivoirienne" /></div>
+                <div style={{ marginBottom: 8 }}><label style={S.label}>Situation professionnelle</label><select value={fd.situation_professionnelle || ''} onChange={e => uf('situation_professionnelle', e.target.value || null)} style={S.inp}><option value="">— Non renseignée —</option>{(refs.situationsPro || []).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}</select></div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px' }}>
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Statut</label><select value={fd.statut || h.defaultStatut} onChange={e => uf('statut', e.target.value)} style={S.inp}>{(refs.statuts || []).filter(s => !s.est_archive).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}</select></div>

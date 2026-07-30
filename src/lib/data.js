@@ -176,11 +176,11 @@ export function useRefs() {
   const [refs, setRefs] = useState({
     statuts: [], roles: [], activites: [], modules: [],
     sujetsEntretien: [], typesDefi: [], statutsDefi: [],
-    statutsEntretien: [], motifsDepart: []
+    statutsEntretien: [], motifsDepart: [], situationsPro: []
   })
   const [loading, setLoading] = useState(true)
   const load = useCallback(async () => {
-    const [statuts, roles, activites, modules, sujets, typesD, statutsD, statutsE, motifs] = await Promise.all([
+    const [statuts, roles, activites, modules, sujets, typesD, statutsD, statutsE, motifs, sitPro] = await Promise.all([
       supabase.from('ref_statuts').select('*').eq('actif', true).order('ordre'),
       supabase.from('ref_roles').select('*').eq('actif', true).order('ordre'),
       supabase.from('activites').select('*').eq('actif', true).order('ordre'),
@@ -190,11 +190,13 @@ export function useRefs() {
       supabase.from('ref_statuts_defi').select('*').eq('actif', true).order('ordre'),
       supabase.from('ref_statuts_entretien').select('*').eq('actif', true).order('ordre'),
       supabase.from('ref_motifs_depart').select('*').eq('actif', true).order('ordre'),
+      supabase.from('ref_situations_pro').select('*').eq('actif', true).order('ordre'),
     ])
     setRefs({
       statuts: statuts.data || [], roles: roles.data || [], activites: activites.data || [],
       modules: modules.data || [], sujetsEntretien: sujets.data || [], typesDefi: typesD.data || [],
       statutsDefi: statutsD.data || [], statutsEntretien: statutsE.data || [], motifsDepart: motifs.data || [],
+      situationsPro: sitPro.data || [],
     })
     setLoading(false)
   }, [])

@@ -29,8 +29,8 @@ export default function ExportPage({ membres, presences, entretiens, defis, refs
     const esc = (v) => '"' + String(v || '').replace(/"/g, '""').replace(/\n/g, ' ') + '"'
     const getSuiveur = (id) => { if (!id) return ''; const m = membres.find(x => x.id === id); return m ? m.prenom + ' ' + m.nom : '' }
     if (type === 'membres') {
-      header = 'ID,Prénom,Nom,Rôle,Statut,Date inscription,Suivi par,Tél,Email,Notes'
-      rows = membres.map(m => [m.id, m.prenom, m.nom, m.role, m.statut, m.date_inscription, getSuiveur(m.suivi_par), m.telephone, m.email, m.notes].map(esc).join(','))
+      header = 'ID,Prénom,Nom,Rôle,Statut,Date inscription,Date naissance,Nationalité,Situation professionnelle,Suivi par,Tél,Email,Notes'
+      rows = membres.map(m => [m.id, m.prenom, m.nom, m.role, m.statut, m.date_inscription, m.date_naissance, m.nationalite, m.situation_professionnelle, getSuiveur(m.suivi_par), m.telephone, m.email, m.notes].map(esc).join(','))
     } else if (type === 'presences') {
       header = 'ID Membre,Prénom,Nom,Activité,Date,Présent,Éligible'
       rows = presences.map(p => { const m = membres.find(x => x.id === p.membre_id); const a = (refs.activites || []).find(x => x.id === p.activite_id); return [p.membre_id, m?.prenom, m?.nom, a?.nom, p.date_presence, p.present ? 'Oui' : 'Non', p.eligible ? 'Oui' : 'Non'].map(esc).join(',') })

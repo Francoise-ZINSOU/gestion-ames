@@ -303,6 +303,10 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Date de naissance</label><input value={fd.date_naissance || ''} onChange={e => uf('date_naissance', e.target.value)} max={today()} style={S.inp} type="date" /></div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px' }}>
+                <div style={{ marginBottom: 8 }}><label style={S.label}>Nationalité</label><input value={fd.nationalite || ''} onChange={e => uf('nationalite', e.target.value)} style={S.inp} placeholder="Ex. Ivoirienne" /></div>
+                <div style={{ marginBottom: 8 }}><label style={S.label}>Situation professionnelle</label><select value={fd.situation_professionnelle || ''} onChange={e => uf('situation_professionnelle', e.target.value || null)} style={S.inp}><option value="">— Non renseignée —</option>{(refs.situationsPro || []).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}</select></div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px' }}>
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Statut</label><select value={fd.statut || h.defaultStatut} onChange={e => uf('statut', e.target.value)} style={S.inp}>{(refs.statuts || []).filter(s => !s.est_archive).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}</select></div>
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Rôle</label><select value={fd.role || h.defaultRole} onChange={e => { uf('role', e.target.value); if (h.isBergerRole(e.target.value)) uf('suivi_par', null) }} style={S.inp}>{(refs.roles || []).map(r => <option key={r.nom} value={r.nom}>{r.nom}</option>)}</select></div>
               </div>

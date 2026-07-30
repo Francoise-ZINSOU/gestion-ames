@@ -13,6 +13,7 @@ const REF_TABLES = [
   { key: 'ref_statuts_defi', label: 'Statuts des défis', fields: ['nom', 'couleur'] },
   { key: 'ref_statuts_entretien', label: 'Statuts des entretiens', fields: ['nom', 'couleur'] },
   { key: 'ref_motifs_depart', label: 'Motifs de départ', fields: ['nom'] },
+  { key: 'ref_situations_pro', label: 'Situations professionnelles', fields: ['nom'] },
 ]
 
 function AccordionRefTable({ table, label, fields, showToast, familleId }) {
