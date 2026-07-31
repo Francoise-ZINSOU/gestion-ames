@@ -1,5 +1,9 @@
 # Gestion des Âmes — Suivi Pastoral
 
+### Cloisonnement de l'invitation admin (session e32)
+Le menu de sélection de famille à l'invitation ne propose plus que les familles de l'église de l'admin (le super-admin voit toujours toutes les églises). Correctif d'interface. ⚠ La vraie barrière doit aussi être dans l'Edge Function invite-user (validation serveur que l'admin a le droit sur la famille ciblée) — à renforcer séparément.
+
+
 ### Date par défaut de la saisie de présences (session e31)
 À l'ouverture de la saisie (et au changement d'activité), la date se cale automatiquement sur la dernière occurrence du jour de l'activité (culte du dimanche → dernier dimanche) au lieu de la date du jour. Évite de proposer un culte du dimanche un vendredi. Les activités ponctuelles (sans jour_semaine) gardent la date du jour.
 

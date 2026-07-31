@@ -42,6 +42,43 @@ function RefTable({ table, label, fields, showToast, familleId }) {
     .replace(/^_+|_+$/g, '')
     .slice(0, 30)
 
+  // Compter combien d'enregistrements utilisent une valeur de référence (par son nom)
+  const compterUsages = async (r) => {
+    // Table -> (table cible, colonne) qui référencent cette valeur par son nom
+    const map = {
+      ref_statuts: ['membres', 'statut'],
+      ref_roles: ['membres', 'role'],
+      ref_statuts_entretien: ['entretiens', 'statut'],
+      ref_types_defi: ['defis', 'type_defi'],
+      ref_statuts_defi: ['defis', 'statut'],
+    }
+    const cible = map[table]
+    if (!cible) return null  // pas de comptage simple pour cette table
+    try {
+      const { count } = await supabase.from(cible[0]).select('id', { count: 'exact', head: true }).eq(cible[1], r.nom)
+      return count || 0
+    } catch { return null }
+  }
+
+  const handleDesactiver = async (r) => {
+    // Réactivation : jamais bloquée
+    if (!r.actif) { try { await desactiver(r.id, true); showToast('✓ Réactivé') } catch (e) { showToast('⚠ ' + e.message) } return }
+
+    // Garde-fou 1 : l'activité culte ne peut pas être désactivée (casse la saisie des présences)
+    if (table === 'activites' && r.code === 'culte') {
+      showToast('⚠ Le culte ne peut pas être désactivé : il est nécessaire à la saisie des présences.')
+      return
+    }
+
+    // Garde-fou 3 : avertir si la valeur est déjà utilisée
+    const n = await compterUsages(r)
+    if (n && n > 0) {
+      const ok = window.confirm('« ' + r.nom + ' » est utilisé par ' + n + ' enregistrement(s). Ils garderont cette valeur mais elle ne sera plus proposée dans les listes. Désactiver quand même ?')
+      if (!ok) return
+    }
+    try { await desactiver(r.id, false); showToast('✓ Désactivé') } catch (e) { showToast('⚠ ' + e.message) }
+  }
+
   const handleAdd = async () => {
     if (!newNom.trim()) return
     const payload = { nom: newNom.trim() }
@@ -81,7 +118,7 @@ function RefTable({ table, label, fields, showToast, familleId }) {
                 <option value="6">Samedi</option>
               </select>
             )}
-            <button onClick={() => desactiver(r.id, !r.actif)} style={{ background: 'none', border: 'none', fontSize: 11, color: r.actif ? '#5E7175' : '#2E7D8A', cursor: 'pointer' }}>
+            <button onClick={() => handleDesactiver(r)} style={{ background: 'none', border: 'none', fontSize: 11, color: r.actif ? '#5E7175' : '#2E7D8A', cursor: 'pointer' }}>
               {r.actif ? 'Désactiver' : 'Réactiver'}
             </button>
           </div>
@@ -120,8 +157,15 @@ function UsersTable({ showToast, actifs, refs, auth }) {
   const [inviting, setInviting] = useState(false)
 
   useEffect(() => {
-    supabase.from('familles_disciples').select('*, eglises(nom, actif)').order('nom').then(({ data }) => setFamilles(data || []))
-  }, [])
+    supabase.from('familles_disciples').select('*, eglises(nom, actif)').order('nom').then(({ data }) => {
+      const toutes = data || []
+      if (auth?.isSuperAdmin) { setFamilles(toutes); return }
+      // Admin ordinaire : restreint aux familles de SA propre église (cloisonnement)
+      const maFamille = toutes.find(f => f.id === auth?.profil?.famille_id)
+      const monEglise = maFamille?.eglise_id
+      setFamilles(monEglise ? toutes.filter(f => f.eglise_id === monEglise) : toutes.filter(f => f.id === auth?.profil?.famille_id))
+    })
+  }, [auth?.isSuperAdmin, auth?.profil?.famille_id])
 
   const handleInvite = async () => {
     if (!inviteData.email?.trim()) { showToast('⚠ Email requis'); return }
