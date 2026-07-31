@@ -30,13 +30,13 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
     return (
       <button key={id} onClick={() => setPage(id)} style={{
         display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '7px 10px',
-        border: 'none', borderRadius: 6, background: page === id ? '#185FA516' : 'transparent',
-        color: page === id ? '#185FA5' : '#475569', fontWeight: page === id ? 600 : 500,
+        border: 'none', borderRadius: 6, background: page === id ? '#B8733316' : 'transparent',
+        color: page === id ? '#B87333' : '#6B5D4A', fontWeight: page === id ? 600 : 500,
         cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', fontSize: 13, marginBottom: 1
       }}>
         <Icon size={15} strokeWidth={page === id ? 2.2 : 1.8} />
         <span style={{ flex: 1 }}>{label}</span>
-        {badge > 0 ? <span style={{ background: '#E11D48', color: '#fff', fontSize: 10, fontWeight: 700, padding: '0 5px', borderRadius: 8 }}>{badge}</span> : null}
+        {badge > 0 ? <span style={{ background: '#C0563A', color: '#fff', fontSize: 10, fontWeight: 700, padding: '0 5px', borderRadius: 8 }}>{badge}</span> : null}
       </button>
     )
   }
@@ -49,14 +49,14 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
   }
 
   return (
-    <div style={{ fontFamily: 'DM Sans, sans-serif', background: '#EEF2F7', color: '#1E293B', fontSize: 14, lineHeight: 1.55, minHeight: '100dvh' }}>
+    <div style={{ fontFamily: 'DM Sans, sans-serif', background: '#FBF7F1', color: '#3D3229', fontSize: 14, lineHeight: 1.55, minHeight: '100dvh' }}>
       {/* Sidebar desktop */}
-      <div className="sb" style={{ position: 'fixed', top: 0, left: 0, bottom: 0, width: 210, background: '#fff', borderRight: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column', zIndex: 100, overflowY: 'auto' }}>
-        <div style={{ padding: '18px 16px 14px', borderBottom: '1px solid #E2E8F0' }}>
-          <div style={{ fontSize: 10, letterSpacing: 3, textTransform: 'uppercase', color: '#185FA5', fontWeight: 700, marginBottom: 4 }}>{egliseName || 'Gestion Pastorale'}</div>
+      <div className="sb" style={{ position: 'fixed', top: 0, left: 0, bottom: 0, width: 210, background: '#fff', borderRight: '1px solid #EADFCF', display: 'flex', flexDirection: 'column', zIndex: 100, overflowY: 'auto' }}>
+        <div style={{ padding: '18px 16px 14px', borderBottom: '1px solid #EADFCF' }}>
+          <div style={{ fontSize: 10, letterSpacing: 3, textTransform: 'uppercase', color: '#B87333', fontWeight: 700, marginBottom: 4 }}>{egliseName || 'Gestion Pastorale'}</div>
           <div style={{ fontSize: 14, fontWeight: 700, fontFamily: "'Outfit', sans-serif" }}>Suivi pastoral</div>
-          {familleName && <div style={{ fontSize: 11, color: '#475569', marginTop: 2 }}>{familleName}</div>}
-          <div style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>{membreCount} membres</div>
+          {familleName && <div style={{ fontSize: 11, color: '#6B5D4A', marginTop: 2 }}>{familleName}</div>}
+          <div style={{ fontSize: 11, color: '#8B7355', marginTop: 2 }}>{membreCount} membres</div>
         </div>
 
         <div style={{ padding: '8px 6px 2px' }}>
@@ -69,7 +69,7 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
         </div>
 
         <div style={{ padding: '8px 6px 2px' }}>
-          <div style={{ fontSize: 10, letterSpacing: 2, textTransform: 'uppercase', color: '#64748B', fontWeight: 600, padding: '0 6px', marginBottom: 2 }}>SUIVI</div>
+          <div style={{ fontSize: 11, letterSpacing: 0.5, color: '#A08B73', fontWeight: 500, padding: '0 6px', marginBottom: 2 }}>Suivi</div>
           {navBtn('alerts', 'Alertes', alertCount)}
           {navBtn('ents', 'Entretiens', 0)}
           {navBtn('protos', 'Formation', 0)}
@@ -79,73 +79,73 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
 
         {(isBergerEglise || isAdmin) && (
           <div style={{ padding: '8px 6px 2px' }}>
-            <div style={{ fontSize: 10, letterSpacing: 2, textTransform: 'uppercase', color: '#64748B', fontWeight: 600, padding: '0 6px', marginBottom: 2 }}>ÉGLISE</div>
+            <div style={{ fontSize: 11, letterSpacing: 0.5, color: '#A08B73', fontWeight: 500, padding: '0 6px', marginBottom: 2 }}>Église</div>
             {navBtn('vueEglise', 'Synthèse', 0)}
           </div>
         )}
 
         {isAdmin && (
           <div style={{ padding: '8px 6px 2px' }}>
-            <div style={{ fontSize: 10, letterSpacing: 2, textTransform: 'uppercase', color: '#64748B', fontWeight: 600, padding: '0 6px', marginBottom: 2 }}>ADMIN</div>
+            <div style={{ fontSize: 11, letterSpacing: 0.5, color: '#A08B73', fontWeight: 500, padding: '0 6px', marginBottom: 2 }}>Admin</div>
             {navBtn('params', 'Paramètres', 0)}
           </div>
         )}
 
         {selectedMembre && <div style={{ padding: '2px 6px' }}>{navBtn('fiche', 'Fiche', 0)}</div>}
 
-        <div style={{ marginTop: 'auto', padding: '10px 12px', borderTop: '1px solid #E2E8F0' }}>
-          <div style={{ fontSize: 11, color: '#475569', marginBottom: 6 }}>{profil?.nom_affiche || profil?.email}</div>
-          <button onClick={logout} style={{ background: 'none', border: 'none', color: '#64748B', fontSize: 12, cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
+        <div style={{ marginTop: 'auto', padding: '10px 12px', borderTop: '1px solid #EADFCF' }}>
+          <div style={{ fontSize: 11, color: '#6B5D4A', marginBottom: 6 }}>{profil?.nom_affiche || profil?.email}</div>
+          <button onClick={logout} style={{ background: 'none', border: 'none', color: '#8B7355', fontSize: 12, cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
             <LogOut size={12} /> Se déconnecter
           </button>
-          <div style={{ fontSize: 10, color: '#CBD5E1', marginTop: 8, display: 'flex', gap: 8, alignItems: 'center' }}><span>{APP_VERSION}</span><span onClick={() => setPage('cgu')} style={{ cursor: 'pointer', textDecoration: 'underline' }}>CGU</span></div>
+          <div style={{ fontSize: 10, color: '#DCC9B0', marginTop: 8, display: 'flex', gap: 8, alignItems: 'center' }}><span>{APP_VERSION}</span><span onClick={() => setPage('cgu')} style={{ cursor: 'pointer', textDecoration: 'underline' }}>CGU</span></div>
         </div>
       </div>
 
       {/* Contenu */}
       <div className="mn" style={{ marginLeft: 210, minHeight: '100dvh' }}>
-        <div style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(255,255,255,.92)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #E2E8F0', padding: '0 20px', height: 48, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(255,255,255,.92)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #EADFCF', padding: '0 20px', height: 48, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <div style={{ fontSize: 15, fontWeight: 700, fontFamily: "'Outfit', sans-serif" }}>{titles[page] || '—'}</div>
-            {(egliseName || familleName) && <div className="mob-only" style={{ fontSize: 10, color: '#185FA5', fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', marginTop: -1 }}>{egliseName}{egliseName && familleName ? ' · ' : ''}{familleName}</div>}
+            {(egliseName || familleName) && <div className="mob-only" style={{ fontSize: 10, color: '#B87333', fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', marginTop: -1 }}>{egliseName}{egliseName && familleName ? ' · ' : ''}{familleName}</div>}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ position: 'relative' }}>
-              <Search size={14} style={{ position: 'absolute', left: 8, top: 8, color: '#64748B', pointerEvents: 'none' }} />
+              <Search size={14} style={{ position: 'absolute', left: 8, top: 8, color: '#8B7355', pointerEvents: 'none' }} />
               <input
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 onFocus={() => setSearchOpen(true)}
                 placeholder="Rechercher..."
-                style={{ padding: '6px 8px 6px 28px', borderRadius: 6, border: '1px solid #E2E8F0', background: '#EEF2F7', fontSize: 12, width: searchOpen ? 200 : 120, transition: 'width .2s', fontFamily: 'inherit', boxSizing: 'border-box', minWidth: 0 }}
+                style={{ padding: '6px 8px 6px 28px', borderRadius: 6, border: '1px solid #EADFCF', background: '#FBF7F1', fontSize: 12, width: searchOpen ? 200 : 120, transition: 'width .2s', fontFamily: 'inherit', boxSizing: 'border-box', minWidth: 0 }}
               />
               {searchOpen && searchQuery.length >= 2 && (
-                <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, background: '#fff', border: '1px solid #E2E8F0', borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,.1)', zIndex: 200, width: 280, maxHeight: 300, overflowY: 'auto' }}>
-                  {searchResults.length === 0 && <div style={{ padding: 14, textAlign: 'center', color: '#64748B', fontSize: 13 }}>Aucun résultat</div>}
+                <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, background: '#fff', border: '1px solid #EADFCF', borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,.1)', zIndex: 200, width: 280, maxHeight: 300, overflowY: 'auto' }}>
+                  {searchResults.length === 0 && <div style={{ padding: 14, textAlign: 'center', color: '#8B7355', fontSize: 13 }}>Aucun résultat</div>}
                   {searchResults.map(m => (
                     <div key={m.id} onClick={() => { onOpenFiche(m.id); setSearchQuery(''); setSearchOpen(false) }}
-                      style={{ padding: '10px 12px', borderBottom: '1px solid #F8F9FB', cursor: 'pointer', fontSize: 13 }}>
-                      <div style={{ fontWeight: 600, color: '#185FA5' }}>{m.prenom} {m.nom}</div>
-                      <div style={{ fontSize: 11, color: '#64748B' }}>{m.role} · {m.statut}</div>
+                      style={{ padding: '10px 12px', borderBottom: '1px solid #FBF7F1', cursor: 'pointer', fontSize: 13 }}>
+                      <div style={{ fontWeight: 600, color: '#B87333' }}>{m.prenom} {m.nom}</div>
+                      <div style={{ fontSize: 11, color: '#8B7355' }}>{m.role} · {m.statut}</div>
                     </div>
                   ))}
                 </div>
               )}
               {searchOpen && <div onClick={() => { setSearchOpen(false); setSearchQuery('') }} style={{ position: 'fixed', inset: 0, zIndex: 199 }} />}
             </div>
-            <span style={{ fontSize: 12, color: '#64748B', whiteSpace: 'nowrap' }}>{membreCount} membres</span>
+            <span style={{ fontSize: 12, color: '#8B7355', whiteSpace: 'nowrap' }}>{membreCount} membres</span>
           </div>
         </div>
         <div style={{ padding: '16px 20px 50px' }}>{children}</div>
       </div>
 
       {/* Nav mobile */}
-      <nav className="nv" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderTop: '1px solid #E2E8F0', display: 'none', zIndex: 200, padding: '4px 0 calc(2px + env(safe-area-inset-bottom, 0px))' }}>
+      <nav className="nv" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderTop: '1px solid #EADFCF', display: 'none', zIndex: 200, padding: '4px 0 calc(2px + env(safe-area-inset-bottom, 0px))' }}>
         {[['home', 'Accueil', Home], ['pres', 'Présences', CheckSquare], ['ames', 'Membres', Users], ['alerts', 'Alertes', Bell], ['menu', 'Plus', Menu]].map(([id, label, Icon]) => (
           <button key={id} onClick={() => id === 'menu' ? setPage('menu') : setPage(id)} style={{
             flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
             padding: '4px 2px', border: 'none', background: 'transparent', cursor: 'pointer',
-            fontFamily: 'inherit', fontSize: 10, color: page === id ? '#185FA5' : '#64748B', fontWeight: page === id ? 700 : 500
+            fontFamily: 'inherit', fontSize: 10, color: page === id ? '#B87333' : '#8B7355', fontWeight: page === id ? 700 : 500
           }}>
             <Icon size={18} strokeWidth={page === id ? 2.2 : 1.5} />
             <span>{label}</span>
@@ -172,10 +172,10 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
         body:has(.modal-overlay){overflow:hidden!important}
         .hide-scrollbar{scrollbar-width:none;-ms-overflow-style:none}
         .hide-scrollbar::-webkit-scrollbar{display:none;width:0;height:0}
-        input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid #185FA5;outline-offset:2px}
+        input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid #B87333;outline-offset:2px}
         *,*::before,*::after{box-sizing:border-box}
         input,select,textarea,button{font-family:inherit;box-sizing:border-box}
-        input[type="checkbox"],input[type="radio"]{accent-color:#185FA5}
+        input[type="checkbox"],input[type="radio"]{accent-color:#B87333}
         button,a{transition:opacity .15s,background .15s,transform .1s}
         button:active{transform:scale(0.97)}
         .modal-overlay{animation:fadeIn .2s}
@@ -184,9 +184,9 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
         .toast-msg{animation:slideUp .25s ease-out}
         @media print{.sb,.mn>div:first-child,.no-print,nav{display:none!important}.mn{margin-left:0!important}#rapport{box-shadow:none;border:none}}
         @keyframes shimmer{0%{background-position:-200px 0}100%{background-position:200px 0}}
-        .skeleton{background:linear-gradient(90deg,#F8F9FB 25%,#E2E8F0 50%,#F8F9FB 75%);background-size:400px 100%;animation:shimmer 1.5s infinite;border-radius:6px}
+        .skeleton{background:linear-gradient(90deg,#FBF7F1 25%,#EADFCF 50%,#FBF7F1 75%);background-size:400px 100%;animation:shimmer 1.5s infinite;border-radius:6px}
         .scroll-fade{position:relative}
-        .scroll-fade::after{content:'';position:absolute;top:0;right:0;bottom:0;width:20px;background:linear-gradient(to right, transparent, #EEF2F7);pointer-events:none}
+        .scroll-fade::after{content:'';position:absolute;top:0;right:0;bottom:0;width:20px;background:linear-gradient(to right, transparent, #FBF7F1);pointer-events:none}
         .modal-overlay.danger{background:rgba(0,0,0,.5);z-index:600}
         .modal-box{width:100%;background:#fff;border-radius:12px;overflow:hidden;overflow-x:hidden!important;box-sizing:border-box;margin-top:4vh;max-height:92vh;max-height:92dvh;display:flex;flex-direction:column}
         @media(max-width:768px){.toast-msg{bottom:80px!important}.modal-box{max-height:88dvh;margin-top:2vh}}

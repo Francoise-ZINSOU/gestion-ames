@@ -39,7 +39,7 @@ export default function HistoriquePage({ presences, refs, datesAnnulees }) {
 
   // Timeline complète avec statuts : saved / cancelled / missing
   if (!activites || !activites.length) return (
-    <div style={{ ...S.card, textAlign: 'center', color: '#6b7280', fontSize: 14, padding: 30, lineHeight: 1.7 }}>
+    <div style={{ ...S.card, textAlign: 'center', color: '#8B7355', fontSize: 14, padding: 30, lineHeight: 1.7 }}>
       Aucune activité configurée pour votre famille.<br />
       Demandez à un admin d'en créer dans <strong>Paramètres → Activités</strong>.
     </div>
@@ -73,27 +73,27 @@ export default function HistoriquePage({ presences, refs, datesAnnulees }) {
     <div>
       <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', marginBottom: 12 }}>
         {activites.map(a => (
-          <button key={a.id} onClick={() => setActId(a.id)} style={{ padding: '6px 12px', borderRadius: 7, border: '1px solid ' + (actId === a.id ? a.couleur : '#e0e4ec'), background: actId === a.id ? a.couleur + '12' : 'transparent', color: actId === a.id ? a.couleur : '#5a6480', fontSize: 13, fontWeight: actId === a.id ? 600 : 500, cursor: 'pointer', fontFamily: 'inherit' }}>{a.icone} {a.nom}</button>
+          <button key={a.id} onClick={() => setActId(a.id)} style={{ padding: '6px 12px', borderRadius: 7, border: '1px solid ' + (actId === a.id ? a.couleur : '#EADFCF'), background: actId === a.id ? a.couleur + '12' : 'transparent', color: actId === a.id ? a.couleur : '#6B5D4A', fontSize: 13, fontWeight: actId === a.id ? 600 : 500, cursor: 'pointer', fontFamily: 'inherit' }}>{a.icone} {a.nom}</button>
         ))}
       </div>
       <div style={S.card}>
         <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Taux par date — {act?.icone} {act?.nom}</div>
         {tl.length > 0 && (
-          <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>
-            {savedTl.length} saisie(s){missingTl.length > 0 && <span style={{ color: '#e03050', fontWeight: 600 }}> · {missingTl.length} manquante(s)</span>} · du {fmtS(firstDate)} au {fmtS(lastDate)}
+          <div style={{ fontSize: 12, color: '#8B7355', marginBottom: 8 }}>
+            {savedTl.length} saisie(s){missingTl.length > 0 && <span style={{ color: '#C0563A', fontWeight: 600 }}> · {missingTl.length} manquante(s)</span>} · du {fmtS(firstDate)} au {fmtS(lastDate)}
           </div>
         )}
         {missingTl.length > 0 && (
-          <div style={{ padding: '6px 10px', background: '#e0305008', border: '1px solid #e0305033', borderRadius: 6, marginBottom: 10, fontSize: 12, color: '#e03050' }}>
+          <div style={{ padding: '6px 10px', background: '#C0563A08', border: '1px solid #C0563A33', borderRadius: 6, marginBottom: 10, fontSize: 12, color: '#C0563A' }}>
             ⚠ {missingTl.length} {act?.nom?.toLowerCase()} non saisie(s) : {missingTl.slice(-3).map(t => fmtS(t.date)).join(', ')}{missingTl.length > 3 ? '...' : ''}
           </div>
         )}
-        <div style={{ display: 'flex', gap: 12, fontSize: 11, color: '#6b7280', marginBottom: 8, flexWrap: 'wrap' }}>
-          <span><span style={{ display: 'inline-block', width: 10, height: 10, background: '#1a9c60', borderRadius: 2, marginRight: 3, verticalAlign: 'middle' }} /> Saisie</span>
-          <span><span style={{ display: 'inline-block', width: 10, height: 10, background: 'repeating-linear-gradient(45deg, #d48f00, #d48f00 3px, transparent 3px, transparent 6px)', border: '1px solid #d48f00', borderRadius: 2, marginRight: 3, verticalAlign: 'middle' }} /> Annulée</span>
-          <span><span style={{ display: 'inline-block', width: 10, height: 10, background: 'transparent', border: '2px dashed #e03050', borderRadius: 2, marginRight: 3, verticalAlign: 'middle' }} /> Non saisie</span>
+        <div style={{ display: 'flex', gap: 12, fontSize: 11, color: '#8B7355', marginBottom: 8, flexWrap: 'wrap' }}>
+          <span><span style={{ display: 'inline-block', width: 10, height: 10, background: '#5B8266', borderRadius: 2, marginRight: 3, verticalAlign: 'middle' }} /> Saisie</span>
+          <span><span style={{ display: 'inline-block', width: 10, height: 10, background: 'repeating-linear-gradient(45deg, #B87333, #B87333 3px, transparent 3px, transparent 6px)', border: '1px solid #B87333', borderRadius: 2, marginRight: 3, verticalAlign: 'middle' }} /> Annulée</span>
+          <span><span style={{ display: 'inline-block', width: 10, height: 10, background: 'transparent', border: '2px dashed #C0563A', borderRadius: 2, marginRight: 3, verticalAlign: 'middle' }} /> Non saisie</span>
         </div>
-        {tl.length === 0 ? <div style={{ padding: 20, textAlign: 'center', color: '#6b7280', fontSize: 13 }}>Aucune donnée</div>
+        {tl.length === 0 ? <div style={{ padding: 20, textAlign: 'center', color: '#8B7355', fontSize: 13 }}>Aucune donnée</div>
           : <div>
             <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', marginBottom: 8 }}>
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 150, minWidth: Math.max(300, tl.length * 32) }}>
@@ -103,27 +103,27 @@ export default function HistoriquePage({ presences, refs, datesAnnulees }) {
                   if (t.status === 'missing') {
                     return (
                       <div key={t.date} title={"Non saisie — " + t.date} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: '1 0 28px', maxWidth: 36 }}>
-                        <div style={{ fontSize: 10, color: '#e03050', marginBottom: 2, fontWeight: 700 }}>?</div>
-                        <div style={{ width: '70%', background: 'transparent', border: '2px dashed #e03050', borderRadius: '3px 3px 0 0', height: '100px', boxSizing: 'border-box' }} />
-                        <div style={{ fontSize: 7, color: '#e03050', marginTop: 2, transform: 'rotate(-45deg)', transformOrigin: 'center', whiteSpace: 'nowrap', fontWeight: 600 }}>{label}</div>
+                        <div style={{ fontSize: 10, color: '#C0563A', marginBottom: 2, fontWeight: 700 }}>?</div>
+                        <div style={{ width: '70%', background: 'transparent', border: '2px dashed #C0563A', borderRadius: '3px 3px 0 0', height: '100px', boxSizing: 'border-box' }} />
+                        <div style={{ fontSize: 7, color: '#C0563A', marginTop: 2, transform: 'rotate(-45deg)', transformOrigin: 'center', whiteSpace: 'nowrap', fontWeight: 600 }}>{label}</div>
                       </div>
                     )
                   }
                   if (t.status === 'cancelled') {
                     return (
                       <div key={t.date} title={"Annulée — " + (t.motif || '')} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: '1 0 28px', maxWidth: 36 }}>
-                        <div style={{ fontSize: 10, color: '#d48f00', marginBottom: 2, fontWeight: 700 }}>—</div>
-                        <div style={{ width: '70%', background: 'repeating-linear-gradient(45deg, #d48f0033, #d48f0033 3px, transparent 3px, transparent 6px)', border: '1px solid #d48f00', borderRadius: '3px 3px 0 0', height: '80px', boxSizing: 'border-box' }} />
-                        <div style={{ fontSize: 7, color: '#d48f00', marginTop: 2, transform: 'rotate(-45deg)', transformOrigin: 'center', whiteSpace: 'nowrap' }}>{label}</div>
+                        <div style={{ fontSize: 10, color: '#B87333', marginBottom: 2, fontWeight: 700 }}>—</div>
+                        <div style={{ width: '70%', background: 'repeating-linear-gradient(45deg, #B8733333, #B8733333 3px, transparent 3px, transparent 6px)', border: '1px solid #B87333', borderRadius: '3px 3px 0 0', height: '80px', boxSizing: 'border-box' }} />
+                        <div style={{ fontSize: 7, color: '#B87333', marginTop: 2, transform: 'rotate(-45deg)', transformOrigin: 'center', whiteSpace: 'nowrap' }}>{label}</div>
                       </div>
                     )
                   }
                   const pct = t.el > 0 ? Math.round(t.pr / t.el * 100) : 0
                   return (
                     <div key={t.date} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: '1 0 28px', maxWidth: 36 }}>
-                      <div style={{ fontSize: 10, color: '#5a6480', marginBottom: 2, fontWeight: 600 }}>{pct}%</div>
-                      <div style={{ width: '70%', background: pct >= 80 ? '#1a9c60' : pct >= 50 ? '#d48f00' : '#e03050', borderRadius: '3px 3px 0 0', height: Math.max(6, pct * 1.2) + 'px' }} />
-                      <div style={{ fontSize: 7, color: '#6b7280', marginTop: 2, transform: 'rotate(-45deg)', transformOrigin: 'center', whiteSpace: 'nowrap' }}>{label}</div>
+                      <div style={{ fontSize: 10, color: '#6B5D4A', marginBottom: 2, fontWeight: 600 }}>{pct}%</div>
+                      <div style={{ width: '70%', background: pct >= 80 ? '#5B8266' : pct >= 50 ? '#B87333' : '#C0563A', borderRadius: '3px 3px 0 0', height: Math.max(6, pct * 1.2) + 'px' }} />
+                      <div style={{ fontSize: 7, color: '#8B7355', marginTop: 2, transform: 'rotate(-45deg)', transformOrigin: 'center', whiteSpace: 'nowrap' }}>{label}</div>
                     </div>
                   )
                 })}
@@ -132,10 +132,10 @@ export default function HistoriquePage({ presences, refs, datesAnnulees }) {
             <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 12 }}>
               <thead><tr>{['Date', 'État', 'Présents', 'Élig.', 'Taux'].map(h => <th key={h} style={S.th}>{h}</th>)}</tr></thead>
               <tbody>{tl.slice().reverse().slice(0, 20).map(t => {
-                if (t.status === 'missing') return <tr key={t.date}><td style={S.td}>{fmt(t.date)}</td><td style={{ ...S.td, color: '#e03050', fontWeight: 600 }}>Non saisie</td><td style={S.td}>—</td><td style={S.td}>—</td><td style={S.td}>—</td></tr>
-                if (t.status === 'cancelled') return <tr key={t.date}><td style={S.td}>{fmt(t.date)}</td><td style={{ ...S.td, color: '#d48f00', fontWeight: 600 }}>Annulée{t.motif ? ' — ' + t.motif : ''}</td><td style={S.td}>—</td><td style={S.td}>—</td><td style={S.td}>—</td></tr>
+                if (t.status === 'missing') return <tr key={t.date}><td style={S.td}>{fmt(t.date)}</td><td style={{ ...S.td, color: '#C0563A', fontWeight: 600 }}>Non saisie</td><td style={S.td}>—</td><td style={S.td}>—</td><td style={S.td}>—</td></tr>
+                if (t.status === 'cancelled') return <tr key={t.date}><td style={S.td}>{fmt(t.date)}</td><td style={{ ...S.td, color: '#B87333', fontWeight: 600 }}>Annulée{t.motif ? ' — ' + t.motif : ''}</td><td style={S.td}>—</td><td style={S.td}>—</td><td style={S.td}>—</td></tr>
                 const pct = t.el > 0 ? Math.round(t.pr / t.el * 100) : 0
-                return <tr key={t.date}><td style={S.td}>{fmt(t.date)}</td><td style={{ ...S.td, color: '#1a9c60' }}>Saisie</td><td style={{ ...S.td, fontWeight: 600 }}>{t.pr}</td><td style={S.td}>{t.el}</td><td style={S.td}><span style={{ fontWeight: 600, color: pct >= 80 ? '#1a9c60' : pct >= 50 ? '#d48f00' : '#e03050' }}>{pct}%</span></td></tr>
+                return <tr key={t.date}><td style={S.td}>{fmt(t.date)}</td><td style={{ ...S.td, color: '#5B8266' }}>Saisie</td><td style={{ ...S.td, fontWeight: 600 }}>{t.pr}</td><td style={S.td}>{t.el}</td><td style={S.td}><span style={{ fontWeight: 600, color: pct >= 80 ? '#5B8266' : pct >= 50 ? '#B87333' : '#C0563A' }}>{pct}%</span></td></tr>
               })}</tbody>
             </table>
           </div>}

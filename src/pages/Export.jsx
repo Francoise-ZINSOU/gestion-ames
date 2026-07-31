@@ -55,10 +55,10 @@ export default function ExportPage({ membres, presences, entretiens, defis, refs
   }
 
   const items = [
-    { t: 'membres', Icon: Users, l: 'Membres', n: membres.length, c: '#185FA5' },
-    { t: 'presences', Icon: CheckSquare, l: 'Présences', n: presences.length, c: '#185FA5' },
-    { t: 'entretiens', Icon: MessageCircle, l: 'Entretiens', n: entretiens.length, c: '#BA7517' },
-    { t: 'defis', Icon: Zap, l: 'Défis', n: defis.length, c: '#BA7517' }
+    { t: 'membres', Icon: Users, l: 'Membres', n: membres.length, c: '#B87333' },
+    { t: 'presences', Icon: CheckSquare, l: 'Présences', n: presences.length, c: '#B87333' },
+    { t: 'entretiens', Icon: MessageCircle, l: 'Entretiens', n: entretiens.length, c: '#B87333' },
+    { t: 'defis', Icon: Zap, l: 'Défis', n: defis.length, c: '#B87333' }
   ]
 
   return (
@@ -66,26 +66,26 @@ export default function ExportPage({ membres, presences, entretiens, defis, refs
       <div style={S.card}>
         <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10 }}>Exporter les données</div>
         {items.map(({ t, Icon, l, n, c }) => (
-          <div key={t} onClick={() => doExport(t)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', borderRadius: 8, border: '1px solid #E2E8F0', cursor: 'pointer', marginBottom: 6 }}>
+          <div key={t} onClick={() => doExport(t)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', borderRadius: 8, border: '1px solid #EADFCF', cursor: 'pointer', marginBottom: 6 }}>
             <div style={{ width: 32, height: 32, borderRadius: '50%', background: c + '14', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon size={16} color={c} /></div>
-            <div style={{ flex: 1 }}><div style={{ fontSize: 14, fontWeight: 600 }}>{l}</div><div style={{ fontSize: 11, color: '#64748B' }}>{n} enregistrement(s)</div></div>
+            <div style={{ flex: 1 }}><div style={{ fontSize: 14, fontWeight: 600 }}>{l}</div><div style={{ fontSize: 11, color: '#8B7355' }}>{n} enregistrement(s)</div></div>
             <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: c, fontWeight: 600 }}><Download size={13} /> CSV</span>
           </div>
         ))}
       </div>
       <div style={{ ...S.card, marginTop: 12 }}>
-        {!auth?.isAdmin && <div style={{ fontSize: 13, color: '#64748B' }}>Seuls les admins peuvent réinitialiser les données.</div>}
-        {auth?.isAdmin && <><div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, fontWeight: 600, marginBottom: 4, color: '#E11D48' }}><Trash2 size={14} /> Réinitialiser</div>
-        <div style={{ fontSize: 12, color: '#64748B', marginBottom: 10 }}>Supprime tous les membres, présences, entretiens et défis. Les tables de référence sont conservées.</div>
-        <button onClick={() => setConfirmAction({ msg: 'Supprimer TOUTES les données de votre famille ?\n\nCette action est irréversible. Les autres familles ne sont pas affectées.', fn: doReset })} style={S.btn('#E11D48', true)}>Réinitialiser</button></>}
+        {!auth?.isAdmin && <div style={{ fontSize: 13, color: '#8B7355' }}>Seuls les admins peuvent réinitialiser les données.</div>}
+        {auth?.isAdmin && <><div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, fontWeight: 600, marginBottom: 4, color: '#C0563A' }}><Trash2 size={14} /> Réinitialiser</div>
+        <div style={{ fontSize: 12, color: '#8B7355', marginBottom: 10 }}>Supprime tous les membres, présences, entretiens et défis. Les tables de référence sont conservées.</div>
+        <button onClick={() => setConfirmAction({ msg: 'Supprimer TOUTES les données de votre famille ?\n\nCette action est irréversible. Les autres familles ne sont pas affectées.', fn: doReset })} style={S.btn('#C0563A', true)}>Réinitialiser</button></>}
       </div>
       {confirmAction && (
         <div className="modal-overlay danger">
           <div className="modal-box" style={{ maxWidth: 380 }}>
-            <div style={{ padding: '20px 24px' }}><div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Confirmation</div><div style={{ fontSize: 14, color: '#475569', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{confirmAction.msg}</div></div>
-            <div style={{ padding: '12px 24px', borderTop: '1px solid #E2E8F0', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => setConfirmAction(null)} style={S.btn('#64748B', true)}>Annuler</button>
-              <button onClick={() => { confirmAction.fn(); setConfirmAction(null) }} disabled={resetting} style={{ ...S.btn('#E11D48', false), opacity: resetting ? 0.6 : 1 }}>{resetting ? 'Suppression...' : 'Confirmer'}</button>
+            <div style={{ padding: '20px 24px' }}><div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Confirmation</div><div style={{ fontSize: 14, color: '#6B5D4A', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{confirmAction.msg}</div></div>
+            <div style={{ padding: '12px 24px', borderTop: '1px solid #EADFCF', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => setConfirmAction(null)} style={S.btn('#8B7355', true)}>Annuler</button>
+              <button onClick={() => { confirmAction.fn(); setConfirmAction(null) }} disabled={resetting} style={{ ...S.btn('#C0563A', false), opacity: resetting ? 0.6 : 1 }}>{resetting ? 'Suppression...' : 'Confirmer'}</button>
             </div>
           </div>
         </div>

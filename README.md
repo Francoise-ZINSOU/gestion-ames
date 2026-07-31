@@ -250,6 +250,7 @@ Les évolutions sont fournies en fichiers séparés à exécuter dans Supabase S
   ⚠️ **v2.1 doit impérativement précéder v2.2** (v2.2 insère dans les colonnes créées par v2.1)
 - `evolution-v2.4-integrite-schema.sql` : FK `ON UPDATE CASCADE` sur les référentiels (renommage sûr), unicité présences/dates annulées, contraintes anti-auto-suivi, `famille_id NOT NULL` sur les 9 tables de données, indexes sur les FK
 - `evolution-v2.7-nationalite-situation-pro.sql` : Champs `nationalite` + `situation_professionnelle` sur membres, table de référence `ref_situations_pro`
+- `evolution-v2.9-vocabulaire-palette.sql` : Renommage statut « En difficulté » → « À accompagner » (CASCADE), alignement des couleurs de référence sur la palette terracotta
 - `evolution-v2.8-coherence-metier.sql` : Contraintes de cohérence — ordre des dates (naissance ≤ inscription ≤ départ ≤ retour), résolution défi ≥ identification, validation module ≥ assignation, âge plausible, triggers suiveur/interlocuteur intra-famille, nettoyage du suivi au transfert de famille
 - `audit-coherence-v2.3.sql` : Script d'audit idempotent — vérifie que v2.1/v2.2 sont bien appliquées, l'absence d'orphelins `famille_id`, de policies RLS avec fallback NULL et de policies en doublon
 
@@ -277,11 +278,16 @@ npm run build       → dossier dist/
 npm run test        → Vitest (CI uniquement, pas de Node local)
 ```
 
-### Structure des styles
-- Palette réelle du code : `#185FA5` (bleu primaire — nav, focus, accent-color), `#059669` (vert succès), `#E11D48` (rouge danger), `#7040d0` (violet formation)
-- Grays (slate) : `#1E293B` texte, `#475569` sub-texte, `#64748B` meta, `#E2E8F0` bordures, `#EEF2F7` fond
+### Structure des styles — palette « terracotta & sable » (pastorale)
+- Palette centralisée dans `src/lib/ui.jsx` (objet `C`) — point de vérité unique
+- Identité : `#B87333` (terracotta — nav, liens, actions, focus, accent-color)
+- Secondaire : `#4A6FA5` (bleu-ardoise doux — info)
+- Sémantique : `#5B8266` (sauge — présent/positif), `#B87333` (attention bienveillante, au lieu du rouge), `#C0563A` (danger réel, rare), `#8B5B9E` (violet — formation)
+- Neutres chauds : `#3D3229` texte, `#8B7355` sous-texte, `#A08B73` méta, `#EADFCF` bordures, `#FBF7F1` fond crème
+- Cartes : ombre douce (pas de bordure sèche), coins 14px, air généreux
+- Vocabulaire humanisé : « À accompagner » (ex-« En difficulté »), « Membres actifs », « Présence au culte » ; labels en minuscules (fin des majuscules administratives)
 - Polices : DM Sans / Outfit / Roboto Mono via Google Fonts CDN
-- `theme-color` (index.html + manifest.json) : `#185FA5`
+- `theme-color` (index.html + manifest.json) : `#B87333`
 
 ### Responsive / UX mobile
 - Mobile-first : `mob-only` / `desk-only` classes
@@ -291,8 +297,8 @@ npm run test        → Vitest (CI uniquement, pas de Node local)
 - Sidebar fixe 210px desktop
 - `box-sizing: border-box` global (aucun overflow)
 - `font-family: inherit` sur tous les form controls
-- `accent-color: #185FA5` sur checkboxes/radios
-- Focus visible clavier : `outline: 2px solid #185FA5`
+- `accent-color: #B87333` sur checkboxes/radios
+- Focus visible clavier : `outline: 2px solid #B87333`
 - Tailles minimales : body 14px, texte courant 13px, meta 12px, micro 10-11px
 - Cartes membres compactes (~60px), bulk bar conditionnelle
 - Dropdown activités sur mobile (boutons sur desktop)

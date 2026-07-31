@@ -1,40 +1,65 @@
+// ── Palette pastorale « terracotta & sable » ──
+// Couleur d'identité : terracotta. Secondaire : bleu-ardoise doux.
+// Un seul point de vérité — modifier ici se propage partout.
+export const C = {
+  primary: '#B87333',      // terracotta (identité : nav, liens, actions)
+  primaryDark: '#A56A2E',  // terracotta foncé (texte sur fond clair)
+  primarySoft: '#F7EDE1',  // sable (fonds de pills, badges chauds)
+  accent: '#4A6FA5',       // bleu-ardoise doux (info secondaire)
+  accentSoft: '#EAF0F6',
+  success: '#5B8266',      // vert sauge (positif, présent)
+  successSoft: '#E7EFE8',
+  attention: '#B87333',    // « à accompagner » = terracotta, pas rouge
+  attentionSoft: '#F7EDE1',
+  danger: '#C0563A',       // terracotta-rouge (rare : suppression, erreur réelle)
+  dangerSoft: '#F7E7E1',
+  page: '#FBF7F1',         // fond crème
+  surface: '#fff',
+  text: '#3D3229',         // brun chaud (au lieu du gris-bleu froid)
+  sub: '#8B7355',          // brun-sable (sous-texte)
+  meta: '#A08B73',         // méta
+  border: '#EADFCF',       // bordure sable douce
+  borderInput: '#DCC9B0',
+  fieldBg: '#FBF7F1',
+  shadow: '0 1px 3px rgba(80,60,40,.06), 0 4px 12px rgba(80,60,40,.04)',
+}
+
 // ── Styles partagés ──
 export const S = {
   pill: (color) => ({
-    display: 'inline-block', padding: '2px 8px', borderRadius: 10,
-    fontSize: 11, fontWeight: 600, background: color + '18', color, whiteSpace: 'nowrap', marginRight: 2
+    display: 'inline-block', padding: '3px 10px', borderRadius: 12,
+    fontSize: 12, fontWeight: 500, background: color + '1c', color, whiteSpace: 'nowrap', marginRight: 2
   }),
   card: {
-    background: '#fff', border: '1px solid #E2E8F0', borderRadius: 10,
-    padding: '16px 18px', marginBottom: 12
+    background: C.surface, border: 'none', borderRadius: 14,
+    boxShadow: C.shadow, padding: '16px 20px', marginBottom: 12
   },
   th: {
-    textAlign: 'left', padding: '6px 8px', fontSize: 10, fontWeight: 600,
-    letterSpacing: 1, textTransform: 'uppercase', color: '#64748B',
-    borderBottom: '2px solid #E2E8F0', background: '#F8F9FB'
+    textAlign: 'left', padding: '7px 8px', fontSize: 12, fontWeight: 500,
+    color: C.sub, borderBottom: '1px solid ' + C.border, background: C.page
   },
-  td: { padding: '7px 8px', borderBottom: '1px solid #E2E8F0', fontSize: 13 },
+  td: { padding: '8px', borderBottom: '1px solid ' + C.border, fontSize: 13, color: C.text },
   inp: {
-    width: '100%', padding: '7px 10px', borderRadius: 6,
-    border: '1px solid #CBD5E1', background: '#F8F9FB', color: '#1E293B',
+    width: '100%', padding: '8px 11px', borderRadius: 8,
+    border: '1px solid ' + C.borderInput, background: C.fieldBg, color: C.text,
     fontFamily: 'inherit', fontSize: 13, outline: '2px solid transparent', outlineOffset: '2px',
     boxSizing: 'border-box'
   },
   label: {
-    display: 'block', fontSize: 11, fontWeight: 600, letterSpacing: 1,
-    textTransform: 'uppercase', color: '#475569', marginBottom: 3
+    display: 'block', fontSize: 12, fontWeight: 500,
+    color: C.sub, marginBottom: 4
   },
   btn: (c, outline) => ({
-    padding: '7px 14px', borderRadius: 7,
+    padding: '8px 15px', borderRadius: 9,
     border: outline ? '1px solid ' + c : 'none',
     background: outline ? 'transparent' : c,
     color: outline ? c : '#fff',
-    fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'opacity 0.15s'
+    fontFamily: 'inherit', fontSize: 13, fontWeight: 500, cursor: 'pointer', transition: 'opacity 0.15s'
   }),
   kpi: (c) => ({
-    background: '#fff', border: '1px solid #E2E8F0', borderRadius: 10,
-    padding: '14px 16px', flex: '1 1 130px', minWidth: 120,
-    borderBottom: '3px solid ' + c
+    background: C.surface, border: 'none', borderRadius: 14, boxShadow: C.shadow,
+    padding: '16px 18px', flex: '1 1 130px', minWidth: 120,
+    borderTop: '3px solid ' + c
   }),
 }
 

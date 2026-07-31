@@ -4,7 +4,7 @@ export default function CGUPage() {
   return (
     <div style={S.card}>
       <div style={{ fontSize: 18, fontWeight: 700, fontFamily: "'Outfit', sans-serif", marginBottom: 12 }}>Conditions d'utilisation</div>
-      <div style={{ fontSize: 14, color: '#5a6480', lineHeight: 1.8 }}>
+      <div style={{ fontSize: 14, color: '#6B5D4A', lineHeight: 1.8 }}>
         <p style={{ marginBottom: 12 }}><strong>Données personnelles</strong><br />
         Cette application traite des données personnelles (noms, coordonnées, présences) dans le cadre du suivi pastoral. Ces données sont stockées de manière sécurisée sur Supabase (hébergement européen). Elles ne sont ni vendues ni partagées avec des tiers.</p>
 
@@ -20,7 +20,7 @@ export default function CGUPage() {
         <p style={{ marginBottom: 12 }}><strong>Durée de conservation</strong><br />
         Les données sont conservées tant que le membre est actif. Les données des membres archivés sont conservées 3 ans puis supprimées.</p>
 
-        <p style={{ fontSize: 12, color: '#6b7280', fontStyle: 'italic' }}>
+        <p style={{ fontSize: 12, color: '#8B7355', fontStyle: 'italic' }}>
         Ce document est un modèle indicatif. Il doit être adapté par un professionnel du droit pour votre contexte spécifique.
         </p>
       </div>
