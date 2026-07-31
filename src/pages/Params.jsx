@@ -208,7 +208,20 @@ function UsersTable({ showToast, actifs, refs, auth }) {
     } finally { setInviting(false) }
   }
 
+  // Compte les membres actuellement suivis par le profil donné (via son membre_id)
+  const compterSuivis = (profil) => {
+    if (!profil?.membre_id) return 0
+    return (actifs || []).filter(m => m.suivi_par === profil.membre_id).length
+  }
+
   const handleRole = async (id, resp, admin) => {
+    // Si on retire la capacité de suivi (plus responsable ni admin) à quelqu'un
+    // qui accompagne des membres, avertir pour éviter des suivis orphelins.
+    if (!resp && !admin) {
+      const prof = (profils || []).find(p => p.id === id)
+      const n = compterSuivis(prof)
+      if (n > 0 && !window.confirm(`Cette personne accompagne actuellement ${n} membre(s) (« suivi par »). En lui retirant ses droits, ces membres resteront rattachés à elle sans qu'elle les suive activement. Pensez à les réassigner depuis Organisation.\n\nContinuer quand même ?`)) return
+    }
     try { await setRole(id, resp, admin); showToast('✓ Droits mis à jour') }
     catch (e) { showToast(e.message?.includes('duplicate') ? '⚠ Ce nom existe déjà' : '⚠ ' + e.message) }
   }
@@ -222,6 +235,11 @@ function UsersTable({ showToast, actifs, refs, auth }) {
   }
 
   const linkBergerEglise = async (profilId, checked, egliseId) => {
+    if (checked) {
+      const prof = (profils || []).find(p => p.id === profilId)
+      const n = compterSuivis(prof)
+      if (n > 0 && !window.confirm(`Cette personne accompagne actuellement ${n} membre(s). En tant que berger d'église, son rôle devient la supervision. Si elle ne suit plus ces membres de près, pensez à les réassigner depuis Organisation.\n\nContinuer ?`)) return
+    }
     try {
       const updates = { est_berger_eglise: checked }
       if (checked && egliseId) updates.eglise_id = egliseId

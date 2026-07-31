@@ -1,5 +1,13 @@
 # Gestion des Âmes — Suivi Pastoral
 
+### Test des rôles et transitions (session e41)
+Nouveau fichier de test permanent src/__tests__/roles.test.jsx : vérifie les états de rôle ET les transitions (le "film" : responsable → berger, admin → responsable, etc.), avec en tête le cas Alfred (berger gardant une famille héritée = berger pur). 13 assertions. Tourne dans la CI à chaque build → si une modif future casse la logique des rôles, le build échoue. Motivé par le fait que le cas Alfred n'avait pas été détecté (test des états figés seulement, pas des transitions).
+
+
+### Berger pur fondé sur les rôles + alerte suivis (session e40)
+Trois corrections liées : (A) un berger qui garde une famille héritée d'un ancien rôle responsable est désormais reconnu comme berger pur — la logique se fonde sur les rôles cochés (est_berger_eglise && !responsable && !admin && !super_admin), plus sur famille_id. (B) Définition unique isBergerPur dans auth.jsx, réutilisée dans App/Layout/MenuMobile (fini les 4 formules divergentes). (C) Avertissement au changement de rôle (retrait de responsable, ou activation berger) si la personne accompagne des membres, pour penser à réassigner les suivis. Rappel : le profil n'est rechargé qu'au login — un changement de rôle prend effet à la reconnexion (ou via reloadProfil).
+
+
 ### Cohérence des rôles (audit systématique — session e39)
 Test de tous les rôles → 3 anomalies corrigées : (1) le super-admin peut désormais accéder aux Paramètres (params : isAdmin OU isSuperAdmin) ; (2) le super-admin peut supprimer (peutSuppr : isAdmin OU isSuperAdmin, dans Fiche/Presences/Croissance) ; (3) un berger qui est AUSSI responsable garde toutes ses fonctions famille (Présences, Entretiens) — seul le berger PUR reste en lecture seule (conditions !isBergerEglise remplacées par !bergerPur). Fichiers : App.jsx, Layout.jsx, MenuMobile.jsx, Fiche.jsx, Presences.jsx, Croissance.jsx.
 

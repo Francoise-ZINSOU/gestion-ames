@@ -35,7 +35,7 @@ export default function App() {
   useEffect(() => {
     if (landedRef.current || auth.loading || !auth.profil) return
     landedRef.current = true
-    const bergerPur = auth.isBergerEglise && !auth.isResponsable && !auth.profil?.famille_id
+    const bergerPur = auth.isBergerPur
     if (bergerPur) setPage('vueEglise')
   }, [auth.loading, auth.profil, auth.isBergerEglise, auth.isResponsable])
 
@@ -179,7 +179,7 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
   let content
   // Garde-fou berger pur : il ne peut atteindre que ses pages « église ».
   // Toute page « famille » est redirigée vers sa Synthèse.
-  const bergerPurRoute = auth.isBergerEglise && !auth.isResponsable && !auth.profil?.famille_id
+  const bergerPurRoute = auth.isBergerPur
   const pageEffective = (bergerPurRoute && !['vueEglise', 'alerts', 'cgu', 'menu'].includes(page)) ? 'vueEglise' : page
   switch (pageEffective) {
     case 'home': content = <HomePage {...ctx} setPage={navigateTo} />; break

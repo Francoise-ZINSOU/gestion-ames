@@ -13,10 +13,10 @@ const navIcons = {
 export default function Layout({ page, setPage, alertCount, membreCount, selectedMembre, children, auth, actifs, onOpenFiche, scopeFamilleId, setScopeFamilleId, famillesScope }) {
   const familleName = auth?.profil?.famille_nom || null
   const egliseName = auth?.profil?.eglise_nom || null
-  const { logout, profil, isAdmin, isBergerEglise, isSuperAdmin } = useAuth()
+  const { logout, profil, isAdmin, isBergerEglise, isSuperAdmin, isBergerPur } = useAuth()
   // Berger « pur » : supervise l'église sans gérer de famille. Menu minimal
   // (Synthèse + Alertes) — les pages « famille » n'ont pas de sens pour lui.
-  const bergerPur = isBergerEglise && !isAdmin && profil?.est_responsable !== true && !profil?.famille_id
+  const bergerPur = isBergerPur
   const [searchQuery, setSearchQuery] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
   const searchResults = searchQuery.length >= 2

@@ -9,7 +9,7 @@ export default function MenuMobile({ setPage, isAdmin, selectedMembre, auth, sco
 
   const berger = auth?.isBergerEglise === true && isAdmin !== true
   // Berger « pur » (sans famille) : menu minimal, cohérent avec le desktop
-  const bergerPur = berger && auth?.isResponsable !== true && !auth?.profil?.famille_id
+  const bergerPur = auth?.isBergerPur === true
   const items = bergerPur ? [
     { id: 'vueEglise', Icon: Building2, label: 'Synthèse église' },
     { id: 'alerts', Icon: Bell, label: 'Alertes' },
