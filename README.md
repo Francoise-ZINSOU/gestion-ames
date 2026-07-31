@@ -1,5 +1,9 @@
 # Gestion des Âmes — Suivi Pastoral
 
+### Date par défaut de la saisie de présences (session e31)
+À l'ouverture de la saisie (et au changement d'activité), la date se cale automatiquement sur la dernière occurrence du jour de l'activité (culte du dimanche → dernier dimanche) au lieu de la date du jour. Évite de proposer un culte du dimanche un vendredi. Les activités ponctuelles (sans jour_semaine) gardent la date du jour.
+
+
 ### Nettoyage du raccourci « Fiche » du menu (session e30)
 L'entrée « Fiche » du menu (desktop et mobile) ne s'affiche plus que tant qu'un membre est réellement ouvert. Quitter la fiche vers une autre page efface la sélection (setSelectedId(null) via une fonction navigateTo), au lieu de laisser le raccourci affiché jusqu'au rechargement.
 

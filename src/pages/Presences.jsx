@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { S, fmt, today } from '../lib/ui'
+import { S, fmt, today, toLocalDate } from '../lib/ui'
 import { Save, Trash2, CheckSquare, Square, Search } from 'lucide-react'
 
 export default function PresencesPage({ actifs, presences, refs, h, enregistrerPresences, supprimerDate, auth, datesAnnulees, ajouterDateAnnulee, supprimerDateAnnulee, showToast, openFiche }) {
@@ -14,6 +14,22 @@ export default function PresencesPage({ actifs, presences, refs, h, enregistrerP
   const [confirmInput, setConfirmInput] = useState('')
 
   useEffect(() => { if (!actId && activites.length) setActId(activites[0].id) }, [activites])
+
+  // Dernière occurrence (aujourd'hui ou avant) d'un jour de semaine donné (0=dimanche)
+  const dernierJour = (jourSemaine) => {
+    const d = new Date()
+    const diff = (d.getDay() - jourSemaine + 7) % 7
+    d.setDate(d.getDate() - diff)
+    return toLocalDate(d)
+  }
+  // Quand on change d'activité : caler la date sur le dernier jour correspondant
+  // (ex. culte du dimanche → dernier dimanche), sauf activité ponctuelle (jour_semaine null)
+  useEffect(() => {
+    const a = activites.find(x => x.id === actId)
+    if (a && a.jour_semaine !== null && a.jour_semaine !== undefined) {
+      setDate(dernierJour(a.jour_semaine))
+    }
+  }, [actId])
   useEffect(() => {
     const obj = {}
     // On ne met dans le state QUE les présences pour les membres actuellement éligibles
@@ -89,7 +105,7 @@ export default function PresencesPage({ actifs, presences, refs, h, enregistrerP
           ))}
         </div>
         {/* Mobile: dropdown compact */}
-        <select className="mob-only" value={actId} onChange={e => setActId(e.target.value)} style={{ flex: 1, padding: '8px 10px', borderRadius: 7, border: '1px solid ' + (act?.couleur || '#C3D4D3'), background: (act?.couleur || '#2E7D8A') + '10', color: act?.couleur || '#5E7175', fontFamily: 'inherit', fontSize: 13, fontWeight: 600 }}>
+        <select className="mob-only" value={actId} onChange={e => setActId(e.target.value)} style={{ maxWidth: '62%', padding: '8px 10px', borderRadius: 7, border: '1px solid ' + (act?.couleur || '#C3D4D3'), background: (act?.couleur || '#2E7D8A') + '10', color: act?.couleur || '#5E7175', fontFamily: 'inherit', fontSize: 13, fontWeight: 600 }}>
           {activites.map(a => <option key={a.id} value={a.id}>{a.icone} {a.nom}</option>)}
         </select>
         <input type="date" value={date} max={today()} onChange={e => setDate(e.target.value)}
