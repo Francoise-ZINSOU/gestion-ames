@@ -8,7 +8,12 @@ export default function MenuMobile({ setPage, isAdmin, selectedMembre, auth, sco
   const { logout, profil } = useAuth()
 
   const berger = auth?.isBergerEglise === true && isAdmin !== true
-  const items = berger ? [
+  // Berger « pur » (sans famille) : menu minimal, cohérent avec le desktop
+  const bergerPur = berger && auth?.isResponsable !== true && !auth?.profil?.famille_id
+  const items = bergerPur ? [
+    { id: 'vueEglise', Icon: Building2, label: 'Synthèse église' },
+    { id: 'alerts', Icon: Bell, label: 'Alertes' },
+  ] : berger ? [
     // Berger : supervision d'abord, cohérent avec le desktop
     { id: 'home', Icon: Home, label: 'Accueil' },
     { id: 'vueEglise', Icon: Building2, label: 'Synthèse église' },
@@ -29,8 +34,8 @@ export default function MenuMobile({ setPage, isAdmin, selectedMembre, auth, sco
     { id: 'protos', Icon: BookOpen, label: 'Parcours de formation' },
     { id: 'rapport', Icon: FileText, label: 'Rapport mensuel' },
   ]
-  if (!berger && (auth?.isBergerEglise || isAdmin)) items.push({ id: 'vueEglise', Icon: Building2, label: 'Synthèse église' })
-  if (isAdmin) items.push({ id: 'params', Icon: Settings, label: 'Paramètres' })
+  if (!berger && auth?.isSuperAdmin) items.push({ id: 'vueEglise', Icon: Building2, label: 'Synthèse église' })
+  if (isAdmin || auth?.isSuperAdmin) items.push({ id: 'params', Icon: Settings, label: 'Paramètres' })
 
   return (
     <div>

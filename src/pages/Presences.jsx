@@ -4,7 +4,7 @@ import { Save, Trash2, CheckSquare, Square, Search } from 'lucide-react'
 
 export default function PresencesPage({ actifs, presences, refs, h, enregistrerPresences, supprimerDate, auth, datesAnnulees, ajouterDateAnnulee, supprimerDateAnnulee, showToast, openFiche }) {
   const activites = refs.activites || []
-  const peutSuppr = auth?.isAdmin === true  // suppression réservée aux admins (RLS v3.2)
+  const peutSuppr = auth?.isAdmin === true || auth?.isSuperAdmin === true  // suppression : admin de sa famille ou super-admin (RLS v3.2)
   const [actId, setActId] = useState(activites[0]?.id || '')
   const [date, setDate] = useState(today())
   const [chk, setChk] = useState({})

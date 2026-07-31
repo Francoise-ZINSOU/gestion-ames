@@ -221,7 +221,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
           </optgroup>
         </select>
         <button onClick={ouvrirAjout} style={{ ...S.btn('#2E7D8A', false), whiteSpace: 'nowrap', padding: '6px 12px', fontSize: 13, opacity: superAdminSansPerimetre ? 0.5 : 1 }}>+ Membre</button>
-        <button onClick={() => setModal('import')} style={{ ...S.btn('#2E7D8A', true), display: 'flex', alignItems: 'center', gap: 3, whiteSpace: 'nowrap', padding: '6px 10px', fontSize: 12 }}><Upload size={12} /> CSV</button>
+        <button onClick={() => { if (superAdminSansPerimetre) { showToast('⚠ Choisissez d\'abord une église (sélecteur « Vue administrateur ») avant d\'importer des membres.'); return } setModal('import') }} style={{ ...S.btn('#2E7D8A', true), display: 'flex', alignItems: 'center', gap: 3, whiteSpace: 'nowrap', padding: '6px 10px', fontSize: 12, opacity: superAdminSansPerimetre ? 0.5 : 1 }}><Upload size={12} /> CSV</button>
         <button onClick={() => setBulkMode(!bulkMode)} style={{ ...S.btn(bulkMode ? '#8B5B9E' : '#5E7175', true), padding: '6px 10px', fontSize: 12 }}>{bulkMode ? '✓ Sélection' : '☐ Sélection'}</button>
       </div>
 
@@ -498,7 +498,9 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                   <button disabled={saving} onClick={async () => {
                     setSaving(true)
                     try {
-                      const rows = toImport.map(({ _skip, _dup, ...r }) => r)
+                      const rows = toImport.map(({ _skip, _dup, ...r }) => (
+                        auth?.isSuperAdmin && scopeFamilleId ? { ...r, famille_id: scopeFamilleId } : r
+                      ))
                       // Batching : 50 lignes à la fois avec feedback
                       const batchSize = 50
                       let done = 0

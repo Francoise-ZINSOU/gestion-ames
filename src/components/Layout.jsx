@@ -13,7 +13,10 @@ const navIcons = {
 export default function Layout({ page, setPage, alertCount, membreCount, selectedMembre, children, auth, actifs, onOpenFiche, scopeFamilleId, setScopeFamilleId, famillesScope }) {
   const familleName = auth?.profil?.famille_nom || null
   const egliseName = auth?.profil?.eglise_nom || null
-  const { logout, profil, isAdmin, isBergerEglise } = useAuth()
+  const { logout, profil, isAdmin, isBergerEglise, isSuperAdmin } = useAuth()
+  // Berger « pur » : supervise l'église sans gérer de famille. Menu minimal
+  // (Synthèse + Alertes) — les pages « famille » n'ont pas de sens pour lui.
+  const bergerPur = isBergerEglise && !isAdmin && profil?.est_responsable !== true && !profil?.famille_id
   const [searchQuery, setSearchQuery] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
   const searchResults = searchQuery.length >= 2
@@ -76,31 +79,35 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
           </div>
         )}
 
+        {!bergerPur && (
         <div style={{ padding: '8px 6px 2px' }}>
           
           {navBtn('home', 'Accueil', 0)}
           {navBtn('ames', 'Membres', 0)}
-          {!isBergerEglise && navBtn('pres', 'Présences', 0)}
+          {!bergerPur && navBtn('pres', 'Présences', 0)}
           {navBtn('timeline', 'Historique', 0)}
           {navBtn('filia', 'Organisation', 0)}
         </div>
+        )}
 
+        {!bergerPur && (
         <div style={{ padding: '8px 6px 2px' }}>
           <div style={{ fontSize: 11, letterSpacing: 0.5, color: '#8A9B9E', fontWeight: 500, padding: '0 6px', marginBottom: 2 }}>Suivi</div>
           {!(isBergerEglise && !isAdmin) && navBtn('alerts', 'Alertes', alertCount)}
-          {!isBergerEglise && navBtn('ents', 'Entretiens', 0)}
+          {!bergerPur && navBtn('ents', 'Entretiens', 0)}
           {navBtn('protos', 'Formation', 0)}
           {navBtn('rapport', 'Rapport mensuel', 0)}
         </div>
+        )}
 
-        {isAdmin && (
+        {isSuperAdmin && (
           <div style={{ padding: '8px 6px 2px' }}>
             <div style={{ fontSize: 11, letterSpacing: 0.5, color: '#8A9B9E', fontWeight: 500, padding: '0 6px', marginBottom: 2 }}>Église</div>
             {navBtn('vueEglise', 'Synthèse', 0)}
           </div>
         )}
 
-        {isAdmin && (
+        {(isAdmin || isSuperAdmin) && (
           <div style={{ padding: '8px 6px 2px' }}>
             <div style={{ fontSize: 11, letterSpacing: 0.5, color: '#8A9B9E', fontWeight: 500, padding: '0 6px', marginBottom: 2 }}>Admin</div>
             {navBtn('params', 'Paramètres', 0)}

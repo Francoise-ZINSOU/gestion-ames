@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from './lib/auth'
 import { useMembres, usePresences, useEntretiens, useDefis, usePlanCroissance, useAlertes, useRefs, useDatesAnnulees, useHistoriqueStatutsGlobal, refHelpers } from './lib/data'
 import { Toast, useToast, today } from './lib/ui'
@@ -28,6 +28,16 @@ export default function App() {
   const { toast, showToast } = useToast()
   const [page, setPage] = useState('home')
   const [selectedId, setSelectedId] = useState(null)
+  // Landing selon le rôle, appliqué une seule fois quand le profil est chargé :
+  // un berger d'église « pur » (sans famille propre) atterrit sur sa Synthèse,
+  // pas sur un tableau de bord famille qui serait vide pour lui.
+  const landedRef = useRef(false)
+  useEffect(() => {
+    if (landedRef.current || auth.loading || !auth.profil) return
+    landedRef.current = true
+    const bergerPur = auth.isBergerEglise && !auth.isResponsable && !auth.profil?.famille_id
+    if (bergerPur) setPage('vueEglise')
+  }, [auth.loading, auth.profil, auth.isBergerEglise, auth.isResponsable])
 
   if (auth.loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100dvh', fontFamily: 'DM Sans, sans-serif' }}>
@@ -36,14 +46,14 @@ export default function App() {
   )
   if (!auth.session) return <LoginPage />
   if (auth.needsPassword) return <SetPasswordPage profil={auth.profil} onDone={auth.clearNeedsPassword} />
-  if (!auth.isResponsable) return <AccessDenied />
+  if (!auth.isResponsable && !auth.isBergerEglise && !auth.isSuperAdmin) return <AccessDenied />
 
   // Utilisateur sans famille assignée : la RLS lui renverrait des listes
   // vides et des alertes absurdes → page dédiée avec instructions.
   // Portes de sortie : super-admin (administration de plateforme) et admin
   // sans famille (peut se réassigner lui-même dans Paramètres → Utilisateurs).
   // Un responsable simple reste bloqué : c'est à l'admin de le rattacher.
-  if (!auth.profil?.famille_id && !auth.profil?.est_super_admin && !auth.profil?.est_admin) return <NoFamillePage />
+  if (!auth.profil?.famille_id && !auth.profil?.est_super_admin && !auth.profil?.est_admin && !auth.isBergerEglise) return <NoFamillePage />
 
   return <AuthorizedApp auth={auth} toast={toast} showToast={showToast} page={page} setPage={setPage} selectedId={selectedId} setSelectedId={setSelectedId} />
 }
@@ -167,7 +177,11 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
   )
 
   let content
-  switch (page) {
+  // Garde-fou berger pur : il ne peut atteindre que ses pages « église ».
+  // Toute page « famille » est redirigée vers sa Synthèse.
+  const bergerPurRoute = auth.isBergerEglise && !auth.isResponsable && !auth.profil?.famille_id
+  const pageEffective = (bergerPurRoute && !['vueEglise', 'alerts', 'cgu', 'menu'].includes(page)) ? 'vueEglise' : page
+  switch (pageEffective) {
     case 'home': content = <HomePage {...ctx} setPage={navigateTo} />; break
     case 'pres': content = <PresencesPage {...ctx} />; break
     case 'ames': content = <AmesPage {...ctx} setPage={navigateTo} />; break
@@ -180,8 +194,8 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
     case 'export': content = null; break  /* Export & sauvegarde désactivé — remettre <ExportPage {...ctx} /> pour réactiver */
     case 'rapport': content = <RapportPage {...ctx} />; break
     case 'cgu': content = <CGUPage />; break
-    case 'vueEglise': content = (auth.isBergerEglise || auth.isAdmin) ? <VueEglisePage auth={auth} refs={rf.refs} h={h} /> : null; break
-    case 'params': content = auth.isAdmin ? <ParamsPage {...ctx} /> : null; break
+    case 'vueEglise': content = (auth.isBergerEglise || auth.isSuperAdmin) ? <VueEglisePage auth={auth} refs={rf.refs} h={h} /> : null; break
+    case 'params': content = (auth.isAdmin || auth.isSuperAdmin) ? <ParamsPage {...ctx} /> : null; break
     case 'menu': content = <MenuMobile setPage={navigateTo} isAdmin={auth.isAdmin} selectedMembre={selectedMembre} auth={auth} scopeFamilleId={scopeFamilleId} setScopeFamilleId={setScopeFamilleId} famillesScope={famillesScope} />; break
     default: content = <HomePage {...ctx} setPage={navigateTo} />
   }

@@ -7,7 +7,7 @@ export default function CroissancePage({ plans, refs, actifs, h, openFiche, assi
   const [modal, setModal] = useState(null)
   const [selMembre, setSelMembre] = useState('')
   const [selModule, setSelModule] = useState('')
-  const peutSuppr = auth?.isAdmin === true  // suppression réservée aux admins (RLS v3.2)
+  const peutSuppr = auth?.isAdmin === true || auth?.isSuperAdmin === true  // suppression : admin de sa famille ou super-admin (RLS v3.2)
 
   const modules = refs.modules || []
 

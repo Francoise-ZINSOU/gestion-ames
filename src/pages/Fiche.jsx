@@ -11,7 +11,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
   const [editEntId, setEditEntId] = useState(null)
   const { hist: historiqueStatuts } = useHistoriqueStatuts(m?.id)
   const { notes: journalNotes, ajouter: ajouterNote, supprimer: supprimerNote } = useJournal(m?.id)
-  const peutSuppr = auth?.isAdmin === true  // suppression réservée aux admins (RLS v3.2)
+  const peutSuppr = auth?.isAdmin === true || auth?.isSuperAdmin === true  // suppression : admin de sa famille ou super-admin (RLS v3.2)
   const estBerger = auth?.isBergerEglise === true && auth?.isAdmin !== true  // berger : consultation, pas le journal
   const [histSuivi, setHistSuivi] = useState([])
   useEffect(() => {

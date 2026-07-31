@@ -1,5 +1,25 @@
 # Gestion des Âmes — Suivi Pastoral
 
+### Cohérence des rôles (audit systématique — session e39)
+Test de tous les rôles → 3 anomalies corrigées : (1) le super-admin peut désormais accéder aux Paramètres (params : isAdmin OU isSuperAdmin) ; (2) le super-admin peut supprimer (peutSuppr : isAdmin OU isSuperAdmin, dans Fiche/Presences/Croissance) ; (3) un berger qui est AUSSI responsable garde toutes ses fonctions famille (Présences, Entretiens) — seul le berger PUR reste en lecture seule (conditions !isBergerEglise remplacées par !bergerPur). Fichiers : App.jsx, Layout.jsx, MenuMobile.jsx, Fiche.jsx, Presences.jsx, Croissance.jsx.
+
+
+### Garde-fous import CSV super-admin (session e38)
+Deux correctifs sur l'import CSV : (1) le bouton CSV reçoit le même garde-fou « super-admin sans périmètre » que le bouton + Membre (évite de créer des membres orphelins sans famille) ; (2) quand un super-admin a choisi un périmètre, le famille_id (scopeFamilleId) est désormais posé sur les lignes importées, comme pour la création unitaire.
+
+
+### Support du berger pur (session e37)
+Un berger d'église sans famille propre était bloqué par AccessDenied (isResponsable requis) puis par NoFamille. Corrigé : il peut entrer, atterrit sur sa Synthèse église, son menu (desktop + mobile) est réduit à Synthèse + Alertes, et un garde-fou de routage redirige toute page « famille » vers sa Synthèse. Concerne App.jsx, Layout.jsx, MenuMobile.jsx.
+
+
+### Synthèse église réservée au berger et super-admin (session e36)
+La Synthèse église (vision transversale) était accessible à tout admin, qui voyait une page à moitié vide (la RLS masquait les autres familles — pas de fuite, mais incohérent). Elle est désormais réservée au berger d'église et au super-admin, aux trois niveaux : accès page (App.jsx), menu desktop (Layout.jsx), menu mobile (MenuMobile.jsx).
+
+
+### Sélecteurs de famille réservés au super-admin (session e35)
+Deux sélecteurs d'interface montraient l'église/famille à un admin ordinaire : la réassignation de famille dans l'onglet Utilisateurs, et le choix de famille pour les activités dans l'onglet Références. Tous deux sont désormais limités — un admin ne voit que sa propre famille (activités) ou plus rien (réassignation). Cohérence d'interface : la RLS bloquait déjà tout changement effectif.
+
+
 ### Invitation limitée à la famille de l'admin (session e34)
 Après clarification : un admin gère SA FAMILLE (pas son église). L'invitation est donc restreinte à sa seule famille, aux deux niveaux — interface (menu à une option) et Edge Function invite-user v5 (validation serveur famille_id === profil.famille_id). Le super-admin invite toujours partout.
 

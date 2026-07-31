@@ -351,7 +351,7 @@ function UsersTable({ showToast, actifs, refs, auth }) {
               </select>
               {linkedMembre && <span style={{ fontSize: 11, color: '#2E7D8A', marginLeft: 6 }}>→ {linkedMembre.prenom} {linkedMembre.nom}</span>}
             </div>
-            {familles.length > 0 && (
+            {auth?.isSuperAdmin && familles.length > 0 && (
               <div style={{ marginTop: 4 }}>
                 <select value={p.famille_id || ''} onChange={e => linkFamille(p.id, e.target.value || null)} style={{ fontSize: 11, padding: '3px 6px', border: '1px solid #DCE6E5', borderRadius: 4, background: p.famille_id ? '#2E7D8A08' : '#C25A4A08', color: '#5E7175', fontFamily: 'inherit', width: '100%', maxWidth: 250 }}>
                   <option value="">— Assigner à une famille —</option>
@@ -496,13 +496,15 @@ export default function ParamsPage({ showToast, actifs, refs, auth }) {
   const [familles, setFamilles] = useState([])
   const [selectedFamilleId, setSelectedFamilleId] = useState(auth?.profil?.famille_id || '')
 
-  // Charger les familles accessibles
+  // Charger les familles accessibles (super-admin : toutes ; admin : sa famille)
   useEffect(() => {
     supabase.from('familles_disciples').select('*, eglises(nom)').eq('actif', true).order('nom').then(({ data }) => {
-      setFamilles(data || [])
-      if (!auth?.profil?.famille_id && data?.length) setSelectedFamilleId(data[0].id)
+      const toutes = data || []
+      const visibles = auth?.isSuperAdmin ? toutes : toutes.filter(f => f.id === auth?.profil?.famille_id)
+      setFamilles(visibles)
+      if (!auth?.profil?.famille_id && visibles.length) setSelectedFamilleId(visibles[0].id)
     })
-  }, [])
+  }, [auth?.isSuperAdmin, auth?.profil?.famille_id])
 
   // Tables partagées (pas de famille_id)
   const sharedTables = REF_TABLES.filter(t => t.key !== 'activites')
