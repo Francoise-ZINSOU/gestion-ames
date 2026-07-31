@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { S, fmt, today } from '../lib/ui'
 import { Save, Trash2, CheckSquare, Square, Search } from 'lucide-react'
 
-export default function PresencesPage({ actifs, presences, refs, enregistrerPresences, supprimerDate, auth, datesAnnulees, ajouterDateAnnulee, supprimerDateAnnulee, showToast, openFiche }) {
+export default function PresencesPage({ actifs, presences, refs, h, enregistrerPresences, supprimerDate, auth, datesAnnulees, ajouterDateAnnulee, supprimerDateAnnulee, showToast, openFiche }) {
   const activites = refs.activites || []
   const peutSuppr = auth?.isAdmin === true  // suppression réservée aux admins (RLS v3.2)
   const [actId, setActId] = useState(activites[0]?.id || '')
@@ -37,6 +37,7 @@ export default function PresencesPage({ actifs, presences, refs, enregistrerPres
   const act = activites.find(a => a.id === actId)
 
   const eligible = actifs.filter(m => {
+    if (h.isBergerRole(m.role)) return false  // le chef de famille n'est pas suivi en présence
     if (m.date_inscription && new Date(m.date_inscription) > new Date(date)) return false
     if (m.est_retour && m.date_depart) {
       const dep = new Date(m.date_depart)

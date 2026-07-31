@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from './lib/auth'
-import { useMembres, usePresences, useEntretiens, useDefis, usePlanCroissance, useAlertes, useRefs, useDatesAnnulees, refHelpers } from './lib/data'
+import { useMembres, usePresences, useEntretiens, useDefis, usePlanCroissance, useAlertes, useRefs, useDatesAnnulees, useHistoriqueStatutsGlobal, refHelpers } from './lib/data'
 import { Toast, useToast, today } from './lib/ui'
 import LoginPage from './pages/Login'
 import AccessDenied from './pages/AccessDenied'
@@ -57,6 +57,29 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
   const al = useAlertes()
   const rf = useRefs()
   const da = useDatesAnnulees()
+  const hs = useHistoriqueStatutsGlobal(30)
+
+  // ── Sélecteur de périmètre (super-admin uniquement) ──
+  // Le super-admin voit TOUTES les églises via la RLS. Pour éviter le mélange
+  // (membres d'autres églises qui apparaissent), il choisit un périmètre :
+  // une famille précise, ou « Toutes ». Le choix filtre le ctx en amont, donc
+  // toutes les pages en héritent sans modification. '' = toutes.
+  const [scopeFamilleId, setScopeFamilleId] = useState('')
+  const [famillesScope, setFamillesScope] = useState([])
+  useEffect(() => {
+    if (!auth.isSuperAdmin) return
+    import('./lib/supabase').then(({ supabase }) => {
+      supabase.from('familles_disciples').select('id, nom, eglises(nom)').eq('actif', true).order('nom')
+        .then(({ data }) => setFamillesScope(data || []))
+    })
+  }, [auth.isSuperAdmin])
+
+  // Filtre de périmètre : n'affecte QUE le super-admin ayant choisi une famille.
+  // Pour tout le monde d'autre, la RLS fait déjà le cloisonnement → aucun effet.
+  const inScope = (arr) => {
+    if (!auth.isSuperAdmin || !scopeFamilleId) return arr
+    return (arr || []).filter(x => x.famille_id === scopeFamilleId)
+  }
 
   // Activités : ne garder que celles de la famille de travail de l'utilisateur.
   // Un super-admin ou un Berger d'église voit les activités de TOUTES les familles
@@ -75,7 +98,14 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
   const selectedMembre = mb.membres.find(m => m.id === selectedId) || null
 
   // Wrappers avec toast
-  const w = (fn, msg) => async (...args) => { try { const r = await fn(...args); showToast(msg); return r } catch (e) { showToast('⚠ ' + (e.message || 'Erreur inattendue')) } }
+  // Mode lecture seule : si la famille (ou son église) est désactivée, aucune
+  // écriture n'est permise. Comme TOUTES les actions passent par ce wrapper,
+  // on bloque en un seul endroit — les données restent consultables.
+  const lectureSeule = auth.isFamilleActive === false
+  const w = (fn, msg) => async (...args) => {
+    if (lectureSeule) { showToast('⚠ Famille désactivée : modification impossible (lecture seule)'); return }
+    try { const r = await fn(...args); showToast(msg); return r } catch (e) { showToast('⚠ ' + (e.message || 'Erreur inattendue')) }
+  }
 
   // Alertes filtrées (masquer les membres avec entretien planifié dans les 30j)
   const _todayStr = today()
@@ -92,9 +122,12 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
   })
 
   const ctx = {
-    membres: mb.membres, actifs: mb.actifs, presences: pr.presences,
-    entretiens: en.entretiens, defis: df.defis, plans: pt.plans,
-    alertes: alertesFiltrees, refs: refsOp, h,
+    membres: inScope(mb.membres), actifs: inScope(mb.actifs), presences: inScope(pr.presences),
+    entretiens: inScope(en.entretiens), defis: inScope(df.defis), plans: inScope(pt.plans),
+    alertes: inScope(alertesFiltrees), refs: refsOp, h,
+    histStatuts: inScope(hs.histStatuts),
+    superAdminSansPerimetre: auth.isSuperAdmin === true && !scopeFamilleId,
+    scopeFamilleId: auth.isSuperAdmin === true ? scopeFamilleId : '',
     openFiche, showToast, selectedMembre, selectedId, auth, prevPage,
     // Membres
     ajouterMembre: w(mb.ajouter, '✓ Membre ajouté'),
@@ -146,12 +179,19 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
     case 'cgu': content = <CGUPage />; break
     case 'vueEglise': content = (auth.isBergerEglise || auth.isAdmin) ? <VueEglisePage auth={auth} refs={rf.refs} h={h} /> : null; break
     case 'params': content = auth.isAdmin ? <ParamsPage {...ctx} /> : null; break
-    case 'menu': content = <MenuMobile setPage={setPage} isAdmin={auth.isAdmin} selectedMembre={selectedMembre} auth={auth} />; break
+    case 'menu': content = <MenuMobile setPage={setPage} isAdmin={auth.isAdmin} selectedMembre={selectedMembre} auth={auth} scopeFamilleId={scopeFamilleId} setScopeFamilleId={setScopeFamilleId} famillesScope={famillesScope} />; break
     default: content = <HomePage {...ctx} setPage={setPage} />
   }
 
   return (
-    <Layout page={page} setPage={setPage} alertCount={alertesFiltrees.length} membreCount={mb.actifs.length} selectedMembre={selectedMembre} auth={auth} actifs={mb.actifs} onOpenFiche={openFiche}>
+    <Layout page={page} setPage={setPage} alertCount={ctx.alertes.length} membreCount={ctx.actifs.length} selectedMembre={selectedMembre} auth={auth} actifs={ctx.actifs} onOpenFiche={openFiche}
+      scopeFamilleId={scopeFamilleId} setScopeFamilleId={setScopeFamilleId} famillesScope={famillesScope}>
+      {(mb.loadError || pr.loadError) && (
+        <div style={{ background: '#C25A4A15', border: '1px solid #C25A4A', borderRadius: 10, padding: '12px 16px', marginBottom: 14, fontSize: 13, color: '#C25A4A', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+          <span>Connexion aux données interrompue. Vérifiez votre réseau — vos données ne sont pas perdues.</span>
+          <button onClick={() => { mb.reload(); pr.reload() }} style={{ background: '#C25A4A', color: '#fff', border: 'none', borderRadius: 7, padding: '6px 14px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>Réessayer</button>
+        </div>
+      )}
       {content}
       <Toast message={toast} />
     </Layout>

@@ -42,6 +42,43 @@ function RefTable({ table, label, fields, showToast, familleId }) {
     .replace(/^_+|_+$/g, '')
     .slice(0, 30)
 
+  // Compter combien d'enregistrements utilisent une valeur de référence (par son nom)
+  const compterUsages = async (r) => {
+    // Table -> (table cible, colonne) qui référencent cette valeur par son nom
+    const map = {
+      ref_statuts: ['membres', 'statut'],
+      ref_roles: ['membres', 'role'],
+      ref_statuts_entretien: ['entretiens', 'statut'],
+      ref_types_defi: ['defis', 'type_defi'],
+      ref_statuts_defi: ['defis', 'statut'],
+    }
+    const cible = map[table]
+    if (!cible) return null  // pas de comptage simple pour cette table
+    try {
+      const { count } = await supabase.from(cible[0]).select('id', { count: 'exact', head: true }).eq(cible[1], r.nom)
+      return count || 0
+    } catch { return null }
+  }
+
+  const handleDesactiver = async (r) => {
+    // Réactivation : jamais bloquée
+    if (!r.actif) { try { await desactiver(r.id, true); showToast('✓ Réactivé') } catch (e) { showToast('⚠ ' + e.message) } return }
+
+    // Garde-fou 1 : l'activité culte ne peut pas être désactivée (casse la saisie des présences)
+    if (table === 'activites' && r.code === 'culte') {
+      showToast('⚠ Le culte ne peut pas être désactivé : il est nécessaire à la saisie des présences.')
+      return
+    }
+
+    // Garde-fou 3 : avertir si la valeur est déjà utilisée
+    const n = await compterUsages(r)
+    if (n && n > 0) {
+      const ok = window.confirm('« ' + r.nom + ' » est utilisé par ' + n + ' enregistrement(s). Ils garderont cette valeur mais elle ne sera plus proposée dans les listes. Désactiver quand même ?')
+      if (!ok) return
+    }
+    try { await desactiver(r.id, false); showToast('✓ Désactivé') } catch (e) { showToast('⚠ ' + e.message) }
+  }
+
   const handleAdd = async () => {
     if (!newNom.trim()) return
     const payload = { nom: newNom.trim() }
@@ -81,7 +118,7 @@ function RefTable({ table, label, fields, showToast, familleId }) {
                 <option value="6">Samedi</option>
               </select>
             )}
-            <button onClick={() => desactiver(r.id, !r.actif)} style={{ background: 'none', border: 'none', fontSize: 11, color: r.actif ? '#5E7175' : '#2E7D8A', cursor: 'pointer' }}>
+            <button onClick={() => handleDesactiver(r)} style={{ background: 'none', border: 'none', fontSize: 11, color: r.actif ? '#5E7175' : '#2E7D8A', cursor: 'pointer' }}>
               {r.actif ? 'Désactiver' : 'Réactiver'}
             </button>
           </div>
@@ -125,6 +162,13 @@ function UsersTable({ showToast, actifs, refs, auth }) {
 
   const handleInvite = async () => {
     if (!inviteData.email?.trim()) { showToast('⚠ Email requis'); return }
+    const emailNorm = inviteData.email.trim().toLowerCase()
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailNorm)) { showToast('⚠ Email invalide'); return }
+    // Garde-fou : ne pas inviter un email qui a déjà un compte
+    if ((profils || []).some(p => (p.email || '').trim().toLowerCase() === emailNorm)) {
+      showToast('⚠ Un compte existe déjà avec cet email')
+      return
+    }
     setInviting(true)
     try {
       const { data, error } = await supabase.functions.invoke('invite-user', {
@@ -231,10 +275,10 @@ function UsersTable({ showToast, actifs, refs, auth }) {
           </div>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 10, fontSize: 12 }}>
             <label style={{ display: 'flex', gap: 4, alignItems: 'center', cursor: 'pointer' }}>
-              <input type="checkbox" checked={inviteData.est_responsable} onChange={e => setInviteData(p => ({ ...p, est_responsable: e.target.checked }))} /> Responsable (accès à l'app)
+              <input type="checkbox" checked={inviteData.est_responsable} onChange={e => setInviteData(p => ({ ...p, est_responsable: e.target.checked, est_admin: e.target.checked ? p.est_admin : false }))} /> Responsable (accès à l'app)
             </label>
             <label style={{ display: 'flex', gap: 4, alignItems: 'center', cursor: 'pointer' }}>
-              <input type="checkbox" checked={inviteData.est_admin} onChange={e => setInviteData(p => ({ ...p, est_admin: e.target.checked }))} /> Admin
+              <input type="checkbox" checked={inviteData.est_admin} onChange={e => setInviteData(p => ({ ...p, est_admin: e.target.checked, est_responsable: e.target.checked ? true : p.est_responsable }))} /> Admin
             </label>
           </div>
           <button onClick={handleInvite} disabled={inviting || !inviteData.email} style={{ ...S.btn('#2E7D8A', false), width: '100%', opacity: inviting || !inviteData.email ? 0.6 : 1 }}>
@@ -252,11 +296,11 @@ function UsersTable({ showToast, actifs, refs, auth }) {
                 <div style={{ fontSize: 11, color: '#5E7175' }}>{p.email}</div>
               </div>
               <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, cursor: 'pointer' }}>
-                <input type="checkbox" checked={p.est_responsable || false} onChange={e => handleRole(p.id, e.target.checked, p.est_admin)} />
+                <input type="checkbox" checked={p.est_responsable || false} onChange={e => handleRole(p.id, e.target.checked, e.target.checked ? p.est_admin : false)} />
                 Resp.
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, cursor: 'pointer' }}>
-                <input type="checkbox" checked={p.est_admin || false} onChange={e => handleRole(p.id, p.est_responsable, e.target.checked)} />
+                <input type="checkbox" checked={p.est_admin || false} onChange={e => handleRole(p.id, e.target.checked ? true : p.est_responsable, e.target.checked)} />
                 Admin
               </label>
               {auth?.isSuperAdmin ? (
@@ -273,6 +317,14 @@ function UsersTable({ showToast, actifs, refs, auth }) {
               {auth?.isSuperAdmin && (
                 <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, cursor: 'pointer', color: '#C25A4A' }} title="Accès technique total (bypass RLS). À n'accorder qu'en connaissance de cause.">
                   <input type="checkbox" checked={p.est_super_admin || false} onChange={async e => {
+                    const veutRetirer = !e.target.checked
+                    if (veutRetirer) {
+                      // Garde-fou 1 : ne pas se retirer soi-même le super-admin
+                      if (p.id === auth?.profil?.id) { showToast('⚠ Vous ne pouvez pas retirer votre propre rôle super-admin'); return }
+                      // Garde-fou 2 : ne pas retirer le dernier super-admin du système
+                      const nbSuper = (profils || []).filter(x => x.est_super_admin).length
+                      if (nbSuper <= 1) { showToast('⚠ Impossible : il doit rester au moins un super-admin'); return }
+                    }
                     if (e.target.checked && !window.confirm('Donner le rôle SUPER-ADMIN à ' + (p.nom_affiche || p.email) + ' ? Ce rôle donne un accès technique total, toutes églises confondues.')) return
                     const { supabase } = await import('../lib/supabase')
                     const { error } = await supabase.from('profils').update({ est_super_admin: e.target.checked }).eq('id', p.id)
