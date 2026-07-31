@@ -95,6 +95,9 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
 
   const [prevPage, setPrevPage] = useState('ames')
   const openFiche = (id) => { setSelectedId(id); setPrevPage(page); setPage('fiche') }
+  // Navigation : quitter la fiche vers une autre page efface le membre sélectionné
+  // (pour que le raccourci « Fiche » du menu ne reste pas affiché indéfiniment)
+  const navigateTo = (p) => { if (p !== 'fiche') setSelectedId(null); setPage(p) }
   const selectedMembre = mb.membres.find(m => m.id === selectedId) || null
 
   // Wrappers avec toast
@@ -158,17 +161,17 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
   }
 
   if (dataLoading) return (
-    <Layout page={page} setPage={setPage} alertCount={0} membreCount={0} selectedMembre={null} auth={auth} actifs={[]} onOpenFiche={() => {}}>
+    <Layout page={page} setPage={navigateTo} alertCount={0} membreCount={0} selectedMembre={null} auth={auth} actifs={[]} onOpenFiche={() => {}}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 20px', color: '#5E7175', fontSize: 13 }}>Chargement des données...</div>
     </Layout>
   )
 
   let content
   switch (page) {
-    case 'home': content = <HomePage {...ctx} setPage={setPage} />; break
+    case 'home': content = <HomePage {...ctx} setPage={navigateTo} />; break
     case 'pres': content = <PresencesPage {...ctx} />; break
-    case 'ames': content = <AmesPage {...ctx} setPage={setPage} />; break
-    case 'fiche': content = <FichePage {...ctx} setPage={setPage} />; break
+    case 'ames': content = <AmesPage {...ctx} setPage={navigateTo} />; break
+    case 'fiche': content = <FichePage {...ctx} setPage={navigateTo} />; break
     case 'alerts': content = <AlertesPage {...ctx} />; break
     case 'ents': content = <EntretiensPage {...ctx} />; break
     case 'protos': content = <CroissancePage {...ctx} />; break
@@ -179,12 +182,12 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
     case 'cgu': content = <CGUPage />; break
     case 'vueEglise': content = (auth.isBergerEglise || auth.isAdmin) ? <VueEglisePage auth={auth} refs={rf.refs} h={h} /> : null; break
     case 'params': content = auth.isAdmin ? <ParamsPage {...ctx} /> : null; break
-    case 'menu': content = <MenuMobile setPage={setPage} isAdmin={auth.isAdmin} selectedMembre={selectedMembre} auth={auth} scopeFamilleId={scopeFamilleId} setScopeFamilleId={setScopeFamilleId} famillesScope={famillesScope} />; break
-    default: content = <HomePage {...ctx} setPage={setPage} />
+    case 'menu': content = <MenuMobile setPage={navigateTo} isAdmin={auth.isAdmin} selectedMembre={selectedMembre} auth={auth} scopeFamilleId={scopeFamilleId} setScopeFamilleId={setScopeFamilleId} famillesScope={famillesScope} />; break
+    default: content = <HomePage {...ctx} setPage={navigateTo} />
   }
 
   return (
-    <Layout page={page} setPage={setPage} alertCount={ctx.alertes.length} membreCount={ctx.actifs.length} selectedMembre={selectedMembre} auth={auth} actifs={ctx.actifs} onOpenFiche={openFiche}
+    <Layout page={page} setPage={navigateTo} alertCount={ctx.alertes.length} membreCount={ctx.actifs.length} selectedMembre={selectedMembre} auth={auth} actifs={ctx.actifs} onOpenFiche={openFiche}
       scopeFamilleId={scopeFamilleId} setScopeFamilleId={setScopeFamilleId} famillesScope={famillesScope}>
       {(mb.loadError || pr.loadError) && (
         <div style={{ background: '#C25A4A15', border: '1px solid #C25A4A', borderRadius: 10, padding: '12px 16px', marginBottom: 14, fontSize: 13, color: '#C25A4A', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
