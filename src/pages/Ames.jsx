@@ -205,6 +205,8 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                 if (!suivId) { showToast('⚠ Choisissez un responsable'); return }
                 const ids = Object.keys(bulkSel).filter(k => bulkSel[k])
                 if (!ids.length) return
+                // Garde-fou : un membre ne peut pas se suivre lui-même
+                if (ids.includes(suivId)) { showToast('⚠ Un membre ne peut pas être son propre suiveur — retirez-le de la sélection'); return }
                 try {
                   for (const id of ids) { await modifierMembre(id, { suivi_par: suivId }) }
                   showToast('✓ ' + ids.length + ' membre(s) assigné(s)')

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from './lib/auth'
 import { useMembres, usePresences, useEntretiens, useDefis, usePlanCroissance, useAlertes, useRefs, useDatesAnnulees, refHelpers } from './lib/data'
 import { Toast, useToast, today } from './lib/ui'
@@ -58,6 +58,28 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
   const rf = useRefs()
   const da = useDatesAnnulees()
 
+  // ── Sélecteur de périmètre (super-admin uniquement) ──
+  // Le super-admin voit TOUTES les églises via la RLS. Pour éviter le mélange
+  // (membres d'autres églises qui apparaissent), il choisit un périmètre :
+  // une famille précise, ou « Toutes ». Le choix filtre le ctx en amont, donc
+  // toutes les pages en héritent sans modification. '' = toutes.
+  const [scopeFamilleId, setScopeFamilleId] = useState('')
+  const [famillesScope, setFamillesScope] = useState([])
+  useEffect(() => {
+    if (!auth.isSuperAdmin) return
+    import('./lib/supabase').then(({ supabase }) => {
+      supabase.from('familles_disciples').select('id, nom, eglises(nom)').eq('actif', true).order('nom')
+        .then(({ data }) => setFamillesScope(data || []))
+    })
+  }, [auth.isSuperAdmin])
+
+  // Filtre de périmètre : n'affecte QUE le super-admin ayant choisi une famille.
+  // Pour tout le monde d'autre, la RLS fait déjà le cloisonnement → aucun effet.
+  const inScope = (arr) => {
+    if (!auth.isSuperAdmin || !scopeFamilleId) return arr
+    return (arr || []).filter(x => x.famille_id === scopeFamilleId)
+  }
+
   // Activités : ne garder que celles de la famille de travail de l'utilisateur.
   // Un super-admin ou un Berger d'église voit les activités de TOUTES les familles
   // via la RLS (voulu pour la Synthèse église), mais les pages opérationnelles
@@ -75,7 +97,14 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
   const selectedMembre = mb.membres.find(m => m.id === selectedId) || null
 
   // Wrappers avec toast
-  const w = (fn, msg) => async (...args) => { try { const r = await fn(...args); showToast(msg); return r } catch (e) { showToast('⚠ ' + (e.message || 'Erreur inattendue')) } }
+  // Mode lecture seule : si la famille (ou son église) est désactivée, aucune
+  // écriture n'est permise. Comme TOUTES les actions passent par ce wrapper,
+  // on bloque en un seul endroit — les données restent consultables.
+  const lectureSeule = auth.isFamilleActive === false
+  const w = (fn, msg) => async (...args) => {
+    if (lectureSeule) { showToast('⚠ Famille désactivée : modification impossible (lecture seule)'); return }
+    try { const r = await fn(...args); showToast(msg); return r } catch (e) { showToast('⚠ ' + (e.message || 'Erreur inattendue')) }
+  }
 
   // Alertes filtrées (masquer les membres avec entretien planifié dans les 30j)
   const _todayStr = today()
@@ -92,9 +121,9 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
   })
 
   const ctx = {
-    membres: mb.membres, actifs: mb.actifs, presences: pr.presences,
-    entretiens: en.entretiens, defis: df.defis, plans: pt.plans,
-    alertes: alertesFiltrees, refs: refsOp, h,
+    membres: inScope(mb.membres), actifs: inScope(mb.actifs), presences: inScope(pr.presences),
+    entretiens: inScope(en.entretiens), defis: inScope(df.defis), plans: inScope(pt.plans),
+    alertes: inScope(alertesFiltrees), refs: refsOp, h,
     openFiche, showToast, selectedMembre, selectedId, auth, prevPage,
     // Membres
     ajouterMembre: w(mb.ajouter, '✓ Membre ajouté'),
@@ -141,7 +170,7 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
     case 'protos': content = <CroissancePage {...ctx} />; break
     case 'timeline': content = <HistoriquePage {...ctx} />; break
     case 'filia': content = <FiliationPage {...ctx} />; break
-    case 'export': content = <ExportPage {...ctx} />; break
+    case 'export': content = null; break  /* Export & sauvegarde désactivé — remettre <ExportPage {...ctx} /> pour réactiver */
     case 'rapport': content = <RapportPage {...ctx} />; break
     case 'cgu': content = <CGUPage />; break
     case 'vueEglise': content = (auth.isBergerEglise || auth.isAdmin) ? <VueEglisePage auth={auth} refs={rf.refs} h={h} /> : null; break
@@ -151,7 +180,8 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
   }
 
   return (
-    <Layout page={page} setPage={setPage} alertCount={alertesFiltrees.length} membreCount={mb.actifs.length} selectedMembre={selectedMembre} auth={auth} actifs={mb.actifs} onOpenFiche={openFiche}>
+    <Layout page={page} setPage={setPage} alertCount={ctx.alertes.length} membreCount={ctx.actifs.length} selectedMembre={selectedMembre} auth={auth} actifs={ctx.actifs} onOpenFiche={openFiche}
+      scopeFamilleId={scopeFamilleId} setScopeFamilleId={setScopeFamilleId} famillesScope={famillesScope}>
       {content}
       <Toast message={toast} />
     </Layout>

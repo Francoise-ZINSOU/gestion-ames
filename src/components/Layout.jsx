@@ -10,7 +10,7 @@ const navIcons = {
   export: Download, params: Settings, fiche: Search, menu: Menu, vueEglise: Building2
 }
 
-export default function Layout({ page, setPage, alertCount, membreCount, selectedMembre, children, auth, actifs, onOpenFiche }) {
+export default function Layout({ page, setPage, alertCount, membreCount, selectedMembre, children, auth, actifs, onOpenFiche, scopeFamilleId, setScopeFamilleId, famillesScope }) {
   const familleName = auth?.profil?.famille_nom || null
   const egliseName = auth?.profil?.eglise_nom || null
   const { logout, profil, isAdmin, isBergerEglise } = useAuth()
@@ -57,27 +57,43 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
           <div style={{ fontSize: 14, fontWeight: 700, fontFamily: "'Outfit', sans-serif" }}>Suivi pastoral</div>
           {familleName && <div style={{ fontSize: 11, color: '#5E7175', marginTop: 2 }}>{familleName}</div>}
           <div style={{ fontSize: 11, color: '#5E7175', marginTop: 2 }}>{membreCount} membres</div>
+          {auth?.isSuperAdmin && famillesScope && famillesScope.length > 0 && (
+            <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px dashed #DCE6E5' }}>
+              <div style={{ fontSize: 9, letterSpacing: 1, textTransform: 'uppercase', color: '#8A9B9E', fontWeight: 600, marginBottom: 4 }}>Vue administrateur</div>
+              <select value={scopeFamilleId || ''} onChange={e => setScopeFamilleId(e.target.value)} style={{ width: '100%', fontSize: 12, padding: '5px 6px', borderRadius: 6, border: '1px solid #C3D4D3', background: '#F5F8F7', color: '#2B3A3D', fontFamily: 'inherit' }}>
+                <option value="">Toutes les églises</option>
+                {famillesScope.map(f => <option key={f.id} value={f.id}>{f.nom}{f.eglises?.nom ? ' — ' + f.eglises.nom : ''}</option>)}
+              </select>
+            </div>
+          )}
         </div>
+
+        {isBergerEglise && !isAdmin && (
+          <div style={{ padding: '8px 6px 2px' }}>
+            <div style={{ fontSize: 11, letterSpacing: 0.5, color: '#8A9B9E', fontWeight: 500, padding: '0 6px', marginBottom: 2 }}>Supervision</div>
+            {navBtn('vueEglise', 'Synthèse église', 0)}
+            {navBtn('alerts', 'Alertes', alertCount)}
+          </div>
+        )}
 
         <div style={{ padding: '8px 6px 2px' }}>
           
           {navBtn('home', 'Accueil', 0)}
           {navBtn('ames', 'Membres', 0)}
-          {navBtn('pres', 'Présences', 0)}
+          {!isBergerEglise && navBtn('pres', 'Présences', 0)}
           {navBtn('timeline', 'Historique', 0)}
           {navBtn('filia', 'Organisation', 0)}
         </div>
 
         <div style={{ padding: '8px 6px 2px' }}>
           <div style={{ fontSize: 11, letterSpacing: 0.5, color: '#8A9B9E', fontWeight: 500, padding: '0 6px', marginBottom: 2 }}>Suivi</div>
-          {navBtn('alerts', 'Alertes', alertCount)}
-          {navBtn('ents', 'Entretiens', 0)}
+          {!(isBergerEglise && !isAdmin) && navBtn('alerts', 'Alertes', alertCount)}
+          {!isBergerEglise && navBtn('ents', 'Entretiens', 0)}
           {navBtn('protos', 'Formation', 0)}
           {navBtn('rapport', 'Rapport mensuel', 0)}
-          {navBtn('export', 'Export & sauvegarde', 0)}
         </div>
 
-        {(isBergerEglise || isAdmin) && (
+        {isAdmin && (
           <div style={{ padding: '8px 6px 2px' }}>
             <div style={{ fontSize: 11, letterSpacing: 0.5, color: '#8A9B9E', fontWeight: 500, padding: '0 6px', marginBottom: 2 }}>Église</div>
             {navBtn('vueEglise', 'Synthèse', 0)}

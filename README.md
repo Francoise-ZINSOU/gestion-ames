@@ -250,6 +250,7 @@ Les évolutions sont fournies en fichiers séparés à exécuter dans Supabase S
   ⚠️ **v2.1 doit impérativement précéder v2.2** (v2.2 insère dans les colonnes créées par v2.1)
 - `evolution-v2.4-integrite-schema.sql` : FK `ON UPDATE CASCADE` sur les référentiels (renommage sûr), unicité présences/dates annulées, contraintes anti-auto-suivi, `famille_id NOT NULL` sur les 9 tables de données, indexes sur les FK
 - `evolution-v2.7-nationalite-situation-pro.sql` : Champs `nationalite` + `situation_professionnelle` sur membres, table de référence `ref_situations_pro`
+- `fix-integrite-hierarchie-suivi-v3.5.sql` : Trigger empêchant qu'un membre soit son propre suiveur ou qu'une boucle hiérarchique se forme (protège l'arbre d'organisation).
 - `fix-protege-dernier-superadmin-v3.4.sql` : Trigger empêchant de retirer le rôle au dernier super-admin (évite le blocage total : plus personne ne pourrait en recréer). Côté UI, on bloque aussi « se retirer soi-même ».
 - `fix-rls-journal-berger-v3.3.sql` : Retire au berger d'église la LECTURE du journal pastoral (confidentialité / RGPD). Il garde les indicateurs (statut, absences) mais plus le contenu des notes.
 - `fix-rls-delete-admin-v3.2.sql` : Réserve la SUPPRESSION (ligne isolée et réinitialisation) aux admins sur 8 tables sensibles — les politiques `ALL` deviennent SELECT/INSERT/UPDATE (responsable) + DELETE (admin). Boutons de suppression de l'UI masqués pour les non-admins.

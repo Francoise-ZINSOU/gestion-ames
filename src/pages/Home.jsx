@@ -43,6 +43,7 @@ export default function HomePage({ actifs, alertes, presences, entretiens, defis
   const myMembre = auth?.profil?.membre_id ? (actifs || []).find(m => m.id === auth.profil.membre_id) : null
   const mySuivis = myMembre ? actifs.filter(m => m.suivi_par === myMembre.id) : []
   const prenom = (auth?.profil?.nom_affiche || '').split(' ')[0]
+  const estBerger = auth?.isBergerEglise === true && auth?.isAdmin !== true  // berger : lecture seule, accueil dédié
 
   const familleInactive = auth?.profil?.familles_disciples && (auth.profil.familles_disciples.actif === false || auth.profil.familles_disciples.eglises?.actif === false)
 
@@ -119,9 +120,14 @@ export default function HomePage({ actifs, alertes, presences, entretiens, defis
 
   return (
     <div>
-      <div style={{ fontSize: 20, fontWeight: 600, fontFamily: "'Outfit', sans-serif", color: C.text, marginBottom: 16 }}>
+      <div style={{ fontSize: 20, fontWeight: 600, fontFamily: "'Outfit', sans-serif", color: C.text, marginBottom: estBerger ? 4 : 16 }}>
         Bonjour{prenom ? ', ' + prenom : ''}
       </div>
+      {estBerger && (
+        <div style={{ fontSize: 13, color: C.sub, marginBottom: 16 }}>
+          Vue berger d'église — consultation de toutes les familles de votre église.
+        </div>
+      )}
 
       {familleInactive && (
         <div style={{ ...S.card, borderLeft: '3px solid ' + C.meta, marginBottom: 12 }}>
@@ -165,8 +171,9 @@ export default function HomePage({ actifs, alertes, presences, entretiens, defis
       )}
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 18, flexWrap: 'wrap' }}>
-        <button onClick={() => setPage('pres')} style={{ ...S.btn(C.primary, false), padding: '9px 18px', fontSize: 13 }}>Saisir les présences</button>
-        <button onClick={() => setPage('ents')} style={{ ...S.btn(C.primary, true), padding: '9px 18px', fontSize: 13 }}>Nouvel entretien</button>
+        {!estBerger && <button onClick={() => setPage('pres')} style={{ ...S.btn(C.primary, false), padding: '9px 18px', fontSize: 13 }}>Saisir les présences</button>}
+        {!estBerger && <button onClick={() => setPage('ents')} style={{ ...S.btn(C.primary, true), padding: '9px 18px', fontSize: 13 }}>Nouvel entretien</button>}
+        {estBerger && <button onClick={() => setPage('vueEglise')} style={{ ...S.btn(C.primary, false), padding: '9px 18px', fontSize: 13 }}>Ouvrir la synthèse église</button>}
       </div>
 
       {recent.length > 0 && (
