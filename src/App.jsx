@@ -104,10 +104,22 @@ function AuthorizedApp({ auth, toast, showToast, page, setPage, selectedId, setS
   const dataLoading = mb.loading || pr.loading || rf.loading
 
   const [prevPage, setPrevPage] = useState('ames')
+  // Rechargement throttlé du profil : à chaque navigation, on rafraîchit les
+  // rôles depuis la base (au plus une fois / 30 s). Ainsi un changement de rôle
+  // (ex. passer quelqu'un berger) prend effet en quelques clics, sans qu'il ait
+  // à se déconnecter/reconnecter.
+  const lastReloadRef = useRef(0)
+  const rafraichirRoles = () => {
+    const now = Date.now()
+    if (now - lastReloadRef.current > 30000) {
+      lastReloadRef.current = now
+      auth.reloadProfil?.()
+    }
+  }
   const openFiche = (id) => { setSelectedId(id); setPrevPage(page); setPage('fiche') }
   // Navigation : quitter la fiche vers une autre page efface le membre sélectionné
   // (pour que le raccourci « Fiche » du menu ne reste pas affiché indéfiniment)
-  const navigateTo = (p) => { if (p !== 'fiche') setSelectedId(null); setPage(p) }
+  const navigateTo = (p) => { if (p !== 'fiche') setSelectedId(null); rafraichirRoles(); setPage(p) }
   const selectedMembre = mb.membres.find(m => m.id === selectedId) || null
 
   // Wrappers avec toast

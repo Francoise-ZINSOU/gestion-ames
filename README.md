@@ -1,5 +1,9 @@
 # Gestion des Âmes — Suivi Pastoral
 
+### Rafraîchissement des rôles sans reconnexion (session e42)
+À chaque navigation, le profil (et donc les rôles) est rechargé depuis la base, au plus une fois toutes les 30 s (throttle via useRef dans App.jsx, réutilise auth.reloadProfil). Un changement de rôle (ex. passer quelqu'un berger, ou le rétrograder) prend désormais effet en quelques clics, sans que l'utilisateur ait à se déconnecter/reconnecter. Répond au cas observé : « il avait encore les anciens accès ».
+
+
 ### Test des rôles et transitions (session e41)
 Nouveau fichier de test permanent src/__tests__/roles.test.jsx : vérifie les états de rôle ET les transitions (le "film" : responsable → berger, admin → responsable, etc.), avec en tête le cas Alfred (berger gardant une famille héritée = berger pur). 13 assertions. Tourne dans la CI à chaque build → si une modif future casse la logique des rôles, le build échoue. Motivé par le fait que le cas Alfred n'avait pas été détecté (test des états figés seulement, pas des transitions).
 
