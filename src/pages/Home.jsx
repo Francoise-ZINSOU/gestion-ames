@@ -46,21 +46,26 @@ export default function HomePage({ actifs, alertes, presences, entretiens, defis
 
   const familleInactive = auth?.profil?.familles_disciples && (auth.profil.familles_disciples.actif === false || auth.profil.familles_disciples.eglises?.actif === false)
 
-  // ─── Église vide : accueil épuré, uniquement la checklist ───
+  // ─── Église vide : accueil épuré, checklist guidée ───
   if (actifs.length === 0) {
+    const chefNom = h.bergerRoleName || 'Chef de famille'
     const steps = [
-      { n: 1, t: 'Ajouter vos premiers membres', d: 'Les personnes que vous accompagnez', go: 'ames', c: C.primary },
-      { n: 2, t: 'Pointer les présences', d: 'Chaque dimanche, cochez qui était là', go: 'pres', c: C.primary },
-      { n: 3, t: "Inviter d'autres responsables", d: 'Chaque pilier aura son propre accès', go: 'params', c: C.accent },
+      { n: 1, t: `Commencer par le ${chefNom.toLowerCase()}`, d: 'La personne qui porte la famille — vous-même ou celui que vous désignez', go: 'ames', c: C.primary },
+      { n: 2, t: 'Ajouter les piliers', d: 'Ceux qui accompagnent à vos côtés — rattachez-les au chef de famille', go: 'ames', c: C.primary },
+      { n: 3, t: 'Ajouter les autres membres', d: 'Rattachez chacun au pilier ou au chef qui le suit', go: 'ames', c: C.primary },
+      { n: 4, t: 'Pointer les présences', d: 'Une fois la famille en place, cochez qui est au culte', go: 'pres', c: C.accent },
     ]
     return (
       <div style={{ maxWidth: 560, margin: '0 auto', paddingTop: 24 }}>
-        <div style={{ textAlign: 'center', marginBottom: 28 }}>
+        <div style={{ textAlign: 'center', marginBottom: 22 }}>
           <div style={{ fontSize: 44, marginBottom: 10 }}>🌱</div>
           <div style={{ fontSize: 20, fontWeight: 600, fontFamily: "'Outfit', sans-serif", color: C.text, marginBottom: 6 }}>
             Bienvenue{prenom ? ', ' + prenom : ''}
           </div>
-          <div style={{ fontSize: 14, color: C.sub }}>Votre espace est prêt. Trois pas pour commencer.</div>
+          <div style={{ fontSize: 14, color: C.sub }}>Votre espace est prêt. Construisez votre famille de haut en bas.</div>
+        </div>
+        <div style={{ background: C.primarySoft, borderRadius: 12, padding: '12px 16px', marginBottom: 18, fontSize: 13, color: C.primaryDark, lineHeight: 1.6 }}>
+          L'ordre compte : ajoutez d'abord le <strong>{chefNom.toLowerCase()}</strong>, puis les <strong>piliers</strong> rattachés à lui, enfin les <strong>membres</strong> rattachés à leur pilier. C'est ce qui construit l'arbre de suivi de votre famille.
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {steps.map(s => (
@@ -72,6 +77,9 @@ export default function HomePage({ actifs, alertes, presences, entretiens, defis
               </div>
             </div>
           ))}
+        </div>
+        <div style={{ fontSize: 12, color: C.meta, textAlign: 'center', marginTop: 16 }}>
+          Vous pourrez inviter d'autres responsables plus tard, depuis les Paramètres.
         </div>
       </div>
     )

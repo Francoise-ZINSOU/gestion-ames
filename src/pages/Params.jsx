@@ -273,6 +273,14 @@ function UsersTable({ showToast, actifs, refs, auth }) {
               {auth?.isSuperAdmin && (
                 <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, cursor: 'pointer', color: '#C25A4A' }} title="Accès technique total (bypass RLS). À n'accorder qu'en connaissance de cause.">
                   <input type="checkbox" checked={p.est_super_admin || false} onChange={async e => {
+                    const veutRetirer = !e.target.checked
+                    if (veutRetirer) {
+                      // Garde-fou 1 : ne pas se retirer soi-même le super-admin
+                      if (p.id === auth?.profil?.id) { showToast('⚠ Vous ne pouvez pas retirer votre propre rôle super-admin'); return }
+                      // Garde-fou 2 : ne pas retirer le dernier super-admin du système
+                      const nbSuper = (profils || []).filter(x => x.est_super_admin).length
+                      if (nbSuper <= 1) { showToast('⚠ Impossible : il doit rester au moins un super-admin'); return }
+                    }
                     if (e.target.checked && !window.confirm('Donner le rôle SUPER-ADMIN à ' + (p.nom_affiche || p.email) + ' ? Ce rôle donne un accès technique total, toutes églises confondues.')) return
                     const { supabase } = await import('../lib/supabase')
                     const { error } = await supabase.from('profils').update({ est_super_admin: e.target.checked }).eq('id', p.id)
