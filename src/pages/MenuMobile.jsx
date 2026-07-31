@@ -7,7 +7,18 @@ import { Home, CheckSquare, TrendingUp, Users, GitBranch, Bell, MessageCircle, B
 export default function MenuMobile({ setPage, isAdmin, selectedMembre, auth }) {
   const { logout, profil } = useAuth()
 
-  const items = [
+  const berger = auth?.isBergerEglise === true && isAdmin !== true
+  const items = berger ? [
+    // Berger : supervision d'abord, cohérent avec le desktop
+    { id: 'home', Icon: Home, label: 'Accueil' },
+    { id: 'vueEglise', Icon: Building2, label: 'Synthèse église' },
+    { id: 'alerts', Icon: Bell, label: 'Alertes' },
+    { id: 'ames', Icon: Users, label: 'Membres' },
+    { id: 'timeline', Icon: TrendingUp, label: 'Historique' },
+    { id: 'filia', Icon: GitBranch, label: 'Organisation' },
+    { id: 'protos', Icon: BookOpen, label: 'Parcours de formation' },
+    { id: 'rapport', Icon: FileText, label: 'Rapport mensuel' },
+  ] : [
     { id: 'home', Icon: Home, label: 'Accueil' },
     { id: 'pres', Icon: CheckSquare, label: 'Présences' },
     { id: 'timeline', Icon: TrendingUp, label: 'Historique' },
@@ -17,9 +28,8 @@ export default function MenuMobile({ setPage, isAdmin, selectedMembre, auth }) {
     { id: 'ents', Icon: MessageCircle, label: 'Entretiens' },
     { id: 'protos', Icon: BookOpen, label: 'Parcours de formation' },
     { id: 'rapport', Icon: FileText, label: 'Rapport mensuel' },
-    { id: 'export', Icon: Download, label: 'Export & sauvegarde' },
   ]
-  if (auth?.isBergerEglise || isAdmin) items.push({ id: 'vueEglise', Icon: Building2, label: 'Synthèse église' })
+  if (!berger && (auth?.isBergerEglise || isAdmin)) items.push({ id: 'vueEglise', Icon: Building2, label: 'Synthèse église' })
   if (isAdmin) items.push({ id: 'params', Icon: Settings, label: 'Paramètres' })
 
   return (

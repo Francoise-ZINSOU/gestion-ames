@@ -155,18 +155,32 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
         <div style={{ padding: '16px 20px 50px' }}>{children}</div>
       </div>
 
-      {/* Nav mobile */}
+      {/* Nav mobile — adaptée au rôle */}
       <nav className="nv" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderTop: '1px solid #DCE6E5', display: 'none', zIndex: 200, padding: '4px 0 calc(2px + env(safe-area-inset-bottom, 0px))' }}>
-        {[['home', 'Accueil', Home], ['pres', 'Présences', CheckSquare], ['ames', 'Membres', Users], ['alerts', 'Alertes', Bell], ['menu', 'Plus', Menu]].map(([id, label, Icon]) => (
-          <button key={id} onClick={() => id === 'menu' ? setPage('menu') : setPage(id)} style={{
-            flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
-            padding: '4px 2px', border: 'none', background: 'transparent', cursor: 'pointer',
-            fontFamily: 'inherit', fontSize: 10, color: page === id ? '#2E7D8A' : '#5E7175', fontWeight: page === id ? 700 : 500
-          }}>
-            <Icon size={18} strokeWidth={page === id ? 2.2 : 1.5} />
-            <span>{label}</span>
-          </button>
-        ))}
+        {(() => {
+          const berger = isBergerEglise && !isAdmin
+          let nav
+          if (berger) {
+            // Berger : pas de Présences (lecture seule), Synthèse en accès direct
+            nav = [['home', 'Accueil', Home], ['ames', 'Membres', Users], ['alerts', 'Alertes', Bell], ['vueEglise', 'Synthèse', Building2], ['menu', 'Plus', Menu]]
+          } else if (isAdmin) {
+            // Admin : Paramètres en accès direct (Alertes reste dans Plus)
+            nav = [['home', 'Accueil', Home], ['pres', 'Présences', CheckSquare], ['ames', 'Membres', Users], ['params', 'Réglages', Settings], ['menu', 'Plus', Menu]]
+          } else {
+            // Responsable : la barre standard
+            nav = [['home', 'Accueil', Home], ['pres', 'Présences', CheckSquare], ['ames', 'Membres', Users], ['alerts', 'Alertes', Bell], ['menu', 'Plus', Menu]]
+          }
+          return nav.map(([id, label, Icon]) => (
+            <button key={id} onClick={() => id === 'menu' ? setPage('menu') : setPage(id)} style={{
+              flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+              padding: '4px 2px', border: 'none', background: 'transparent', cursor: 'pointer',
+              fontFamily: 'inherit', fontSize: 10, color: page === id ? '#2E7D8A' : '#5E7175', fontWeight: page === id ? 700 : 500
+            }}>
+              <Icon size={18} strokeWidth={page === id ? 2.2 : 1.5} />
+              <span>{label}</span>
+            </button>
+          ))
+        })()}
       </nav>
 
       <style>{`
