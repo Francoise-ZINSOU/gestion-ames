@@ -250,6 +250,7 @@ Les évolutions sont fournies en fichiers séparés à exécuter dans Supabase S
   ⚠️ **v2.1 doit impérativement précéder v2.2** (v2.2 insère dans les colonnes créées par v2.1)
 - `evolution-v2.4-integrite-schema.sql` : FK `ON UPDATE CASCADE` sur les référentiels (renommage sûr), unicité présences/dates annulées, contraintes anti-auto-suivi, `famille_id NOT NULL` sur les 9 tables de données, indexes sur les FK
 - `evolution-v2.7-nationalite-situation-pro.sql` : Champs `nationalite` + `situation_professionnelle` sur membres, table de référence `ref_situations_pro`
+- `evolution-v3.1-refs-nettoyage.sql` : Correction des ordres en doublon (statuts d'entretien, statuts membres) et affinage des types de défis (« Spirituel » → « Spirituel / foi », ajout « Autre »)
 - `evolution-v3.0-modules-formation.sql` : Remplacement complet du référentiel des parcours de formation par 6 playlists vidéo (purge des modules et assignations existants)
 - `evolution-v2.9-vocabulaire-palette.sql` : Renommage statut « En difficulté » → « À accompagner » (CASCADE), alignement des couleurs de référence sur la palette terracotta
 - `evolution-v2.8-coherence-metier.sql` : Contraintes de cohérence — ordre des dates (naissance ≤ inscription ≤ départ ≤ retour), résolution défi ≥ identification, validation module ≥ assignation, âge plausible, triggers suiveur/interlocuteur intra-famille, nettoyage du suivi au transfert de famille
