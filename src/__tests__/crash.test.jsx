@@ -83,15 +83,15 @@ import Layout from '../components/Layout'
 // ── Jeux de données par scénario ──
 const REFS = {
   statuts: [
-    { id: 's1', nom: 'Nouveau', ordre: 1, couleur: '#185FA5', actif: true },
-    { id: 's2', nom: 'Archivé', ordre: 9, couleur: '#64748B', actif: true },
+    { id: 's1', nom: 'Nouveau', ordre: 1, couleur: '#2E7D8A', actif: true },
+    { id: 's2', nom: 'Archivé', ordre: 9, couleur: '#8A9B9E', actif: true },
   ],
   roles: [
-    { id: 'r0', nom: 'Chef de famille', niveau: 0, peut_suivre: true, couleur: '#185FA5', actif: true },
-    { id: 'r1', nom: 'Membre', niveau: 5, peut_suivre: false, couleur: '#64748B', actif: true },
+    { id: 'r0', nom: 'Chef de famille', niveau: 0, peut_suivre: true, couleur: '#2E7D8A', actif: true },
+    { id: 'r1', nom: 'Membre', niveau: 5, peut_suivre: false, couleur: '#8A9B9E', actif: true },
     { id: 'r2', nom: 'Pilier', niveau: 2, peut_suivre: true, couleur: '#7040d0', actif: true },
   ],
-  activites: [{ id: 'a1', nom: 'Culte', code: 'culte', couleur: '#185FA5', icone: '⛪', actif: true, jour_semaine: 0 }],
+  activites: [{ id: 'a1', nom: 'Culte', code: 'culte', couleur: '#2E7D8A', icone: '⛪', actif: true, jour_semaine: 0 }],
   modules: [{ id: 'm1', nom: 'Fondations', actif: true, ordre: 1, url: '' }],
   sujetsEntretien: [{ id: 'su1', nom: 'Suivi', actif: true }],
   typesDefi: [{ id: 't1', nom: 'Spirituel', actif: true }],

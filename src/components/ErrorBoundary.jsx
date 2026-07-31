@@ -17,17 +17,17 @@ export default class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100dvh', background: '#FBF7F1', fontFamily: 'DM Sans, sans-serif', padding: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100dvh', background: '#F5F3EE', fontFamily: 'DM Sans, sans-serif', padding: 20 }}>
           <div style={{ textAlign: 'center', maxWidth: 400 }}>
             <div style={{ fontSize: 48, marginBottom: 16 }}>⚠️</div>
             <div style={{ fontSize: 18, fontWeight: 700, fontFamily: "'Outfit', sans-serif", marginBottom: 8 }}>Quelque chose s'est mal passé</div>
-            <div style={{ fontSize: 14, color: '#6B5D4A', lineHeight: 1.6, marginBottom: 20 }}>
+            <div style={{ fontSize: 14, color: '#5E7175', lineHeight: 1.6, marginBottom: 20 }}>
               L'application a rencontré une erreur inattendue. Essayez de rafraîchir la page.
             </div>
-            <div style={{ fontSize: 12, color: '#8B7355', background: '#FBF7F1', padding: '8px 12px', borderRadius: 8, marginBottom: 20, textAlign: 'left', wordBreak: 'break-word' }}>
+            <div style={{ fontSize: 12, color: '#5E7175', background: '#F5F3EE', padding: '8px 12px', borderRadius: 8, marginBottom: 20, textAlign: 'left', wordBreak: 'break-word' }}>
               {this.state.error?.message || 'Erreur inconnue'}
             </div>
-            <button onClick={() => window.location.reload()} style={{ padding: '10px 24px', borderRadius: 8, border: 'none', background: '#B87333', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+            <button onClick={() => window.location.reload()} style={{ padding: '10px 24px', borderRadius: 8, border: 'none', background: '#2E7D8A', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
               Rafraîchir la page
             </button>
           </div>

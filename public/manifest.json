@@ -4,8 +4,8 @@
   "description": "Application de gestion pastorale pour le suivi des membres",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#FBF7F1",
-  "theme_color": "#B87333",
+  "background_color": "#F5F3EE",
+  "theme_color": "#2E7D8A",
   "orientation": "any",
   "icons": [
     {

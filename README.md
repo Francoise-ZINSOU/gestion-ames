@@ -246,7 +246,7 @@ Les évolutions sont fournies en fichiers séparés à exécuter dans Supabase S
 - `evolution-v1.9-audit-experts.sql` : Historique du suivi pastoral, contrainte anti-auto-suivi
 - `evolution-v2.0-multi-tenant-fix.sql` : Triggers auto `famille_id` sur 9 tables, protection auto-transfert
 - `evolution-v2.1-modules-enrichis.sql` : Colonnes `description` + `url` sur modules, statuts Abandonné (défis) / Reporté, Annulé (entretiens)
-- `evolution-v2.2-statuts-roles-modules.sql` : Suppression STAR (migration vers Intégré), renommage Berger principal → Chef de famille, 12 modules de formation pré-remplis (ICC / Yvan Castanou)
+- `evolution-v2.2-statuts-roles-modules.sql` : Suppression STAR (migration vers Intégré), renommage Berger principal → Chef de famille, 6 parcours de formation (playlists vidéo)
   ⚠️ **v2.1 doit impérativement précéder v2.2** (v2.2 insère dans les colonnes créées par v2.1)
 - `evolution-v2.4-integrite-schema.sql` : FK `ON UPDATE CASCADE` sur les référentiels (renommage sûr), unicité présences/dates annulées, contraintes anti-auto-suivi, `famille_id NOT NULL` sur les 9 tables de données, indexes sur les FK
 - `evolution-v2.7-nationalite-situation-pro.sql` : Champs `nationalite` + `situation_professionnelle` sur membres, table de référence `ref_situations_pro`
@@ -280,16 +280,17 @@ npm run build       → dossier dist/
 npm run test        → Vitest (CI uniquement, pas de Node local)
 ```
 
-### Structure des styles — palette « terracotta & sable » (pastorale)
+### Structure des styles — palette « bleu-canard et sable » (pastorale)
 - Palette centralisée dans `src/lib/ui.jsx` (objet `C`) — point de vérité unique
-- Identité : `#B87333` (terracotta — nav, liens, actions, focus, accent-color)
-- Secondaire : `#4A6FA5` (bleu-ardoise doux — info)
-- Sémantique : `#5B8266` (sauge — présent/positif), `#B87333` (attention bienveillante, au lieu du rouge), `#C0563A` (danger réel, rare), `#8B5B9E` (violet — formation)
-- Neutres chauds : `#3D3229` texte, `#8B7355` sous-texte, `#A08B73` méta, `#EADFCF` bordures, `#FBF7F1` fond crème
-- Cartes : ombre douce (pas de bordure sèche), coins 14px, air généreux
-- Vocabulaire humanisé : « À accompagner » (ex-« En difficulté »), « Membres actifs », « Présence au culte » ; labels en minuscules (fin des majuscules administratives)
+- Identité : `#2E7D8A` (bleu-canard / sarcelle — nav, liens, actions, focus, accent-color)
+- Accent chaud : `#C68A3E` (ambre — moments positifs, anniversaires, attention bienveillante)
+- Sémantique : `#4E8D6E` (vert d'eau — présent/positif), `#C25A4A` (danger réel, rare), `#8B5B9E` (violet — formation)
+- Neutres : `#2B3A3D` texte, `#5E7175` sous-texte, `#8A9B9E` méta, `#DCE6E5` bordures, `#F5F3EE` fond crème
+- Cartes : ombre douce, coins 14px, air généreux
+- Accueil épuré et adaptatif : église vide → checklist seule ; église active → salutation + KPIs + bloc « Aujourd'hui » fusionné
+- Vocabulaire humanisé : « À accompagner », « Membres actifs », « Présence au culte » ; libellés en minuscules
 - Polices : DM Sans / Outfit / Roboto Mono via Google Fonts CDN
-- `theme-color` (index.html + manifest.json) : `#B87333`
+- `theme-color` (index.html + manifest.json) : `#2E7D8A`
 
 ### Responsive / UX mobile
 - Mobile-first : `mob-only` / `desk-only` classes
@@ -299,8 +300,8 @@ npm run test        → Vitest (CI uniquement, pas de Node local)
 - Sidebar fixe 210px desktop
 - `box-sizing: border-box` global (aucun overflow)
 - `font-family: inherit` sur tous les form controls
-- `accent-color: #B87333` sur checkboxes/radios
-- Focus visible clavier : `outline: 2px solid #B87333`
+- `accent-color: #2E7D8A` sur checkboxes/radios
+- Focus visible clavier : `outline: 2px solid #2E7D8A`
 - Tailles minimales : body 14px, texte courant 13px, meta 12px, micro 10-11px
 - Cartes membres compactes (~60px), bulk bar conditionnelle
 - Dropdown activités sur mobile (boutons sur desktop)

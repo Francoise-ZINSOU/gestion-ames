@@ -26,8 +26,8 @@ export default function AlertesPage({ alertes, membres, openFiche, entretiens, r
   return (
     <div style={S.card}>
       <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10 }}>Membres nécessitant attention ({filtered.length})</div>
-      <div style={{ fontSize: 12, color: '#8B7355', marginBottom: 10 }}>Plus le score est élevé, plus le membre a besoin d'attention. Cliquez sur un membre pour ouvrir sa fiche.. Les membres avec un entretien planifié dans les 30 prochains jours sont masqués.</div>
-      {filtered.length === 0 ? <div style={{ padding: 12, textAlign: 'center', color: '#5B8266', fontSize: 13 }}>✓ Aucune alerte — tout va bien !</div>
+      <div style={{ fontSize: 12, color: '#5E7175', marginBottom: 10 }}>Plus le score est élevé, plus le membre a besoin d'attention. Cliquez sur un membre pour ouvrir sa fiche. Les membres avec un entretien planifié dans les 30 prochains jours sont masqués.</div>
+      {filtered.length === 0 ? <div style={{ padding: 12, textAlign: 'center', color: '#4E8D6E', fontSize: 13 }}>✓ Aucune alerte — tout va bien !</div>
         : filtered.map(a => {
           // Recalculer les détails en excluant "sans entretien" si un entretien est planifié
           const hasPlanned = (entretiens || []).some(e =>
@@ -37,16 +37,16 @@ export default function AlertesPage({ alertes, membres, openFiche, entretiens, r
             && e.date_entretien <= in30Str
           )
           const details = []
-          if (a.absences >= 3) details.push({ label: a.absences + ' abs. consécutives', pts: 3, color: '#C0563A' })
-          if (!hasPlanned && a.jours_sans_entretien > 21) details.push({ label: (a.jours_sans_entretien < 30 ? a.jours_sans_entretien + 'j' : a.jours_sans_entretien < 365 ? Math.floor(a.jours_sans_entretien / 30) + ' mois' : Math.floor(a.jours_sans_entretien / 365) + ' an(s)') + ' sans entretien', pts: 2, color: '#B87333' })
+          if (a.absences >= 3) details.push({ label: a.absences + ' abs. consécutives', pts: 3, color: '#C25A4A' })
+          if (!hasPlanned && a.jours_sans_entretien > 21) details.push({ label: (a.jours_sans_entretien < 30 ? a.jours_sans_entretien + 'j' : a.jours_sans_entretien < 365 ? Math.floor(a.jours_sans_entretien / 30) + ' mois' : Math.floor(a.jours_sans_entretien / 365) + ' an(s)') + ' sans entretien', pts: 2, color: '#2E7D8A' })
           if (a.defis_ouverts > 0) details.push({ label: a.defis_ouverts + ' défi(s) ouvert(s)', pts: 1, color: '#8B5B9E' })
           return (
-            <div key={a.membre_id} onClick={() => openFiche(a.membre_id)} style={{ padding: '10px 8px', borderBottom: '1px solid #EADFCF', cursor: 'pointer' }}>
+            <div key={a.membre_id} onClick={() => openFiche(a.membre_id)} style={{ padding: '10px 8px', borderBottom: '1px solid #DCE6E5', cursor: 'pointer' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                <div style={{ width: 28, height: 28, borderRadius: '50%', background: a.score_severite >= 4 ? '#C0563A1a' : '#B873331a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, color: a.score_severite >= 4 ? '#C0563A' : '#B87333', fontWeight: 700, flexShrink: 0 }}>{a.score_severite}</div>
+                <div style={{ width: 28, height: 28, borderRadius: '50%', background: a.score_severite >= 4 ? '#C25A4A1a' : '#2E7D8A1a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, color: a.score_severite >= 4 ? '#C25A4A' : '#2E7D8A', fontWeight: 700, flexShrink: 0 }}>{a.score_severite}</div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: '#B87333' }}>{a.nom_complet}</div>
-                  <div style={{ fontSize: 11, color: '#8B7355' }}>suivi par {getSuiveur(a.suivi_par)}</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#2E7D8A' }}>{a.nom_complet}</div>
+                  <div style={{ fontSize: 11, color: '#5E7175' }}>suivi par {getSuiveur(a.suivi_par)}</div>
                 </div>
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginLeft: 36 }}>

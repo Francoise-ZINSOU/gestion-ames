@@ -46,28 +46,28 @@ export default function RapportPage({ actifs, presences, entretiens, defis, refs
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }} className="no-print">
-        <div style={{ fontSize: 14, color: '#6B5D4A' }}>Rapport des 30 derniers jours. Cliquez Imprimer pour obtenir un PDF.</div>
-        <button onClick={handlePrint} style={{ ...S.btn('#B87333', false), display: 'flex', alignItems: 'center', gap: 6 }}><Printer size={14} /> Imprimer</button>
+        <div style={{ fontSize: 14, color: '#5E7175' }}>Rapport des 30 derniers jours. Cliquez Imprimer pour obtenir un PDF.</div>
+        <button onClick={handlePrint} style={{ ...S.btn('#2E7D8A', false), display: 'flex', alignItems: 'center', gap: 6 }}><Printer size={14} /> Imprimer</button>
       </div>
 
       <div id="rapport" style={{ ...S.card, padding: 24 }}>
         <div style={{ textAlign: 'center', marginBottom: 20 }}>
-          <div style={{ fontSize: 11, letterSpacing: 3, textTransform: 'uppercase', color: '#B87333', fontWeight: 700 }}>{egliseName}</div>
+          <div style={{ fontSize: 11, letterSpacing: 3, textTransform: 'uppercase', color: '#2E7D8A', fontWeight: 700 }}>{egliseName}</div>
           <div style={{ fontSize: 20, fontWeight: 700, fontFamily: "'Outfit', sans-serif", marginBottom: 4 }}>Rapport pastoral mensuel</div>
-          <div style={{ fontSize: 13, color: '#6B5D4A' }}>{familleName} — {fmt(monthAgoStr)} au {fmt(todayStr)}</div>
+          <div style={{ fontSize: 13, color: '#5E7175' }}>{familleName} — {fmt(monthAgoStr)} au {fmt(todayStr)}</div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 20 }}>
           {[
-            { label: 'Membres actifs', value: actifs.length, color: '#B87333' },
-            { label: 'Nouveaux', value: nouveaux, color: '#B87333' },
-            { label: 'En difficulté', value: enDifficulte, color: '#C0563A' },
-            { label: 'Taux culte moyen', value: tauxMoyen !== null ? tauxMoyen + '%' : '—', color: tauxMoyen >= 80 ? '#5B8266' : '#B87333' },
+            { label: 'Membres actifs', value: actifs.length, color: '#2E7D8A' },
+            { label: 'Nouveaux', value: nouveaux, color: '#2E7D8A' },
+            { label: 'En difficulté', value: enDifficulte, color: '#C25A4A' },
+            { label: 'Taux culte moyen', value: tauxMoyen !== null ? tauxMoyen + '%' : '—', color: tauxMoyen >= 80 ? '#4E8D6E' : '#2E7D8A' },
             { label: 'Entretiens réalisés', value: entMois, color: '#8B5B9E' },
-            { label: 'Défis résolus', value: defisClos, color: '#5B8266' },
+            { label: 'Défis résolus', value: defisClos, color: '#4E8D6E' },
           ].map((k, i) => (
-            <div key={i} style={{ padding: 14, background: '#FBF7F1', borderRadius: 8, textAlign: 'center' }}>
-              <div style={{ fontSize: 12, color: '#8B7355', marginBottom: 4 }}>{k.label}</div>
+            <div key={i} style={{ padding: 14, background: '#F5F3EE', borderRadius: 8, textAlign: 'center' }}>
+              <div style={{ fontSize: 12, color: '#5E7175', marginBottom: 4 }}>{k.label}</div>
               <div style={{ fontSize: 24, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: k.color }}>{k.value}</div>
             </div>
           ))}
@@ -83,7 +83,7 @@ export default function RapportPage({ actifs, presences, entretiens, defis, refs
                   <td style={S.td}>{fmt(t.date)}</td>
                   <td style={S.td}>{t.presents}</td>
                   <td style={S.td}>{t.total}</td>
-                  <td style={{ ...S.td, fontWeight: 600, color: t.taux >= 80 ? '#5B8266' : t.taux >= 50 ? '#B87333' : '#C0563A' }}>{t.taux}%</td>
+                  <td style={{ ...S.td, fontWeight: 600, color: t.taux >= 80 ? '#4E8D6E' : t.taux >= 50 ? '#2E7D8A' : '#C25A4A' }}>{t.taux}%</td>
                 </tr>
               ))}</tbody>
             </table>
@@ -92,14 +92,14 @@ export default function RapportPage({ actifs, presences, entretiens, defis, refs
 
         {absCritiques.length > 0 && (
           <div style={{ marginBottom: 20 }}>
-            <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8, color: '#C0563A' }}>Membres avec 3+ absences consécutives</div>
+            <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8, color: '#C25A4A' }}>Membres avec 3+ absences consécutives</div>
             {absCritiques.map(m => (
-              <div key={m.id} style={{ fontSize: 13, padding: '4px 0', borderBottom: '1px solid #FBF7F1' }}>{m.prenom} {m.nom} — {m.statut}</div>
+              <div key={m.id} style={{ fontSize: 13, padding: '4px 0', borderBottom: '1px solid #F5F3EE' }}>{m.prenom} {m.nom} — {m.statut}</div>
             ))}
           </div>
         )}
 
-        <div style={{ marginTop: 20, paddingTop: 12, borderTop: '1px solid #EADFCF', fontSize: 11, color: '#8B7355', textAlign: 'center' }}>
+        <div style={{ marginTop: 20, paddingTop: 12, borderTop: '1px solid #DCE6E5', fontSize: 11, color: '#5E7175', textAlign: 'center' }}>
           Généré le {fmt(todayStr)} — Suivi pastoral v1.0.0
         </div>
       </div>

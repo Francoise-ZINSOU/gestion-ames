@@ -27,7 +27,7 @@ export default function FiliationPage({ actifs, refs, h, openFiche }) {
   const renderMembre = (m, depth) => {
     const enfants = getSuivis(m.id)
     const isLeader = h.canFollow(m.role) && !h.isBergerRole(m.role)
-    const color = isLeader ? '#8B5B9E' : '#B87333'
+    const color = isLeader ? '#8B5B9E' : '#2E7D8A'
 
     return (
       <div key={m.id} style={{ marginBottom: enfants.length > 0 ? 8 : 3 }}>
@@ -35,7 +35,7 @@ export default function FiliationPage({ actifs, refs, h, openFiche }) {
           <div style={{ width: 24, height: 24, borderRadius: '50%', background: color + '18', border: '2px solid ' + color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color, flexShrink: 0 }}>{(m.prenom || '?').charAt(0)}</div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 13, fontWeight: 600, color }}>{m.prenom} {m.nom}</div>
-            {isLeader && <div style={{ fontSize: 10, color: '#8B7355' }}>{m.role} · {enfants.length} suivi(s)</div>}
+            {isLeader && <div style={{ fontSize: 10, color: '#5E7175' }}>{m.role} · {enfants.length} suivi(s)</div>}
           </div>
           <span style={S.pill(getStatutColor(refs, m.statut))}>{m.statut}</span>
         </div>
@@ -53,9 +53,9 @@ export default function FiliationPage({ actifs, refs, h, openFiche }) {
   return (
     <div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 14 }}>
-        <div style={S.kpi('#B87333')}><div style={{ fontSize: 12, fontWeight: 500, color: '#8B7355', marginBottom: 6 }}>Bergers</div><div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: '#B87333' }}>{bergers.length}</div></div>
-        <div style={S.kpi('#8B5B9E')}><div style={{ fontSize: 12, fontWeight: 500, color: '#8B7355', marginBottom: 6 }}>Piliers</div><div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: '#8B5B9E' }}>{piliers.length}</div></div>
-        <div style={S.kpi('#C0563A')}><div style={{ fontSize: 12, fontWeight: 500, color: '#8B7355', marginBottom: 6 }}>Sans suiveur</div><div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: '#C0563A' }}>{orphelinsMembres.length}</div></div>
+        <div style={S.kpi('#2E7D8A')}><div style={{ fontSize: 12, fontWeight: 500, color: '#5E7175', marginBottom: 6 }}>Bergers</div><div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: '#2E7D8A' }}>{bergers.length}</div></div>
+        <div style={S.kpi('#8B5B9E')}><div style={{ fontSize: 12, fontWeight: 500, color: '#5E7175', marginBottom: 6 }}>Piliers</div><div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: '#8B5B9E' }}>{piliers.length}</div></div>
+        <div style={S.kpi('#C25A4A')}><div style={{ fontSize: 12, fontWeight: 500, color: '#5E7175', marginBottom: 6 }}>Sans suiveur</div><div style={{ fontSize: 26, fontWeight: 700, fontFamily: "'Outfit', sans-serif", color: '#C25A4A' }}>{orphelinsMembres.length}</div></div>
       </div>
 
       {/* Arbres des Bergers — récursif */}
@@ -64,14 +64,14 @@ export default function FiliationPage({ actifs, refs, h, openFiche }) {
         return (
           <div key={b.id} style={S.card}>
             <div onClick={() => openFiche(b.id)} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', marginBottom: enfB.length > 0 ? 10 : 0 }}>
-              <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#B8733318', border: '2px solid #B87333', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 700, color: '#B87333' }}>{(b.prenom || '?').charAt(0)}</div>
+              <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#2E7D8A18', border: '2px solid #2E7D8A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 700, color: '#2E7D8A' }}>{(b.prenom || '?').charAt(0)}</div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: '#B87333' }}>{b.prenom} {b.nom}</div>
-                <div style={{ fontSize: 11, color: '#8B7355' }}>Chef de famille · {enfB.length} suivi(s) directs</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: '#2E7D8A' }}>{b.prenom} {b.nom}</div>
+                <div style={{ fontSize: 11, color: '#5E7175' }}>Chef de famille · {enfB.length} suivi(s) directs</div>
               </div>
             </div>
             {enfB.length > 0 && (
-              <div style={{ marginLeft: 20, borderLeft: '2px solid #B8733340', paddingLeft: 14 }}>
+              <div style={{ marginLeft: 20, borderLeft: '2px solid #2E7D8A40', paddingLeft: 14 }}>
                 {enfB.map(e => renderMembre(e, 1))}
               </div>
             )}
@@ -82,8 +82,8 @@ export default function FiliationPage({ actifs, refs, h, openFiche }) {
       {/* Piliers orphelins (sans suiveur du tout ou lien cassé) */}
       {orphelinsPiliers.length > 0 && (
         <div style={S.card}>
-          <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8, color: '#B87333' }}>Piliers sans suiveur ({orphelinsPiliers.length})</div>
-          <div style={{ fontSize: 12, color: '#8B7355', marginBottom: 8 }}>Ces piliers n'ont pas de "Suivi par" — assignez-les au Berger ou à un autre Pilier.</div>
+          <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8, color: '#2E7D8A' }}>Piliers sans suiveur ({orphelinsPiliers.length})</div>
+          <div style={{ fontSize: 12, color: '#5E7175', marginBottom: 8 }}>Ces piliers n'ont pas de "Suivi par" — assignez-les au Berger ou à un autre Pilier.</div>
           {orphelinsPiliers.map(p => renderMembre(p, 0))}
         </div>
       )}
@@ -91,10 +91,10 @@ export default function FiliationPage({ actifs, refs, h, openFiche }) {
       {/* Membres sans suiveur */}
       {orphelinsMembres.length > 0 && (
         <div style={S.card}>
-          <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8, color: '#C0563A' }}>Membres sans suiveur ({orphelinsMembres.length})</div>
+          <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8, color: '#C25A4A' }}>Membres sans suiveur ({orphelinsMembres.length})</div>
           {orphelinsMembres.map(o => (
-            <div key={o.id} onClick={() => openFiche(o.id)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 0', borderBottom: '1px solid #EADFCF', cursor: 'pointer' }}>
-              <span style={{ fontSize: 12, fontWeight: 600, color: '#B87333', flex: 1 }}>{o.prenom} {o.nom}</span>
+            <div key={o.id} onClick={() => openFiche(o.id)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 0', borderBottom: '1px solid #DCE6E5', cursor: 'pointer' }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: '#2E7D8A', flex: 1 }}>{o.prenom} {o.nom}</span>
               <span style={S.pill(getStatutColor(refs, o.statut))}>{o.statut}</span>
             </div>
           ))}
@@ -102,7 +102,7 @@ export default function FiliationPage({ actifs, refs, h, openFiche }) {
       )}
 
       {bergers.length === 0 && orphelinsPiliers.length === 0 && orphelinsMembres.length === 0 && (
-        <div style={{ ...S.card, textAlign: 'center', color: '#8B7355' }}>Aucun membre. Créez des membres et assignez des rôles.</div>
+        <div style={{ ...S.card, textAlign: 'center', color: '#5E7175' }}>Aucun membre. Créez des membres et assignez des rôles.</div>
       )}
     </div>
   )

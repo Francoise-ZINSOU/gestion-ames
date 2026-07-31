@@ -1,27 +1,27 @@
-// ── Palette pastorale « terracotta & sable » ──
-// Couleur d'identité : terracotta. Secondaire : bleu-ardoise doux.
+// ── Palette « bleu-canard & sable » (pastorale, chaleureuse) ──
+// Couleur d'identité : bleu-canard / sarcelle. Secondaire : ambre chaud.
 // Un seul point de vérité — modifier ici se propage partout.
 export const C = {
-  primary: '#B87333',      // terracotta (identité : nav, liens, actions)
-  primaryDark: '#A56A2E',  // terracotta foncé (texte sur fond clair)
-  primarySoft: '#F7EDE1',  // sable (fonds de pills, badges chauds)
-  accent: '#4A6FA5',       // bleu-ardoise doux (info secondaire)
-  accentSoft: '#EAF0F6',
-  success: '#5B8266',      // vert sauge (positif, présent)
-  successSoft: '#E7EFE8',
-  attention: '#B87333',    // « à accompagner » = terracotta, pas rouge
-  attentionSoft: '#F7EDE1',
-  danger: '#C0563A',       // terracotta-rouge (rare : suppression, erreur réelle)
-  dangerSoft: '#F7E7E1',
-  page: '#FBF7F1',         // fond crème
+  primary: '#2E7D8A',      // bleu-canard (identité : nav, liens, actions)
+  primaryDark: '#256470',  // canard foncé (texte sur fond clair)
+  primarySoft: '#E4F0F1',  // canard très pâle (fonds de pills, badges)
+  accent: '#C68A3E',       // ambre chaud (accent, moments positifs)
+  accentSoft: '#F6ECDC',
+  success: '#4E8D6E',      // vert d'eau (positif, présent)
+  successSoft: '#E5F0EA',
+  attention: '#C68A3E',    // « à accompagner » = ambre, pas rouge
+  attentionSoft: '#F6ECDC',
+  danger: '#C25A4A',       // corail-rouge doux (rare : suppression, erreur réelle)
+  dangerSoft: '#F6E4E0',
+  page: '#F5F3EE',         // fond crème doux
   surface: '#fff',
-  text: '#3D3229',         // brun chaud (au lieu du gris-bleu froid)
-  sub: '#8B7355',          // brun-sable (sous-texte)
-  meta: '#A08B73',         // méta
-  border: '#EADFCF',       // bordure sable douce
-  borderInput: '#DCC9B0',
-  fieldBg: '#FBF7F1',
-  shadow: '0 1px 3px rgba(80,60,40,.06), 0 4px 12px rgba(80,60,40,.04)',
+  text: '#2B3A3D',         // gris-canard profond (texte)
+  sub: '#5E7175',          // gris-canard moyen (sous-texte)
+  meta: '#8A9B9E',         // méta
+  border: '#DCE6E5',       // bordure canard pâle
+  borderInput: '#C3D4D3',
+  fieldBg: '#F5F8F7',
+  shadow: '0 1px 3px rgba(40,70,75,.06), 0 4px 12px rgba(40,70,75,.05)',
 }
 
 // ── Styles partagés ──
@@ -117,12 +117,12 @@ export const validTel = (t) => !t || /^[+\d\s()-]{6,}$/.test(t)
 // ── Couleur par statut ──
 export function getStatutColor(refs, statut) {
   const found = (refs.statuts || []).find(s => s.nom === statut)
-  return found?.couleur || '#64748B'
+  return found?.couleur || C.meta
 }
 
 export function getRoleColor(refs, role) {
   const found = (refs.roles || []).find(r => r.nom === role)
-  return found?.couleur || '#64748B'
+  return found?.couleur || C.meta
 }
 
 // ── Toast ──
@@ -133,7 +133,7 @@ export function Toast({ message }) {
     <div className="toast-msg" style={{
       position: 'fixed', bottom: 20, left: '50%', transform: 'translateX(-50%)',
       padding: '10px 18px', borderRadius: 8, maxWidth: 'calc(100vw - 32px)',
-      background: isError ? '#E11D48' : '#059669', color: '#fff', fontSize: 14,
+      background: isError ? C.danger : C.success, color: '#fff', fontSize: 14,
       fontWeight: 600, zIndex: 999, boxShadow: '0 4px 12px rgba(0,0,0,.15)'
     }}>{message}</div>
   )
@@ -156,7 +156,7 @@ export function Skeleton({ width, height, style }) {
 
 export function SkeletonCard() {
   return (
-    <div style={{ padding: 16, background: '#fff', borderRadius: 10, border: '1px solid #E2E8F0' }}>
+    <div style={{ padding: 16, background: C.surface, borderRadius: 12, border: '1px solid ' + C.border }}>
       <Skeleton height={12} width="40%" style={{ marginBottom: 10 }} />
       <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
         <Skeleton height={60} width="25%" />
