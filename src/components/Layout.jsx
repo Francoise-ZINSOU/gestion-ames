@@ -120,12 +120,12 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
 
       {/* Contenu */}
       <div className="mn" style={{ marginLeft: 210, minHeight: '100dvh' }}>
-        <div style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(255,255,255,.92)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #DCE6E5', padding: '0 20px', height: 48, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ fontSize: 15, fontWeight: 700, fontFamily: "'Outfit', sans-serif" }}>{titles[page] || '—'}</div>
-            {(egliseName || familleName) && <div className="mob-only" style={{ fontSize: 10, color: '#2E7D8A', fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', marginTop: -1 }}>{egliseName}{egliseName && familleName ? ' · ' : ''}{familleName}</div>}
+        <div style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(255,255,255,.92)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #DCE6E5', padding: '8px 16px', minHeight: 48, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ fontSize: 15, fontWeight: 700, fontFamily: "'Outfit', sans-serif", whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{titles[page] || '—'}</div>
+            {(egliseName || familleName) && <div className="mob-only" style={{ fontSize: 10, color: '#2E7D8A', fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', marginTop: -1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{egliseName}{egliseName && familleName ? ' · ' : ''}{familleName}</div>}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
             <div style={{ position: 'relative' }}>
               <Search size={14} style={{ position: 'absolute', left: 8, top: 8, color: '#5E7175', pointerEvents: 'none' }} />
               <input
@@ -133,10 +133,10 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
                 onChange={e => setSearchQuery(e.target.value)}
                 onFocus={() => setSearchOpen(true)}
                 placeholder="Rechercher..."
-                style={{ padding: '6px 8px 6px 28px', borderRadius: 6, border: '1px solid #DCE6E5', background: '#F5F3EE', fontSize: 12, width: searchOpen ? 200 : 120, transition: 'width .2s', fontFamily: 'inherit', boxSizing: 'border-box', minWidth: 0 }}
+                style={{ padding: '6px 8px 6px 28px', borderRadius: 6, border: '1px solid #DCE6E5', background: '#F5F3EE', fontSize: 12, width: searchOpen ? 160 : 110, maxWidth: '42vw', transition: 'width .2s', fontFamily: 'inherit', boxSizing: 'border-box', minWidth: 0 }}
               />
               {searchOpen && searchQuery.length >= 2 && (
-                <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, background: '#fff', border: '1px solid #DCE6E5', borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,.1)', zIndex: 200, width: 280, maxHeight: 300, overflowY: 'auto' }}>
+                <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, background: '#fff', border: '1px solid #DCE6E5', borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,.1)', zIndex: 200, width: 280, maxWidth: '80vw', maxHeight: 300, overflowY: 'auto' }}>
                   {searchResults.length === 0 && <div style={{ padding: 14, textAlign: 'center', color: '#5E7175', fontSize: 13 }}>Aucun résultat</div>}
                   {searchResults.map(m => (
                     <div key={m.id} onClick={() => { onOpenFiche(m.id); setSearchQuery(''); setSearchOpen(false) }}
@@ -149,7 +149,7 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
               )}
               {searchOpen && <div onClick={() => { setSearchOpen(false); setSearchQuery('') }} style={{ position: 'fixed', inset: 0, zIndex: 199 }} />}
             </div>
-            <span style={{ fontSize: 12, color: '#5E7175', whiteSpace: 'nowrap' }}>{membreCount} membres</span>
+            <span className="desk-only" style={{ fontSize: 12, color: '#5E7175', whiteSpace: 'nowrap' }}>{membreCount} membres</span>
           </div>
         </div>
         <div style={{ padding: '16px 20px 50px' }}>{children}</div>

@@ -1,5 +1,16 @@
 # Gestion des Âmes — Suivi Pastoral
 
+### Défauts de conception corrigés (session e22)
+- Le chef de famille n'est pas compté dans le taux de présence ni affiché dans la saisie des présences (c'est un accompagnateur, pas un membre suivi).
+- Rôle « Admin » implique désormais « Responsable » (cohérence de la porte d'entrée), à l'invitation et dans la liste.
+- Invitation : blocage si l'email a déjà un compte + validation du format.
+- Perte de connexion aux données : bandeau d'alerte avec bouton « Réessayer » (au lieu de listes vides silencieuses).
+
+
+### Fil d'activité récente
+L'accueil affiche un encart « Activité récente » fusionnant nouveaux membres, changements de statut (table `historique_statuts`), entretiens et défis, triés par date. Hook `useHistoriqueStatutsGlobal` dans data.js. Filtré par périmètre pour le super-admin.
+
+
 Application web de gestion pastorale pour le suivi individualisé des membres d'une église.
 
 **Production** : https://suivi-enracinees.netlify.app

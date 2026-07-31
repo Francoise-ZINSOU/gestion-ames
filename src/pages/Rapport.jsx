@@ -22,7 +22,8 @@ export default function RapportPage({ actifs, presences, entretiens, defis, refs
 
   // Culte stats
   const culte = (refs.activites || []).find(a => a.code === 'culte')
-  const cultePres = culte ? presences.filter(p => p.activite_id === culte.id && p.eligible && p.date_presence >= monthAgoStr) : []
+  const bergerIds = new Set((actifs || []).filter(m => h.isBergerRole(m.role)).map(m => m.id))
+  const cultePres = culte ? presences.filter(p => p.activite_id === culte.id && p.eligible && p.date_presence >= monthAgoStr && !bergerIds.has(p.membre_id)) : []
   const culteDates = [...new Set(cultePres.map(p => p.date_presence))].sort()
   const tauxParDim = culteDates.map(d => {
     const ps = cultePres.filter(p => p.date_presence === d)
@@ -33,6 +34,7 @@ export default function RapportPage({ actifs, presences, entretiens, defis, refs
   // Absences critiques (3+)
   const absCritiques = actifs.filter(m => {
     if (!culte) return false
+    if (h.isBergerRole(m.role)) return false  // le chef n'est pas suivi en présence
     const ps = presences.filter(p => p.membre_id === m.id && p.activite_id === culte.id && p.eligible).sort((a, b) => b.date_presence.localeCompare(a.date_presence))
     let c = 0; for (const p of ps) { if (p.present) break; c++ }
     return c >= 3

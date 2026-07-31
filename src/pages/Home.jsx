@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { toLocalDate, S, C, fmtS, dago, today, getStatutColor } from '../lib/ui'
-import { AlertTriangle, Clock, BookOpen, CheckSquare, TrendingDown, Cake } from 'lucide-react'
+import { AlertTriangle, Clock, BookOpen, CheckSquare, TrendingDown, Cake, UserPlus, MessageCircle, Zap, Activity } from 'lucide-react'
 
-export default function HomePage({ actifs, alertes, presences, entretiens, defis, plans, refs, h, openFiche, setPage, datesAnnulees, auth }) {
+export default function HomePage({ actifs, alertes, presences, entretiens, defis, plans, refs, h, openFiche, setPage, datesAnnulees, auth, histStatuts }) {
   const statutCount = (nom) => actifs.filter(m => m.statut === nom).length
   const statutColor = (nom) => (refs.statuts || []).find(s => s.nom === nom)?.couleur || C.meta
   const statutCritique = (refs.statuts || []).filter(s => !s.est_archive).sort((a, b) => b.ordre - a.ordre)[0]?.nom || 'À accompagner'
@@ -29,7 +29,7 @@ export default function HomePage({ actifs, alertes, presences, entretiens, defis
 
   let tG = 0
   if (culte) {
-    const membresAvecTaux = actifs.map(m => {
+    const membresAvecTaux = actifs.filter(m => !h.isBergerRole(m.role)).map(m => {
       const ps = presences.filter(p => p.membre_id === m.id && p.activite_id === culte.id && p.eligible && !cancelledCulteDates.has(p.date_presence))
       if (!ps.length) return null
       return Math.round(ps.filter(p => p.present).length / ps.length * 100)
@@ -39,6 +39,21 @@ export default function HomePage({ actifs, alertes, presences, entretiens, defis
 
   const recent = actifs.filter(m => { const d = dago(m.date_inscription); return d !== null && d <= 30 })
     .sort((a, b) => new Date(b.date_inscription || 0) - new Date(a.date_inscription || 0)).slice(0, 8)
+
+  // ── Fil d'activité : fusion des événements récents, tous types confondus ──
+  const nomMembre = (id) => { const m = (actifs || []).find(x => x.id === id); return m ? m.prenom + ' ' + m.nom : 'un membre' }
+  const fil = (() => {
+    const ev = []
+    // Nouveaux membres (date_inscription)
+    ;(actifs || []).forEach(m => { if (m.date_inscription) ev.push({ d: m.date_inscription, icon: UserPlus, c: C.primary, txt: `${m.prenom} ${m.nom} a rejoint`, go: m.id }) })
+    // Changements de statut
+    ;(histStatuts || []).forEach(hh => { if (hh.date_changement) ev.push({ d: hh.date_changement, icon: Activity, c: C.accent, txt: `${nomMembre(hh.membre_id)} : ${hh.ancien_statut || '—'} → ${hh.nouveau_statut || '—'}`, go: hh.membre_id }) })
+    // Entretiens enregistrés
+    ;(entretiens || []).forEach(e => { const d = e.created_at || e.date_entretien; if (d) ev.push({ d, icon: MessageCircle, c: '#8B5B9E', txt: `Entretien avec ${nomMembre(e.membre_id)}`, go: e.membre_id }) })
+    // Défis ouverts
+    ;(defis || []).forEach(df => { if (df.created_at) ev.push({ d: df.created_at, icon: Zap, c: C.danger, txt: `Défi pour ${nomMembre(df.membre_id)}`, go: df.membre_id }) })
+    return ev.sort((a, b) => new Date(b.d) - new Date(a.d)).slice(0, 8)
+  })()
 
   const myMembre = auth?.profil?.membre_id ? (actifs || []).find(m => m.id === auth.profil.membre_id) : null
   const mySuivis = myMembre ? actifs.filter(m => m.suivi_par === myMembre.id) : []
@@ -98,6 +113,7 @@ export default function HomePage({ actifs, alertes, presences, entretiens, defis
   const staleNouveau = actifs.filter(m => m.statut === h.defaultStatut && dago(m.date_inscription) > 90)
   const defisSansModule = defis.filter(d => !h.isStatutFinal(d.statut) && !plans.some(p => p.defi_id === d.id))
   const declining = culte ? actifs.filter(m => {
+    if (h.isBergerRole(m.role)) return false  // le chef n'est pas suivi en présence
     const ps = presences.filter(p => p.membre_id === m.id && p.activite_id === culte.id && p.eligible && !cancelledCulteDates.has(p.date_presence)).sort((a, b) => new Date(b.date_presence) - new Date(a.date_presence))
     if (ps.length < 6) return false
     return ps.slice(4, 8).filter(p => p.present).length >= 3 && ps.slice(0, 4).filter(p => p.present).length <= 1
@@ -175,6 +191,26 @@ export default function HomePage({ actifs, alertes, presences, entretiens, defis
         {!estBerger && <button onClick={() => setPage('ents')} style={{ ...S.btn(C.primary, true), padding: '9px 18px', fontSize: 13 }}>Nouvel entretien</button>}
         {estBerger && <button onClick={() => setPage('vueEglise')} style={{ ...S.btn(C.primary, false), padding: '9px 18px', fontSize: 13 }}>Ouvrir la synthèse église</button>}
       </div>
+
+      {fil.length > 0 && (
+        <div style={{ ...S.card, marginBottom: 18 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 600, fontFamily: "'Outfit', sans-serif", color: C.text, marginBottom: 12 }}>
+            <Activity size={16} color={C.primary} /> Activité récente
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {fil.map((it, i) => {
+              const Icon = it.icon
+              return (
+                <div key={i} onClick={it.go ? () => openFiche(it.go) : undefined} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 4px', borderBottom: i < fil.length - 1 ? '1px solid ' + C.border : 'none', cursor: it.go ? 'pointer' : 'default' }}>
+                  <Icon size={14} color={it.c} style={{ flexShrink: 0 }} />
+                  <span style={{ fontSize: 13, color: C.text, flex: 1 }}>{it.txt}</span>
+                  <span style={{ fontSize: 12, color: C.meta, flexShrink: 0 }}>{fmtS(it.d)}</span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {recent.length > 0 && (
         <div style={S.card}>

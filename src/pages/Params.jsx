@@ -125,6 +125,13 @@ function UsersTable({ showToast, actifs, refs, auth }) {
 
   const handleInvite = async () => {
     if (!inviteData.email?.trim()) { showToast('⚠ Email requis'); return }
+    const emailNorm = inviteData.email.trim().toLowerCase()
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailNorm)) { showToast('⚠ Email invalide'); return }
+    // Garde-fou : ne pas inviter un email qui a déjà un compte
+    if ((profils || []).some(p => (p.email || '').trim().toLowerCase() === emailNorm)) {
+      showToast('⚠ Un compte existe déjà avec cet email')
+      return
+    }
     setInviting(true)
     try {
       const { data, error } = await supabase.functions.invoke('invite-user', {
@@ -231,10 +238,10 @@ function UsersTable({ showToast, actifs, refs, auth }) {
           </div>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 10, fontSize: 12 }}>
             <label style={{ display: 'flex', gap: 4, alignItems: 'center', cursor: 'pointer' }}>
-              <input type="checkbox" checked={inviteData.est_responsable} onChange={e => setInviteData(p => ({ ...p, est_responsable: e.target.checked }))} /> Responsable (accès à l'app)
+              <input type="checkbox" checked={inviteData.est_responsable} onChange={e => setInviteData(p => ({ ...p, est_responsable: e.target.checked, est_admin: e.target.checked ? p.est_admin : false }))} /> Responsable (accès à l'app)
             </label>
             <label style={{ display: 'flex', gap: 4, alignItems: 'center', cursor: 'pointer' }}>
-              <input type="checkbox" checked={inviteData.est_admin} onChange={e => setInviteData(p => ({ ...p, est_admin: e.target.checked }))} /> Admin
+              <input type="checkbox" checked={inviteData.est_admin} onChange={e => setInviteData(p => ({ ...p, est_admin: e.target.checked, est_responsable: e.target.checked ? true : p.est_responsable }))} /> Admin
             </label>
           </div>
           <button onClick={handleInvite} disabled={inviting || !inviteData.email} style={{ ...S.btn('#2E7D8A', false), width: '100%', opacity: inviting || !inviteData.email ? 0.6 : 1 }}>
@@ -252,11 +259,11 @@ function UsersTable({ showToast, actifs, refs, auth }) {
                 <div style={{ fontSize: 11, color: '#5E7175' }}>{p.email}</div>
               </div>
               <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, cursor: 'pointer' }}>
-                <input type="checkbox" checked={p.est_responsable || false} onChange={e => handleRole(p.id, e.target.checked, p.est_admin)} />
+                <input type="checkbox" checked={p.est_responsable || false} onChange={e => handleRole(p.id, e.target.checked, e.target.checked ? p.est_admin : false)} />
                 Resp.
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, cursor: 'pointer' }}>
-                <input type="checkbox" checked={p.est_admin || false} onChange={e => handleRole(p.id, p.est_responsable, e.target.checked)} />
+                <input type="checkbox" checked={p.est_admin || false} onChange={e => handleRole(p.id, e.target.checked ? true : p.est_responsable, e.target.checked)} />
                 Admin
               </label>
               {auth?.isSuperAdmin ? (

@@ -68,9 +68,10 @@ export default function VueEglisePage({ auth, refs, h }) {
   const stats = {}
   familles.forEach(f => {
     const famMembres = rawData.membres.filter(m => m.famille_id === f.id)
+    const bergerIds = new Set(famMembres.filter(m => h.isBergerRole(m.role)).map(m => m.id))
     const culteAct = rawData.activites.find(a => a.famille_id === f.id) || rawData.activites.find(a => !a.famille_id)
     const cancelledDates = new Set((rawData.datesAnn || []).filter(d => culteAct && d.activite_id === culteAct.id).map(d => d.date_annulee))
-    const famPresences = culteAct ? rawData.presences.filter(p => (p.famille_id === f.id || !p.famille_id) && p.activite_id === culteAct.id && p.eligible && !cancelledDates.has(p.date_presence)) : []
+    const famPresences = culteAct ? rawData.presences.filter(p => (p.famille_id === f.id || !p.famille_id) && p.activite_id === culteAct.id && p.eligible && !cancelledDates.has(p.date_presence) && !bergerIds.has(p.membre_id)) : []
 
     // Moyenne culte dans la période sélectionnée
     const recentPres = famPresences.filter(p => p.date_presence >= filterDe && p.date_presence <= filterA)

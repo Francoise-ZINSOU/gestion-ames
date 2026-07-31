@@ -25,9 +25,11 @@ export function useTable(table, options = {}) {
 export function useMembres() {
   const [membres, setMembres] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const load = useCallback(async () => {
-    const { data } = await supabase.from('membres').select('*').order('nom')
-    setMembres(data || []); setLoading(false)
+    const { data, error } = await supabase.from('membres').select('*').order('nom')
+    if (error) { setLoadError(true); setLoading(false); return }
+    setLoadError(false); setMembres(data || []); setLoading(false)
   }, [])
   useEffect(() => {
     load()
@@ -61,16 +63,18 @@ export function useMembres() {
     await load()
   }
 
-  return { membres, actifs, archives, loading, reload: load, ajouter, modifier, archiver, importerCSV }
+  return { membres, actifs, archives, loading, loadError, reload: load, ajouter, modifier, archiver, importerCSV }
 }
 
 // ── Présences ──
 export function usePresences() {
   const [presences, setPresences] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const load = useCallback(async () => {
-    const { data } = await supabase.from('presences').select('*')
-    setPresences(data || []); setLoading(false)
+    const { data, error } = await supabase.from('presences').select('*')
+    if (error) { setLoadError(true); setLoading(false); return }
+    setLoadError(false); setPresences(data || []); setLoading(false)
   }, [])
   useEffect(() => {
     load()
@@ -87,7 +91,7 @@ export function usePresences() {
     const { error } = await supabase.rpc('supprimer_presences_date', { p_activite_id: activiteId, p_date: date })
     if (error) throw error; await load()
   }
-  return { presences, loading, sauver, supprimerDate, reload: load }
+  return { presences, loading, loadError, sauver, supprimerDate, reload: load }
 }
 
 // ── Entretiens (+ realtime) ──
@@ -363,4 +367,19 @@ export function useJournal(membreId) {
     if (error) throw error; await load()
   }
   return { notes, loading, ajouter, supprimer, reload: load }
+}
+
+// ── Fil d'activité : historique global des changements de statut ──
+// Lit les changements récents (toutes familles selon la RLS de l'utilisateur).
+// Les autres événements du fil (nouveaux membres, entretiens, défis) sont
+// dérivés des données déjà chargées dans le ctx — pas de requête ici.
+export function useHistoriqueStatutsGlobal(limit = 30) {
+  const [hist, setHist] = useState([])
+  const load = useCallback(async () => {
+    const { data } = await supabase.from('historique_statuts')
+      .select('*').order('date_changement', { ascending: false }).limit(limit)
+    setHist(data || [])
+  }, [limit])
+  useEffect(() => { load() }, [load])
+  return { histStatuts: hist, reload: load }
 }

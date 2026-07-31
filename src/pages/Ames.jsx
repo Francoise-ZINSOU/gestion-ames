@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { S, fmtS, today, getStatutColor, getRoleColor, validEmail, validTel } from '../lib/ui'
 import { Upload, Search } from 'lucide-react'
 
-export default function AmesPage({ membres, actifs, refs, h, openFiche, showToast, reloadMembres, presences, entretiens, setPage, ajouterMembre, modifierMembre, importerCSV, auth, datesAnnulees }) {
+export default function AmesPage({ membres, actifs, refs, h, openFiche, showToast, reloadMembres, presences, entretiens, setPage, ajouterMembre, modifierMembre, importerCSV, auth, datesAnnulees, superAdminSansPerimetre, scopeFamilleId }) {
   const [q, setQ] = useState('')
   const [fRole, setFRole] = useState('all')
   const [fSt, setFSt] = useState('actifs')
@@ -70,6 +70,14 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
     return membres.some(m => m.id !== excludeId && (m.nom || '').toLowerCase() === (nom || '').toLowerCase() && (m.prenom || '').toLowerCase() === (prenom || '').toLowerCase())
   }
 
+  const ouvrirAjout = () => {
+    if (superAdminSansPerimetre) {
+      showToast('⚠ Choisissez d\'abord une église (sélecteur « Vue administrateur ») pour savoir dans quelle famille ajouter ce membre.')
+      return
+    }
+    setFd({ statut: h.defaultStatut, role: h.defaultRole, date_inscription: today() }); setModal('add')
+  }
+
   const handleSave = async () => {
     if (!fd.nom?.trim() || !fd.prenom?.trim()) { showToast('⚠ Nom et prénom obligatoires'); return }
     if (fd.email && !validEmail(fd.email)) { showToast('⚠ Email invalide'); return }
@@ -122,6 +130,10 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
           if (existingBerger) { showToast('⚠ Un Chef de famille existe déjà : ' + existingBerger.prenom + ' ' + existingBerger.nom); setSaving(false); return }
         }
         const { id, _reassignFrom, _reassignSuivis, ...data } = fd
+        // Super-admin avec une église choisie : on force explicitement la famille
+        // du périmètre, sinon le trigger base rattacherait le membre à la famille
+        // du profil super-admin (souvent la mauvaise église).
+        if (auth?.isSuperAdmin && scopeFamilleId) data.famille_id = scopeFamilleId
         const inserted = await ajouterMembre({ ...data, statut: data.statut || h.defaultStatut, role: data.role || h.defaultRole })
         setModal(null); setFd({})
         if (inserted?.id) openFiche(inserted.id)
@@ -164,7 +176,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
             <option value="all">Tout afficher</option>
           </optgroup>
         </select>
-        <button onClick={() => { setFd({ statut: h.defaultStatut, role: h.defaultRole, date_inscription: today() }); setModal('add') }} style={{ ...S.btn('#2E7D8A', false), whiteSpace: 'nowrap', padding: '6px 12px', fontSize: 13 }}>+ Membre</button>
+        <button onClick={ouvrirAjout} style={{ ...S.btn('#2E7D8A', false), whiteSpace: 'nowrap', padding: '6px 12px', fontSize: 13, opacity: superAdminSansPerimetre ? 0.5 : 1 }}>+ Membre</button>
         <button onClick={() => setModal('import')} style={{ ...S.btn('#2E7D8A', true), display: 'flex', alignItems: 'center', gap: 3, whiteSpace: 'nowrap', padding: '6px 10px', fontSize: 12 }}><Upload size={12} /> CSV</button>
         <button onClick={() => setBulkMode(!bulkMode)} style={{ ...S.btn(bulkMode ? '#8B5B9E' : '#5E7175', true), padding: '6px 10px', fontSize: 12 }}>{bulkMode ? '✓ Sélection' : '☐ Sélection'}</button>
       </div>
@@ -223,7 +235,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
       {/* Liste — CARTES sur mobile, tableau sur desktop */}
       <div style={S.card}>
         {filt.length === 0 ? (
-          <div style={{ padding: 16, textAlign: 'center', color: '#5E7175' }}>Aucun membre. <span onClick={() => { setFd({ statut: h.defaultStatut, role: h.defaultRole, date_inscription: today() }); setModal('add') }} style={{ color: '#2E7D8A', cursor: 'pointer', textDecoration: 'underline' }}>+ Ajouter</span></div>
+          <div style={{ padding: 16, textAlign: 'center', color: '#5E7175' }}>Aucun membre. <span onClick={ouvrirAjout} style={{ color: '#2E7D8A', cursor: 'pointer', textDecoration: 'underline' }}>+ Ajouter</span></div>
         ) : (
           <div>
             {/* Desktop: tableau */}
