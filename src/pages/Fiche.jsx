@@ -63,6 +63,11 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
       showToast('⚠ Impossible d\'archiver le ' + h.bergerRoleName + '. Transférez d\'abord le rôle à quelqu\'un d\'autre.')
       return
     }
+    // Confirmation renforcée : super-admin agissant HORS de sa propre famille
+    if (auth?.isSuperAdmin && auth?.profil?.famille_id && m.famille_id && m.famille_id !== auth.profil.famille_id) {
+      const ok = window.confirm('⚠ Attention : ' + m.prenom + ' ' + m.nom + ' n\'appartient pas à votre famille.\n\nVous agissez en tant que super-administrateur sur une communauté qui n\'est pas la vôtre. Archiver ce membre quand même ?')
+      if (!ok) return
+    }
     const mesSuivis = getSuivis()
     if (mesSuivis.length > 0) {
       setFd(prev => ({ ...prev, _archiveSuivis: mesSuivis }))

@@ -212,7 +212,20 @@ export default function Layout({ page, setPage, alertCount, membreCount, selecte
         @keyframes fadeIn{from{opacity:0}to{opacity:1}}
         @keyframes slideUp{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
         .toast-msg{animation:slideUp .25s ease-out}
-        @media print{.sb,.mn>div:first-child,.no-print,nav{display:none!important}.mn{margin-left:0!important}#rapport{box-shadow:none;border:none}}
+        @media print{
+          .sb,.mn>div:first-child,.no-print,nav{display:none!important}
+          .mn{margin-left:0!important}
+          #rapport{box-shadow:none!important;border:none!important;padding:0!important}
+          *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+          @page{margin:1.5cm}
+          #rapport table{page-break-inside:auto}
+          #rapport tr{page-break-inside:avoid;page-break-after:auto}
+          #rapport thead{display:table-header-group}
+          #rapport>div{page-break-inside:avoid}
+          #rapport>div.print-flow{page-break-inside:auto}
+          .print-keep{page-break-inside:avoid}
+          body{background:#fff!important}
+        }
         @keyframes shimmer{0%{background-position:-200px 0}100%{background-position:200px 0}}
         .skeleton{background:linear-gradient(90deg,#F5F3EE 25%,#DCE6E5 50%,#F5F3EE 75%);background-size:400px 100%;animation:shimmer 1.5s infinite;border-radius:6px}
         .scroll-fade{position:relative}

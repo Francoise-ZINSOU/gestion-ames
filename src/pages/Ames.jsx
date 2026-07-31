@@ -16,6 +16,43 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
   const [sortDir, setSortDir] = useState('asc')
   const uf = (k, v) => setFd(prev => ({ ...prev, [k]: v }))
 
+  // Rend les <option> d'un menu de référence, en ajoutant la valeur courante
+  // (grisée, « obsolète ») si elle a été désactivée et n'est plus dans la liste.
+  const optsRef = (liste, valeurCourante) => {
+    const noms = liste.map(x => x.nom)
+    const opts = liste.map(x => <option key={x.nom} value={x.nom}>{x.nom}</option>)
+    if (valeurCourante && !noms.includes(valeurCourante)) {
+      opts.push(<option key={valeurCourante} value={valeurCourante}>{valeurCourante} (obsolète)</option>)
+    }
+    return opts
+  }
+
+  // Normalise un nom/prénom pour comparaison : retire accents, casse, apostrophes, tirets, espaces
+  const norm = (s) => (s || '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[\u0027\u2019\u2018\u0060\u00b4\-\s]/g, '')
+    .trim()
+  // Distance de Levenshtein (fautes de frappe)
+  const lev = (a, b) => {
+    const m = a.length, n = b.length
+    const d = Array.from({ length: m + 1 }, (_, i) => [i, ...Array(n).fill(0)])
+    for (let j = 0; j <= n; j++) d[0][j] = j
+    for (let i = 1; i <= m; i++)
+      for (let j = 1; j <= n; j++)
+        d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1))
+    return d[m][n]
+  }
+  // Prénom proche : identique OU l'un contenu dans l'autre (Marina ⊆ Marina-Ingrid)
+  const prenomProche = (a, b) => { a = norm(a); b = norm(b); if (!a || !b) return false; return a === b || a.includes(b) || b.includes(a) }
+  // Nom proche : identique OU 1 faute de frappe (si nom d'au moins 4 lettres)
+  const nomProche = (a, b) => { a = norm(a); b = norm(b); if (!a || !b) return false; if (a === b) return true; if (Math.min(a.length, b.length) < 4) return false; return lev(a, b) <= 1 }
+  // Renvoie les membres de la même famille qui pourraient être la même personne
+  const trouverProches = (nom, prenom, excludeId, familleId) =>
+    membres.filter(m => m.id !== excludeId
+      && (familleId ? m.famille_id === familleId : true)
+      && prenomProche(m.prenom, prenom) && nomProche(m.nom, nom))
+
   // Trouver le membre lié au profil connecté (membre_id direct, sinon fallback email)
   const myMembreId = auth?.profil?.membre_id
   const myEmail = auth?.profil?.email?.toLowerCase()
@@ -66,10 +103,6 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
   const getSuiveur = (id) => { if (!id) return '—'; const m = membres.find(x => x.id === id); return m ? `${m.prenom} ${m.nom}${m.archive ? ' (archivé)' : ''}` : '—' }
   const getSuivis = (id) => actifs.filter(m => m.suivi_par === id)
 
-  const hasDuplicate = (nom, prenom, excludeId) => {
-    return membres.some(m => m.id !== excludeId && (m.nom || '').toLowerCase() === (nom || '').toLowerCase() && (m.prenom || '').toLowerCase() === (prenom || '').toLowerCase())
-  }
-
   const ouvrirAjout = () => {
     if (superAdminSansPerimetre) {
       showToast('⚠ Choisissez d\'abord une église (sélecteur « Vue administrateur ») pour savoir dans quelle famille ajouter ce membre.')
@@ -90,8 +123,19 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
     if (fd.telephone && !validTel(fd.telephone)) { showToast('⚠ Téléphone invalide'); return }
 
     const isEdit = modal === 'edit' && fd.id
-    if (hasDuplicate(fd.nom, fd.prenom, isEdit ? fd.id : '')) {
-      setConfirmAction({ msg: `${fd.prenom} ${fd.nom} existe déjà. Créer quand même ?`, fn: () => doSave() })
+    // Famille cible : édition = celle du membre ; création super-admin = périmètre choisi ;
+    // création normale = famille de l'utilisateur (héritée via trigger base)
+    const familleCible = isEdit
+      ? fd.famille_id
+      : (auth?.isSuperAdmin && scopeFamilleId ? scopeFamilleId : auth?.profil?.famille_id)
+    const proches = trouverProches(fd.nom, fd.prenom, isEdit ? fd.id : '', familleCible)
+    if (proches.length > 0) {
+      const noms = proches.slice(0, 3).map(m => `${m.prenom} ${m.nom}`).join(', ')
+      const suite = proches.length > 3 ? ` … et ${proches.length - 3} autre(s)` : ''
+      const msg = proches.length === 1
+        ? `« ${fd.prenom} ${fd.nom} » ressemble à un membre déjà présent dans cette famille : ${noms}. S'agit-il de la même personne ? Créer quand même ?`
+        : `« ${fd.prenom} ${fd.nom} » ressemble à ${proches.length} membres déjà présents dans cette famille : ${noms}${suite}. S'agit-il de l'un d'eux ? Créer quand même ?`
+      setConfirmAction({ msg, fn: () => doSave() })
       return
     }
 
@@ -325,8 +369,8 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                 <div style={{ marginBottom: 8 }}><label style={S.label}>Situation professionnelle</label><select value={fd.situation_professionnelle || ''} onChange={e => uf('situation_professionnelle', e.target.value || null)} style={S.inp}><option value="">— Non renseignée —</option>{(refs.situationsPro || []).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}</select></div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px' }}>
-                <div style={{ marginBottom: 8 }}><label style={S.label}>Statut</label><select value={fd.statut || h.defaultStatut} onChange={e => uf('statut', e.target.value)} style={S.inp}>{(refs.statuts || []).filter(s => !s.est_archive).map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}</select></div>
-                <div style={{ marginBottom: 8 }}><label style={S.label}>Rôle</label><select value={fd.role || h.defaultRole} onChange={e => { uf('role', e.target.value); if (h.isBergerRole(e.target.value)) uf('suivi_par', null) }} style={S.inp}>{(refs.roles || []).map(r => <option key={r.nom} value={r.nom}>{r.nom}</option>)}</select></div>
+                <div style={{ marginBottom: 8 }}><label style={S.label}>Statut</label><select value={fd.statut || h.defaultStatut} onChange={e => uf('statut', e.target.value)} style={S.inp}>{optsRef((refs.statuts || []).filter(s => !s.est_archive), fd.statut)}</select></div>
+                <div style={{ marginBottom: 8 }}><label style={S.label}>Rôle</label><select value={fd.role || h.defaultRole} onChange={e => { uf('role', e.target.value); if (h.isBergerRole(e.target.value)) uf('suivi_par', null) }} style={S.inp}>{optsRef((refs.roles || []), fd.role)}</select></div>
               </div>
               {(!h.isBergerRole(fd.role)) && <div style={{ marginBottom: 8 }}><label style={S.label}>Suivi par</label><select value={fd.suivi_par || ''} onChange={e => uf('suivi_par', e.target.value || null)} style={S.inp}><option value="">— Aucun —</option>{leaders.filter(l => l.id !== fd.id).map(l => <option key={l.id} value={l.id}>{l.prenom} {l.nom} ({l.role})</option>)}</select></div>}
               <div style={{ marginBottom: 8 }}><label style={S.label}>Notes</label><textarea value={fd.notes || ''} onChange={e => uf('notes', e.target.value)} rows={2} style={{ ...S.inp, resize: 'vertical' }} /></div>
@@ -403,7 +447,7 @@ export default function AmesPage({ membres, actifs, refs, h, openFiche, showToas
                           email: colMap.email !== undefined ? cells[colMap.email] || '' : '',
                           date_inscription: colMap.date_inscription !== undefined ? cells[colMap.date_inscription] || today() : today(),
                           statut: h.defaultStatut, role: h.defaultRole, _skip: false,
-                          _dup: membres.some(m => m.nom?.toLowerCase() === (cells[colMap.nom] || '').toLowerCase() && m.prenom?.toLowerCase() === (cells[colMap.prenom] || '').toLowerCase())
+                          _dup: (() => { const fam = auth?.isSuperAdmin && scopeFamilleId ? scopeFamilleId : auth?.profil?.famille_id; return membres.some(m => (fam ? m.famille_id === fam : true) && prenomProche(m.prenom, cells[colMap.prenom] || '') && nomProche(m.nom, cells[colMap.nom] || '')) })()
                         }
                       }).filter(r => r.prenom || r.nom)
                       if (rows.length === 0) { showToast('⚠ Aucune ligne valide détectée'); return }

@@ -1,5 +1,13 @@
 # Gestion des Âmes — Suivi Pastoral
 
+### Invitation limitée à la famille de l'admin (session e34)
+Après clarification : un admin gère SA FAMILLE (pas son église). L'invitation est donc restreinte à sa seule famille, aux deux niveaux — interface (menu à une option) et Edge Function invite-user v5 (validation serveur famille_id === profil.famille_id). Le super-admin invite toujours partout.
+
+
+### Onglet Église réservé au super-admin (session e33)
+L'onglet « Église » des paramètres (création/désactivation d'églises et de familles) est désormais masqué aux admins non super-admins — cohérent avec la base, qui réservait déjà l'écriture au super-admin (policies v2.5/v2.6).
+
+
 ### Cloisonnement de l'invitation admin (session e32)
 Le menu de sélection de famille à l'invitation ne propose plus que les familles de l'église de l'admin (le super-admin voit toujours toutes les églises). Correctif d'interface. ⚠ La vraie barrière doit aussi être dans l'Edge Function invite-user (validation serveur que l'admin a le droit sur la famille ciblée) — à renforcer séparément.
 

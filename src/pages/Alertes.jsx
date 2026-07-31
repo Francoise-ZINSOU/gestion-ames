@@ -38,7 +38,7 @@ export default function AlertesPage({ alertes, membres, openFiche, entretiens, r
           )
           const details = []
           if (a.absences >= 3) details.push({ label: a.absences + ' abs. consécutives', pts: 3, color: '#C25A4A' })
-          if (!hasPlanned && a.jours_sans_entretien > 21) details.push({ label: (a.jours_sans_entretien < 30 ? a.jours_sans_entretien + 'j' : a.jours_sans_entretien < 365 ? Math.floor(a.jours_sans_entretien / 30) + ' mois' : Math.floor(a.jours_sans_entretien / 365) + ' an(s)') + ' sans entretien', pts: 2, color: '#2E7D8A' })
+          if (!hasPlanned && a.jours_sans_entretien >= 30) details.push({ label: (a.jours_sans_entretien < 30 ? a.jours_sans_entretien + 'j' : a.jours_sans_entretien < 365 ? Math.floor(a.jours_sans_entretien / 30) + ' mois' : Math.floor(a.jours_sans_entretien / 365) + ' an(s)') + ' sans entretien', pts: 2, color: '#2E7D8A' })
           if (a.defis_ouverts > 0) details.push({ label: a.defis_ouverts + ' défi(s) ouvert(s)', pts: 1, color: '#8B5B9E' })
           return (
             <div key={a.membre_id} onClick={() => openFiche(a.membre_id)} style={{ padding: '10px 8px', borderBottom: '1px solid #DCE6E5', cursor: 'pointer' }}>

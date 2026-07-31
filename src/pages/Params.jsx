@@ -160,10 +160,8 @@ function UsersTable({ showToast, actifs, refs, auth }) {
     supabase.from('familles_disciples').select('*, eglises(nom, actif)').order('nom').then(({ data }) => {
       const toutes = data || []
       if (auth?.isSuperAdmin) { setFamilles(toutes); return }
-      // Admin ordinaire : restreint aux familles de SA propre église (cloisonnement)
-      const maFamille = toutes.find(f => f.id === auth?.profil?.famille_id)
-      const monEglise = maFamille?.eglise_id
-      setFamilles(monEglise ? toutes.filter(f => f.eglise_id === monEglise) : toutes.filter(f => f.id === auth?.profil?.famille_id))
+      // Admin ordinaire : restreint à SA SEULE famille (son périmètre de données)
+      setFamilles(toutes.filter(f => f.id === auth?.profil?.famille_id))
     })
   }, [auth?.isSuperAdmin, auth?.profil?.famille_id])
 
@@ -516,11 +514,11 @@ export default function ParamsPage({ showToast, actifs, refs, auth }) {
       <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
         <button onClick={() => setTab('refs')} style={{ ...S.btn(tab === 'refs' ? '#2E7D8A' : '#5E7175', tab !== 'refs'), fontFamily: 'inherit' }}>Références</button>
         <button onClick={() => setTab('users')} style={{ ...S.btn(tab === 'users' ? '#2E7D8A' : '#5E7175', tab !== 'users'), fontFamily: 'inherit' }}>Utilisateurs</button>
-        <button onClick={() => setTab('eglise')} style={{ ...S.btn(tab === 'eglise' ? '#2E7D8A' : '#5E7175', tab !== 'eglise'), fontFamily: 'inherit' }}>Église</button>
+        {auth?.isSuperAdmin && <button onClick={() => setTab('eglise')} style={{ ...S.btn(tab === 'eglise' ? '#2E7D8A' : '#5E7175', tab !== 'eglise'), fontFamily: 'inherit' }}>Église</button>}
       </div>
       <div style={S.card}>
         {tab === 'users' ? <UsersTable showToast={showToast} actifs={actifs} refs={refs} auth={auth} />
-          : tab === 'eglise' ? <EglisePanel showToast={showToast} />
+          : tab === 'eglise' ? (auth?.isSuperAdmin ? <EglisePanel showToast={showToast} /> : null)
           : <>
             {sharedTables.map(t => <AccordionRefTable key={t.key} table={t.key} label={t.label} fields={t.fields} showToast={showToast} />)}
 
