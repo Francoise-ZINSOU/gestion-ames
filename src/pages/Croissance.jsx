@@ -2,11 +2,12 @@ import { useState } from 'react'
 import { S, C, fmtS } from '../lib/ui'
 import { BookOpen, Check, Plus, X, ExternalLink } from 'lucide-react'
 
-export default function CroissancePage({ plans, refs, actifs, h, openFiche, assignerModule, validerModule, retirerModule, showToast }) {
+export default function CroissancePage({ plans, refs, actifs, h, openFiche, assignerModule, validerModule, retirerModule, showToast, auth }) {
   const [vue, setVue] = useState('parcours')
   const [modal, setModal] = useState(null)
   const [selMembre, setSelMembre] = useState('')
   const [selModule, setSelModule] = useState('')
+  const peutSuppr = auth?.isAdmin === true  // suppression réservée aux admins (RLS v3.2)
 
   const modules = refs.modules || []
 

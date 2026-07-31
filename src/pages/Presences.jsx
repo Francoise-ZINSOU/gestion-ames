@@ -4,6 +4,7 @@ import { Save, Trash2, CheckSquare, Square, Search } from 'lucide-react'
 
 export default function PresencesPage({ actifs, presences, refs, enregistrerPresences, supprimerDate, auth, datesAnnulees, ajouterDateAnnulee, supprimerDateAnnulee, showToast, openFiche }) {
   const activites = refs.activites || []
+  const peutSuppr = auth?.isAdmin === true  // suppression réservée aux admins (RLS v3.2)
   const [actId, setActId] = useState(activites[0]?.id || '')
   const [date, setDate] = useState(today())
   const [chk, setChk] = useState({})
@@ -131,7 +132,7 @@ export default function PresencesPage({ actifs, presences, refs, enregistrerPres
                     const m = actifs.find(x => x.id === first.membre_id)
                     if (m) { openFiche(m.id) }
                   }} style={{ background: '#fff', border: '1px solid #2E7D8A55', borderRadius: 5, padding: '3px 8px', fontSize: 11, color: '#633806', cursor: 'pointer', fontFamily: 'inherit' }}>Ouvrir la fiche pour ajuster la date d'inscription</button>
-                  <button onClick={() => setConfirmAction({ msg: 'Supprimer ' + orphelines.length + ' présence(s) orpheline(s) ? Cette action est définitive.', fn: async () => {
+                  {peutSuppr && <button onClick={() => setConfirmAction({ msg: 'Supprimer ' + orphelines.length + ' présence(s) orpheline(s) ? Cette action est définitive.', fn: async () => {
                     try {
                       const { supabase } = await import('../lib/supabase')
                       const ids = orphelines.map(p => p.id)
@@ -139,7 +140,7 @@ export default function PresencesPage({ actifs, presences, refs, enregistrerPres
                       if (error) throw error
                       showToast('✓ ' + orphelines.length + ' présence(s) supprimée(s)')
                     } catch (e) { showToast('⚠ ' + (e.message || 'Erreur')) }
-                  } })} style={{ background: '#fff', border: '1px solid #C25A4A55', borderRadius: 5, padding: '3px 8px', fontSize: 11, color: '#791F1F', cursor: 'pointer', fontFamily: 'inherit' }}>Supprimer ces présences</button>
+                  } })} style={{ background: '#fff', border: '1px solid #C25A4A55', borderRadius: 5, padding: '3px 8px', fontSize: 11, color: '#791F1F', cursor: 'pointer', fontFamily: 'inherit' }}>Supprimer ces présences</button>}
                 </div>
               </div>
             )
@@ -154,7 +155,7 @@ export default function PresencesPage({ actifs, presences, refs, enregistrerPres
             <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
               <button onClick={() => { const o = {}; eligible.forEach(m => { o[m.id] = true }); setChk(o); setSaved(false) }} style={{ ...S.btn('#2E7D8A', true), padding: '5px 10px', fontSize: 12 }}>Tous</button>
               <button onClick={() => { setChk({}); setSaved(false) }} style={{ ...S.btn('#5E7175', true), padding: '5px 10px', fontSize: 12 }}>Aucun</button>
-              {existing.length > 0 && <button onClick={handleDelete} style={{ ...S.btn('#C25A4A', true), display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', fontSize: 12 }}><Trash2 size={13} /> Suppr.</button>}
+              {existing.length > 0 && peutSuppr && <button onClick={handleDelete} style={{ ...S.btn('#C25A4A', true), display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', fontSize: 12 }}><Trash2 size={13} /> Suppr.</button>}
               {!(datesAnnulees || []).some(d => d.activite_id === actId && d.date_annulee === date) && (
                 <button onClick={() => setConfirmAction({ msg: 'Annuler cette date ? Les absences ne seront pas comptabilisées.', input: true, fn: async (motif) => { try { await ajouterDateAnnulee(actId, date, motif || null) } catch(e) {} } })} style={{ ...S.btn('#2E7D8A', true), padding: '5px 10px', fontSize: 12 }}>Annuler date</button>
               )}

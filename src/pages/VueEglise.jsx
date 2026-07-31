@@ -153,10 +153,10 @@ export default function VueEglisePage({ auth, refs, h }) {
           {!fDateDe && !fDateA && <span style={{ fontSize: 11, color: '#5E7175', fontStyle: 'italic', fontWeight: 400 }}>(par défaut : 4 dernières semaines)</span>}
           {(fDateDe || fDateA) && <button onClick={() => { setFDateDe(''); setFDateA('') }} style={{ background: 'none', border: 'none', fontSize: 11, color: '#C25A4A', cursor: 'pointer', marginLeft: 'auto' }}>✕ Réinitialiser</button>}
         </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <input type="date" value={fDateDe || defaultDeStr} onChange={e => setFDateDe(e.target.value)} max={toLocalDate(now)} style={{ flex: 1, padding: '6px 8px', borderRadius: 6, border: '1px solid #C3D4D3', background: fDateDe ? '#F5F3EE' : '#F5F3EE', fontSize: 12, fontFamily: 'inherit', minWidth: 0, color: fDateDe ? '#2B3A3D' : '#5E7175' }} />
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+          <input type="date" value={fDateDe || defaultDeStr} onChange={e => setFDateDe(e.target.value)} max={toLocalDate(now)} style={{ width: 160, maxWidth: '44%', padding: '6px 8px', borderRadius: 6, border: '1px solid #C3D4D3', background: fDateDe ? '#F5F3EE' : '#F5F3EE', fontSize: 12, fontFamily: 'inherit', color: fDateDe ? '#2B3A3D' : '#5E7175' }} />
           <span style={{ fontSize: 12, color: '#5E7175', flexShrink: 0 }}>→</span>
-          <input type="date" value={fDateA || toLocalDate(now)} onChange={e => setFDateA(e.target.value)} max={toLocalDate(now)} style={{ flex: 1, padding: '6px 8px', borderRadius: 6, border: '1px solid #C3D4D3', background: fDateA ? '#F5F3EE' : '#F5F3EE', fontSize: 12, fontFamily: 'inherit', minWidth: 0, color: fDateA ? '#2B3A3D' : '#5E7175' }} />
+          <input type="date" value={fDateA || toLocalDate(now)} onChange={e => setFDateA(e.target.value)} max={toLocalDate(now)} style={{ width: 160, maxWidth: '44%', padding: '6px 8px', borderRadius: 6, border: '1px solid #C3D4D3', background: fDateA ? '#F5F3EE' : '#F5F3EE', fontSize: 12, fontFamily: 'inherit', color: fDateA ? '#2B3A3D' : '#5E7175' }} />
         </div>
       </div>
       {/* KPIs globaux */}

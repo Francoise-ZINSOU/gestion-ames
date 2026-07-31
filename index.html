@@ -1,29 +1,24 @@
-import { S } from '../lib/ui'
-
-export default function CGUPage() {
-  return (
-    <div style={S.card}>
-      <div style={{ fontSize: 18, fontWeight: 700, fontFamily: "'Outfit', sans-serif", marginBottom: 12 }}>Conditions d'utilisation</div>
-      <div style={{ fontSize: 14, color: '#5E7175', lineHeight: 1.8 }}>
-        <p style={{ marginBottom: 12 }}><strong>Données personnelles</strong><br />
-        Cette application traite des données personnelles (noms, coordonnées, présences) dans le cadre du suivi pastoral. Ces données sont stockées de manière sécurisée sur Supabase (hébergement européen). Elles ne sont ni vendues ni partagées avec des tiers.</p>
-
-        <p style={{ marginBottom: 12 }}><strong>Responsable du traitement</strong><br />
-        Le responsable du traitement est l'administrateur de l'église qui a créé le compte. Il est responsable de la conformité RGPD au sein de son organisation.</p>
-
-        <p style={{ marginBottom: 12 }}><strong>Droits des personnes</strong><br />
-        Toute personne dont les données sont enregistrées peut demander l'accès, la rectification ou la suppression de ses données en contactant l'administrateur de son église.</p>
-
-        <p style={{ marginBottom: 12 }}><strong>Données sensibles</strong><br />
-        Les données de présence au culte constituent des données relatives aux convictions religieuses (article 9 du RGPD). Leur traitement est fondé sur le consentement implicite des membres de l'église et l'intérêt légitime de l'organisation religieuse.</p>
-
-        <p style={{ marginBottom: 12 }}><strong>Durée de conservation</strong><br />
-        Les données sont conservées tant que le membre est actif. Les données des membres archivés sont conservées 3 ans puis supprimées.</p>
-
-        <p style={{ fontSize: 12, color: '#5E7175', fontStyle: 'italic' }}>
-        Ce document est un modèle indicatif. Il doit être adapté par un professionnel du droit pour votre contexte spécifique.
-        </p>
-      </div>
-    </div>
-  )
-}
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="Gestion des Âmes — application de suivi pastoral : membres, présences, entretiens, parcours de formation." />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#2E7D8A" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- iOS ignore les SVG pour apple-touch-icon : fournir un PNG 180x180 dans /public -->
+    <link rel="apple-touch-icon" href="/icon-180.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <title>Gestion des Âmes — Suivi pastoral</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>⛪</text></svg>" />
+  </head>
+  <body style="margin:0;background:#F5F3EE">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

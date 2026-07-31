@@ -11,6 +11,8 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
   const [editEntId, setEditEntId] = useState(null)
   const { hist: historiqueStatuts } = useHistoriqueStatuts(m?.id)
   const { notes: journalNotes, ajouter: ajouterNote, supprimer: supprimerNote } = useJournal(m?.id)
+  const peutSuppr = auth?.isAdmin === true  // suppression réservée aux admins (RLS v3.2)
+  const estBerger = auth?.isBergerEglise === true && auth?.isAdmin !== true  // berger : consultation, pas le journal
   const [histSuivi, setHistSuivi] = useState([])
   useEffect(() => {
     if (m?.id) {
@@ -110,7 +112,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
       <div style={{ display: 'flex', gap: 5, marginBottom: 10, alignItems: 'center', position: 'sticky', top: 48, zIndex: 40, background: '#F5F3EE', paddingBottom: 4 }}>
         <button onClick={() => setPage(prevPage || 'ames')} style={{ ...S.btn('#5E7175', true), flexShrink: 0 }}>{({ alerts: '← Alertes', ames: '← Liste', ents: '← Entretiens', home: '← Accueil' })[prevPage] || '← Liste'}</button>
         <div className="hide-scrollbar scroll-fade" style={{ display: 'flex', gap: 5, alignItems: 'center', overflowX: 'auto', WebkitOverflowScrolling: 'touch', flex: 1, minWidth: 0 }}>
-          {[['id', 'Identité', ClipboardList], ['jn', 'Journal', NotebookPen], ['en', 'Entretiens', MessageCircle], ['pr', 'Présences', BarChart3], ['df', 'Défis', Zap], ['pt', 'Formation', BookOpen]].map(([id, label, Icon]) => (
+          {[['id', 'Identité', ClipboardList], ...(estBerger ? [] : [['jn', 'Journal', NotebookPen]]), ['en', 'Entretiens', MessageCircle], ['pr', 'Présences', BarChart3], ['df', 'Défis', Zap], ['pt', 'Formation', BookOpen]].map(([id, label, Icon]) => (
             <button key={id} onClick={() => setFtab(id)} style={{ padding: '4px 12px', borderRadius: 14, border: '1px solid ' + (ftab === id ? '#2E7D8A' : '#DCE6E5'), background: ftab === id ? '#2E7D8A14' : '#F5F3EE', color: ftab === id ? '#2E7D8A' : '#5E7175', fontSize: 12, fontWeight: ftab === id ? 600 : 500, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap', flexShrink: 0 }}><Icon size={12} /> {label}</button>
           ))}
         </div>
@@ -125,7 +127,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
               {m.archive && <div onClick={() => { setConfirmAction({ msg: 'Restaurer ce membre ? Il redeviendra actif avec le statut "' + h.defaultStatut + '".', fn: async () => {
                 try { await modifierMembre(m.id, { archive: false, statut: h.defaultStatut }); showToast('✓ Membre restauré'); reloadMembres() } catch(e) { showToast('⚠ Erreur') }
               } }); setShowActionMenu(false) }} style={{ padding: '10px 14px', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, color: '#2E7D8A', borderBottom: '1px solid #F5F3EE' }}><ArchiveRestore size={13} /> Restaurer</div>}
-              {auth?.isAdmin && <div onClick={async () => {
+              {false /* transfert désactivé temporairement — remettre auth?.isAdmin pour réactiver (admin only) */ && <div onClick={async () => {
                 const { supabase } = await import('../lib/supabase')
                 const { data } = await supabase.from('familles_disciples').select('*, eglises(nom, actif)').eq('actif', true).order('nom')
                 setFd({ _familles: data || [] }); setModal('transfer'); setShowActionMenu(false)
@@ -272,7 +274,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
                     <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
                       <span style={S.pill(sc)}>{e.statut}</span>
                       <button onClick={() => { setFd({ ...e }); setEditEntId(e.id); setModal('ent') }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: '#2E7D8A' }}><Pencil size={12} /></button>
-                      <button onClick={() => setConfirmAction({ msg: 'Supprimer cet entretien ?', fn: () => supprimerEnt(e.id) })} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: '#5E7175', padding: '4px 8px' }}>✕</button>
+                      {peutSuppr && <button onClick={() => setConfirmAction({ msg: 'Supprimer cet entretien ?', fn: () => supprimerEnt(e.id) })} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: '#5E7175', padding: '4px 8px' }}>✕</button>}
                     </div>
                   </div>
                   {e.commentaires && <div style={{ fontSize: 12, color: '#5E7175', lineHeight: 1.4, whiteSpace: 'pre-wrap', padding: '4px 8px', background: '#F5F3EE', borderRadius: 4, borderLeft: '3px solid ' + sc }}>{e.commentaires}</div>}
@@ -299,7 +301,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
                       <span style={S.pill('#2E7D8A')}>{d.type_defi}</span>
                       <span style={S.pill(stColor)}>{d.statut}</span>
                       <button onClick={() => { setFd({ _editDefiId: d.id, type_defi: d.type_defi, description: d.description, statut_defi: d.statut }); setModal('editDefi') }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2E7D8A', padding: '4px 8px' }}><Pencil size={13} /></button>
-                      <button onClick={() => setConfirmAction({ msg: 'Supprimer ce défi ?', fn: async () => { await supprimerDefi(d.id) } })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#5E7175', padding: '4px 8px', fontSize: 14 }}>✕</button>
+                      {peutSuppr && <button onClick={() => setConfirmAction({ msg: 'Supprimer ce défi ?', fn: async () => { await supprimerDefi(d.id) } })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#5E7175', padding: '4px 8px', fontSize: 14 }}>✕</button>}
                     </div>
                     <div style={{ fontSize: 13, lineHeight: 1.4 }}>{d.description}</div>
                   </div>
@@ -353,7 +355,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
                                 {p.valide && p.date_validation && <div style={{ fontSize: 10, color: '#5E7175' }}>Validé le {fmt(p.date_validation)}</div>}
                               </div>
                               <span style={S.pill(p.valide ? '#4E8D6E' : '#5E7175')}>{p.valide ? 'Validé' : 'En attente'}</span>
-                              <button onClick={e => { e.stopPropagation(); retirerModule(p.id) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, color: '#5E7175' }}>✕</button>
+                              {peutSuppr && <button onClick={e => { e.stopPropagation(); retirerModule(p.id) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, color: '#5E7175' }}>✕</button>}
                             </div>
                           )
                         })}
@@ -379,7 +381,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
                         <div style={{ width: 20, height: 20, borderRadius: '50%', border: '2px solid ' + (p.valide ? '#4E8D6E' : '#DCE6E5'), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: p.valide ? '#4E8D6E' : '#5E7175' }}>{p.valide ? '✓' : ''}</div>
                         <div style={{ flex: 1 }}><div style={{ fontSize: 13, fontWeight: 600, color: p.valide ? '#4E8D6E' : '#2B3A3D' }}>{mod?.nom || '?'}</div></div>
                         <span style={S.pill(p.valide ? '#4E8D6E' : '#5E7175')}>{p.valide ? 'Validé' : 'En attente'}</span>
-                        <button onClick={e => { e.stopPropagation(); retirerModule(p.id) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, color: '#5E7175' }}>✕</button>
+                        {peutSuppr && <button onClick={e => { e.stopPropagation(); retirerModule(p.id) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, color: '#5E7175' }}>✕</button>}
                       </div>
                     )
                   })}
@@ -393,7 +395,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
       )}
 
       {/* Tab Journal */}
-      {ftab === 'jn' && (
+      {ftab === 'jn' && !estBerger && (
         <div style={S.card}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <div style={{ fontSize: 14, fontWeight: 600 }}>Journal pastoral</div>
@@ -408,7 +410,7 @@ export default function FichePage({ membres, actifs, presences, entretiens, defi
                     <span style={{ fontSize: 12, color: '#5E7175' }}>{fmt(n.date_note)}</span>
                     {n.type && n.type !== 'note' && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 8, background: '#8B5B9E14', color: '#8B5B9E', fontWeight: 600 }}>{n.type}</span>}
                   </div>
-                  <button onClick={() => setConfirmAction({ msg: 'Supprimer cette note ?', fn: async () => { try { await supprimerNote(n.id) } catch(e) { showToast('⚠ Erreur') } } })} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: '#5E7175', padding: '4px 8px' }}>✕</button>
+                  {peutSuppr && <button onClick={() => setConfirmAction({ msg: 'Supprimer cette note ?', fn: async () => { try { await supprimerNote(n.id) } catch(e) { showToast('⚠ Erreur') } } })} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: '#5E7175', padding: '4px 8px' }}>✕</button>}
                 </div>
                 <div style={{ fontSize: 13, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{n.contenu}</div>
               </div>
